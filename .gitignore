@@ -2,6 +2,8 @@
 .terraform/
 *.tfstate
 *.tfstate.*
+*.tfplan
+tfplan
 crash.log
 *.tfvars
 *.tfvars.json
@@ -20,6 +22,8 @@ __pycache__/
 env/
 venv/
 ENV/
+*.pyc
+.pytest_cache/
 
 # Node.js (Frontend)
 node_modules/
@@ -27,8 +31,12 @@ dist/
 build/
 .npm
 
-# OCR Lab Data (Không commit hóa đơn thật)
+# Bí mật và dữ liệu
+.env
+node_modules/
 ocr-lab/data/
+ocr-lab/out/
+ocr-lab/data_small/
 
 # IDE & OS
 .vscode/
