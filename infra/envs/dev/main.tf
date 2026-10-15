@@ -35,3 +35,20 @@ module "network" {
   cidr = "10.0.0.0/16"
   azs  = ["ap-southeast-1a", "ap-southeast-1b"]
 }
+
+module "ecr" {
+  source = "../../modules/ecr"
+  name   = "homewallet-backend"
+}
+
+module "compute" {
+  source = "../../modules/compute"
+
+  name              = "homewallet-dev"
+  vpc_id            = module.network.vpc_id
+  public_subnet_ids = module.network.public_subnet_ids
+  app_subnet_ids    = module.network.app_subnet_ids
+  sg_alb_id         = module.network.sg_ids.alb
+  sg_app_id         = module.network.sg_ids.app
+  image             = "${module.ecr.repository_url}:v0.1"
+}
