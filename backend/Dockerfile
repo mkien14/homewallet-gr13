@@ -8,7 +8,11 @@ WORKDIR /srv
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+ADD --chmod=644 https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem /etc/ssl/rds-global-bundle.pem
+
 COPY app ./app
+COPY jobs ./jobs
+COPY db ./db
 
 RUN useradd --create-home --uid 10001 appuser
 USER appuser
