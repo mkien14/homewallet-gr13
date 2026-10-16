@@ -1,2 +1,4 @@
 flask>=3.0,<4
 gunicorn>=22
+pymysql>=1.1
+cryptography>=42
