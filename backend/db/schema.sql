@@ -29,7 +29,7 @@ CREATE TABLE household_members (
   PRIMARY KEY (household_id, user_id),
   FOREIGN KEY (household_id) REFERENCES households(id),
   FOREIGN KEY (user_id) REFERENCES users(id),
-  INDEX idx_members_user (user_id)
+  UNIQUE KEY uq_member_user (user_id)
 );
 
 CREATE TABLE categories (
