@@ -11,6 +11,7 @@ crash.log
 # Environment variables & Secrets
 .env
 .env.*
+!.env.example
 *.pem
 *.key
 
