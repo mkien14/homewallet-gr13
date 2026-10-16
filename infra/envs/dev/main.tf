@@ -79,3 +79,13 @@ module "migrate" {
   db_host             = module.data.address
   db_secret_arn       = module.data.secret_arn
 }
+
+module "cognito" {
+  source = "../../modules/cognito"
+
+  name                = "homewallet-dev"
+  callback_urls       = ["http://localhost:5173/auth/callback"]
+  logout_urls         = ["http://localhost:5173/"]
+  enable_dev_client   = true
+  deletion_protection = "INACTIVE"
+}
