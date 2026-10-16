@@ -4,9 +4,17 @@ import uuid
 
 from flask import Flask, g, jsonify, request
 
+from . import households
+from .config import load_config
+from .db import close_db
+from .errors import register_error_handlers
 
-def create_app() -> Flask:
+def create_app(test_config=None) -> Flask:
     app = Flask(__name__)
+    app.json.ensure_ascii = False  
+    app.config.update(load_config())
+    if test_config:
+        app.config.update(test_config)
 
     logging.basicConfig(
         level=os.getenv("LOG_LEVEL", "INFO"),
@@ -22,6 +30,10 @@ def create_app() -> Flask:
         resp.headers["X-Request-Id"] = g.get("request_id", "")
         return resp
 
+    app.teardown_appcontext(close_db)
+    register_error_handlers(app)
+    app.register_blueprint(households.bp)
+
     @app.get("/health")
     def health():
         return jsonify(status="ok")
@@ -29,14 +41,6 @@ def create_app() -> Flask:
     @app.get("/api/ping")
     def ping():
         return jsonify(message="pong")
-
-    @app.errorhandler(404)
-    def not_found(_e):
-        return jsonify(error={
-            "code": "NOT_FOUND",
-            "message": "Không tìm thấy",
-            "request_id": g.get("request_id"),
-        }), 404
 
     return app
 
