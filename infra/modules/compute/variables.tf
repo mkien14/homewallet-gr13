@@ -23,3 +23,17 @@ variable "memory" {
   type    = number
   default = 1024 
 }
+variable "api_environment" {
+  type    = map(string)
+  default = {}
+}
+
+variable "api_secrets" {
+  type    = map(string)
+  default = {}
+}
+
+variable "secret_arns" {
+  type    = list(string)
+  default = []
+}

@@ -40,3 +40,18 @@ resource "aws_iam_role_policy" "api_s3" {
   name   = "s3-receipts"
   role   = aws_iam_role.api_task.id
   policy = data.aws_iam_policy_document.api_s3.json
+}
+
+resource "aws_iam_role_policy" "execution_read_secrets" {
+  count = length(var.secret_arns) > 0 ? 1 : 0
+  name  = "read-task-secrets"
+  role  = aws_iam_role.execution.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["secretsmanager:GetSecretValue"]
+      Resource = var.secret_arns
+    }]
+  })
+}
