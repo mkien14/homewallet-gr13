@@ -29,6 +29,8 @@ resource "aws_ecs_task_definition" "api" {
     essential    = true
     stopTimeout  = 30
     portMappings = [{ containerPort = var.container_port, protocol = "tcp" }]
+    environment  = [for k, v in var.api_environment : { name = k, value = v }]
+    secrets      = [for k, v in var.api_secrets : { name = k, valueFrom = v }]
     logConfiguration = {
       logDriver = "awslogs"
       options = {
@@ -66,5 +68,5 @@ resource "aws_ecs_service" "api" {
     rollback = true
   }
 
-  depends_on = [aws_lb_listener.http]
+  depends_on = [aws_lb_listener.http, aws_iam_role_policy.execution_read_secrets]
 }
