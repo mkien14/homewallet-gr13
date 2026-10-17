@@ -48,13 +48,14 @@ locals {
 module "compute" {
   source = "../../modules/compute"
 
-  name              = "homewallet-dev"
-  vpc_id            = module.network.vpc_id
-  public_subnet_ids = module.network.public_subnet_ids
-  app_subnet_ids    = module.network.app_subnet_ids
-  sg_alb_id         = module.network.sg_ids.alb
-  sg_app_id         = module.network.sg_ids.app
-  image             = local.image
+  name                = "homewallet-dev"
+  vpc_id              = module.network.vpc_id
+  public_subnet_ids   = module.network.public_subnet_ids
+  app_subnet_ids      = module.network.app_subnet_ids
+  sg_alb_id           = module.network.sg_ids.alb
+  sg_app_id           = module.network.sg_ids.app
+  image               = local.image
+  receipts_bucket_arn = module.storage.bucket_arn
 }
 
 module "data" {
@@ -88,4 +89,11 @@ module "cognito" {
   logout_urls         = ["http://localhost:5173/"]
   enable_dev_client   = true
   deletion_protection = "INACTIVE"
+}
+module "storage" {
+  source = "../../modules/storage"
+
+  env           = "dev"
+  cors_origins  = ["http://localhost:5173"]
+  force_destroy = true
 }

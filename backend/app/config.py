@@ -20,4 +20,8 @@ def load_config():
         "DB_PASSWORD": os.getenv("DB_PASSWORD", ""),
         "DB_NAME": os.getenv("DB_NAME", "homewallet"),
         "DB_SSL_CA": os.getenv("DB_SSL_CA"),
+        "S3_BUCKET": os.getenv("S3_BUCKET"),
+        "AWS_REGION": os.getenv("AWS_REGION", "ap-southeast-1"),
+        "MAX_RECEIPT_BYTES": int(os.getenv("MAX_RECEIPT_BYTES", str(5 * 1024 * 1024))),
+        "PRESIGN_EXPIRES": int(os.getenv("PRESIGN_EXPIRES", "300")),
     }
