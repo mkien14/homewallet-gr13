@@ -39,3 +39,26 @@ function Invoke-Api($Method, $Path, $Token, $Body) {
   try { Invoke-RestMethod @p }
   catch { Write-Host "Lỗi HTTP:" $_.ErrorDetails.Message -ForegroundColor Yellow }
 }
+
+$RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
+
+function Write-DevEnvFiles {
+  $issuer = Get-TfOutput cognito_issuer
+  $jwks   = Get-TfOutput cognito_jwks_uri
+  $spa    = Get-TfOutput cognito_spa_client_id
+  $dev    = Get-TfOutput cognito_dev_client_id
+  $hosted = Get-TfOutput cognito_hosted_ui
+  $bucket = Get-TfOutput receipts_bucket
+
+  Set-Content -Encoding ascii -Path (Join-Path $RepoRoot "backend\.env") -Value @(
+    "COGNITO_ISSUER=$issuer", "COGNITO_JWKS_URI=$jwks",
+    "COGNITO_CLIENT_IDS=$spa,$dev", "COGNITO_HOSTED_UI=$hosted",
+    "DB_HOST=localhost", "DB_PORT=3307", "DB_USER=root", "DB_PASSWORD=devpass",
+    "S3_BUCKET=$bucket", "AWS_REGION=ap-southeast-1")
+
+  Set-Content -Encoding ascii -Path (Join-Path $RepoRoot "frontend\.env.local") -Value @(
+    "VITE_COGNITO_DOMAIN=$hosted", "VITE_COGNITO_CLIENT_ID=$spa",
+    "VITE_API_TARGET=http://localhost:5000")
+
+  Write-Host "Đã ghi backend\.env và frontend\.env.local"
+}
