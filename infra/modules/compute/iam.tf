@@ -22,3 +22,21 @@ resource "aws_iam_role" "api_task" {
   name               = "hw-api-task-role"
   assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume.json
 }
+
+data "aws_iam_policy_document" "api_s3" {
+  statement {
+    sid       = "PutUploads"
+    actions   = ["s3:PutObject"]
+    resources = ["${var.receipts_bucket_arn}/receipts/uploads/*"]
+  }
+  statement {
+    sid       = "ReadReceipts"
+    actions   = ["s3:GetObject"]
+    resources = ["${var.receipts_bucket_arn}/receipts/*"]
+  }
+}
+
+resource "aws_iam_role_policy" "api_s3" {
+  name   = "s3-receipts"
+  role   = aws_iam_role.api_task.id
+  policy = data.aws_iam_policy_document.api_s3.json

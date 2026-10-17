@@ -12,3 +12,4 @@ output "cognito_dev_client_id" { value = module.cognito.dev_client_id }
 output "cognito_issuer" { value = module.cognito.issuer }
 output "cognito_jwks_uri" { value = module.cognito.jwks_uri }
 output "cognito_hosted_ui" { value = module.cognito.hosted_ui_base }
+output "receipts_bucket" { value = module.storage.bucket_name }

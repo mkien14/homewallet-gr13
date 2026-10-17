@@ -60,7 +60,7 @@ def db_app(app, monkeypatch):
         pytest.skip("Không kết nối được MySQL cục bộ (docker start hw-mysql)")
     with conn.cursor() as cur:
         cur.execute("SET FOREIGN_KEY_CHECKS = 0")
-        for t in ("household_members", "households", "users"):
+        for t in ("receipts", "household_members", "households", "users"):
             cur.execute(f"TRUNCATE TABLE {t}")
         cur.execute("SET FOREIGN_KEY_CHECKS = 1")
     conn.commit()
