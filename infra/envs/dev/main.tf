@@ -93,7 +93,7 @@ module "data" {
 module "migrate" {
   source = "../../modules/migrate"
 
-   name               = "homewallet-dev"
+  name               = "homewallet-dev"
   cluster_name       = module.compute.cluster_name
   image              = local.image
   execution_role_arn = module.compute.execution_role_arn
@@ -116,4 +116,12 @@ module "storage" {
   env           = "dev"
   cors_origins  = ["http://localhost:5173"]
   force_destroy = true
+}
+module "team_access" {
+  source = "../../modules/team-access"
+
+  name                = "homewallet-dev"
+  state_bucket        = "hw-tfstate-homewallet-gr13"
+  receipts_bucket_arn = module.storage.bucket_arn
+  user_pool_arn       = module.cognito.user_pool_arn
 }

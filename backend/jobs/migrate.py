@@ -15,7 +15,7 @@ def connect():
         user=os.environ["DB_USER"],
         password=os.environ["DB_PASSWORD"],
         charset="utf8mb4",
-        ssl_ca="/etc/ssl/rds-global-bundle.pem",  # xác thực chứng chỉ của RDS
+        ssl_ca="/etc/ssl/rds-global-bundle.pem",  
         ssl_verify_cert=True,
         ssl_verify_identity=True,
         connect_timeout=10,
@@ -23,7 +23,7 @@ def connect():
 
 
 def split_statements(sql):
-    sql = re.sub(r"--[^\n]*", "", sql)  # bỏ chú thích
+    sql = re.sub(r"--[^\n]*", "", sql)  
     return [s.strip() for s in sql.split(";") if s.strip()]
 
 

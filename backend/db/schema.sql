@@ -34,7 +34,7 @@ CREATE TABLE household_members (
 
 CREATE TABLE categories (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  household_id BIGINT NULL,            -- NULL = danh mục hệ thống
+  household_id BIGINT NULL,            
   name VARCHAR(100) NOT NULL,
   icon VARCHAR(50),
   is_fixed TINYINT(1) NOT NULL DEFAULT 0,
@@ -99,7 +99,7 @@ CREATE TABLE transaction_items (
 CREATE TABLE budgets (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   household_id BIGINT NOT NULL,
-  period CHAR(7) NOT NULL,              -- 'YYYY-MM'
+  period CHAR(7) NOT NULL,              
   income_estimate BIGINT NOT NULL,
   savings_goal BIGINT NOT NULL DEFAULT 0,
   source ENUM('MANUAL','LLM','RULE') NOT NULL,
@@ -134,7 +134,7 @@ CREATE TABLE alert_state (
   household_id BIGINT NOT NULL,
   period CHAR(7) NOT NULL,
   category_id BIGINT NOT NULL,
-  threshold SMALLINT NOT NULL,          -- 80 hoặc 100
+  threshold SMALLINT NOT NULL,          
   sent_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (household_id, period, category_id, threshold)
 );
@@ -166,7 +166,6 @@ CREATE TABLE audit_logs (
   at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Danh mục hệ thống mặc định
 INSERT INTO categories (household_id, name, icon, is_fixed) VALUES
   (NULL, 'Ăn uống', 'utensils', 0),
   (NULL, 'Đi chợ, siêu thị', 'shopping-cart', 0),
