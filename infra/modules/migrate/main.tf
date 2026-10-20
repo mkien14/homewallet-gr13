@@ -42,6 +42,7 @@ resource "aws_ecs_task_definition" "migrate" {
     environment = [
       { name = "DB_HOST", value = var.db_host },
       { name = "DB_PORT", value = "3306" },
+      { name = "DB_SSL_CA", value = "/etc/ssl/rds-global-bundle.pem" },
     ]
     secrets = [
       { name = "DB_USER", valueFrom = "${var.db_secret_arn}:username::" },

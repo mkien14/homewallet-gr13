@@ -9,7 +9,8 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import errors, types
 
-from common import parse_date, parse_vnd
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "backend"))
+from app.parsing import parse_date, parse_vnd
 
 os.chdir(pathlib.Path(__file__).resolve().parent)
 load_dotenv()
