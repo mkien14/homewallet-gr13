@@ -16,9 +16,13 @@ GET /api/receipts/{id}
 POST /api/receipts/{id}/confirm   body như "draft" (đã sửa)  -> 200 {"transaction":{...}}; 409 nếu đã xác nhận; 422 nếu sai
 GET  /api/categories              -> {"categories":[{"id":1,"name":"Ăn uống","icon":"utensils","is_fixed":false}]}
 POST /api/transactions            header Idempotency-Key; body {"occurred_on","total_amount","category_id","note"}
-                                  -> 201 (gửi lại cùng khóa: 200 và trả bản ghi cũ)
+                                  -> 201 {"transaction":{...}} (gửi lại cùng khóa: 200 và trả bản ghi cũ)
+                                  Giao dịch nhập tay được tạo ở trạng thái CONFIRMED.
 GET  /api/transactions?period=2026-10&member_id=&category_id=&limit=50&cursor=
-PATCH|DELETE /api/transactions/{id}   (người tạo hoặc Chủ hộ, BR4)
+                                  -> {"items":[...],"next_cursor":null}; sắp xếp id giảm dần,
+                                  cursor là id cuối cùng của trang trước; limit tối đa 100.
+PATCH|DELETE /api/transactions/{id}   (người tạo hoặc Chủ hộ, BR4); PATCH nhận các trường
+                                      occurred_on, total_amount, category_id, note.
 GET  /api/dashboard?period=2026-10
   -> {"period":"2026-10","total":0,"by_category":[{"category_id":1,"name":"...","amount":0}],
       "by_member":[{"user_id":1,"display_name":"...","amount":0}],"by_week":[{"week_start":"2026-10-05","amount":0}]}

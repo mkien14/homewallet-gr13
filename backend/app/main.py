@@ -4,7 +4,7 @@ import uuid
 
 from flask import Flask, g, jsonify, request
 
-from . import households, receipts
+from . import households, receipts, transactions
 from .config import load_config
 from .db import close_db
 from .errors import register_error_handlers
@@ -35,6 +35,7 @@ def create_app(test_config=None) -> Flask:
     register_error_handlers(app)
     app.register_blueprint(households.bp)
     app.register_blueprint(receipts.bp)
+    app.register_blueprint(transactions.bp)
     
     @app.get("/health")
     def health():
