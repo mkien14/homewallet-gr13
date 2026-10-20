@@ -5,7 +5,8 @@ import time
 
 import boto3 
 
-from common import parse_date, parse_vnd
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "backend"))
+from app.parsing import parse_date, parse_vnd
 
 REGION = "ap-southeast-1"
 client = boto3.client("textract", region_name=REGION)
