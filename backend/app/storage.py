@@ -40,6 +40,14 @@ def presign_upload(key, content_type):
     )
 
 
+def presign_download(key):
+    return _client().generate_presigned_url(
+        "get_object",
+        Params={"Bucket": _bucket(), "Key": key},
+        ExpiresIn=300,
+    )
+
+
 def object_exists(key):
     try:
         _client().head_object(Bucket=_bucket(), Key=key)

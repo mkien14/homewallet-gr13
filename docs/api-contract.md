@@ -5,6 +5,7 @@ GET /api/receipts?status=&limit=50&cursor=
   -> {"items":[{"id":12,"status":"DRAFT_READY","merchant":"Highlands Coffee",
        "total_amount":147000,"occurred_on":"2026-10-12","created_at":"...","warnings":[]}],
       "next_cursor":null}
+  Pagination sorts receipts by descending id; pass next_cursor as cursor for the next page.
 
 GET /api/receipts/{id}
   -> {"id":12,"status":"DRAFT_READY","error_code":null,"warnings":["TOTAL_MISMATCH"],

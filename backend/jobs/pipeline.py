@@ -11,6 +11,7 @@ import boto3
 from PIL import Image, ImageOps
 
 from app.config import load_config
+from app.cache import invalidate_dashboard
 from app.db import connect
 from app.parsing import parse_date, parse_vnd
 from jobs.llm import extract_invoice
@@ -25,10 +26,6 @@ FINISHED_RECEIPT_STATUSES = ("DRAFT_READY", "NEEDS_REVIEW", "CONFIRMED")
 
 class ReceiptNotFound(Exception):
     pass
-
-
-def invalidate_dashboard(household_id):
-    return None
 
 
 def resolve_file(file_path):
