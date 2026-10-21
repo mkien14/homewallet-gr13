@@ -118,8 +118,12 @@ def normalize_invoice(raw, category_rows, uploaded_at, *, today=None):
     today = today or date.today()
     invoice_date = parse_date(raw.get("date"))
     parsed_date = date.fromisoformat(invoice_date) if invoice_date else None
-    date_needs_review = parsed_date is None or parsed_date > today + timedelta(days=1)
-    occurred_on = uploaded_date if date_needs_review else parsed_date
+    if parsed_date is None or parsed_date > today + timedelta(days=1):
+        date_needs_review = True
+        occurred_on = uploaded_date
+    else:
+        date_needs_review = False
+        occurred_on = parsed_date
 
     total_amount = parse_vnd(raw.get("total"))
     total_missing = total_amount is None
@@ -374,6 +378,7 @@ def process_local_file(file_path, household_id, user_id, *, config=None):
     path = resolve_file(file_path)
     raw_bytes = path.read_bytes()
     db = connect(config)
+    receipt_id = None
     try:
         with db.cursor() as cursor:
             cursor.execute(
@@ -396,17 +401,18 @@ def process_local_file(file_path, household_id, user_id, *, config=None):
                 "status": "PROCESSING",
                 "created_at": datetime.now(),
             }
+            receipt_id = receipt["id"]
             _mark_processing(cursor, receipt["id"])
         db.commit()
         return _persist_receipt(db, receipt, raw_bytes, False)
     except Exception:
         db.rollback()
-        if "receipt" in locals():
+        if receipt_id is not None:
             with db.cursor() as cursor:
                 cursor.execute(
                     "UPDATE receipts SET status = 'FAILED', error_code = %s, "
                     "processed_at = CURRENT_TIMESTAMP WHERE id = %s",
-                    ("LOCAL_PROCESSING_FAILED", receipt["id"]),
+                    ("LOCAL_PROCESSING_FAILED", receipt_id),
                 )
             db.commit()
         raise
