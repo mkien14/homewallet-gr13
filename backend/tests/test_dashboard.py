@@ -59,10 +59,13 @@ def test_dashboard_aggregates_confirmed_transactions_by_category_member_and_week
         db = get_db()
         with db.cursor() as cur:
             cur.execute(
-                "SELECT id FROM users WHERE cognito_sub IN (%s, %s) ORDER BY cognito_sub",
+                "SELECT id, display_name FROM users "
+                "WHERE cognito_sub IN (%s, %s) ORDER BY cognito_sub",
                 ("sub-a", "sub-b"),
             )
-            member_ids = [row["id"] for row in cur.fetchall()]
+            members = cur.fetchall()
+            member_ids = [row["id"] for row in members]
+            display_names = [row["display_name"] for row in members]
             cur.execute("SELECT id FROM categories WHERE household_id IS NULL ORDER BY id LIMIT 2")
             category_ids = [row["id"] for row in cur.fetchall()]
 
@@ -101,8 +104,8 @@ def test_dashboard_aggregates_confirmed_transactions_by_category_member_and_week
         {"category_id": category_ids[1], "name": "Đi chợ, siêu thị", "amount": 50000},
     ]
     assert result["by_member"] == [
-        {"user_id": member_ids[0], "display_name": None, "amount": 120000},
-        {"user_id": member_ids[1], "display_name": None, "amount": 80000},
+        {"user_id": member_ids[0], "display_name": display_names[0], "amount": 120000},
+        {"user_id": member_ids[1], "display_name": display_names[1], "amount": 80000},
     ]
     assert result["by_week"] == [
         {"week_start": "2026-10-05", "amount": 170000},
