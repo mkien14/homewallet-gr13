@@ -26,4 +26,5 @@ PATCH|DELETE /api/transactions/{id}   (người tạo hoặc Chủ hộ, BR4); P
 GET  /api/dashboard?period=2026-10
   -> {"period":"2026-10","total":0,"by_category":[{"category_id":1,"name":"...","amount":0}],
       "by_member":[{"user_id":1,"display_name":"...","amount":0}],"by_week":[{"week_start":"2026-10-05","amount":0}]}
+  period is required (YYYY-MM); totals include CONFIRMED transactions only.
 Lỗi: {"error":{"code","message","request_id"}}; hộ khác luôn trả 404.
