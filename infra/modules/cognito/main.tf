@@ -13,6 +13,10 @@ resource "aws_cognito_user_pool" "this" {
   username_attributes      = ["email"]
   auto_verified_attributes = ["email"]
 
+  lifecycle {
+    prevent_destroy = true
+  }
+
   password_policy {
     minimum_length                   = 10
     require_lowercase                = true

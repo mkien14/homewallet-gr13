@@ -7,6 +7,11 @@ locals {
 resource "aws_s3_bucket" "receipts" {
   bucket        = local.bucket_name
   force_destroy = var.force_destroy
+
+  lifecycle {
+    prevent_destroy = true
+  }
+
 }
 
 resource "aws_s3_bucket_public_access_block" "receipts" {
