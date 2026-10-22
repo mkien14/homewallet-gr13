@@ -10,6 +10,11 @@ resource "aws_ecr_repository" "this" {
   image_scanning_configuration {
     scan_on_push = true
   }
+
+  lifecycle {
+    prevent_destroy = true
+  }
+
 }
 
 resource "aws_ecr_lifecycle_policy" "this" {
