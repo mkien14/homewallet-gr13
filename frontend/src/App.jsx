@@ -1,11 +1,12 @@
 import { BrowserRouter, Link, Navigate, Route, Routes } from "react-router-dom";
 import { isLoggedIn, login, logout } from "./auth/auth";
+import { USE_MOCK } from "./mode";
 import Callback from "./pages/Callback";
 import Home from "./pages/Home";
 import Upload from "./pages/Upload";
 
 function Protected({ children }) {
-  if (!isLoggedIn()) {
+  if (!USE_MOCK && !isLoggedIn()) {
     return (
       <div className="card">
         <h2>HomeWallet</h2>
@@ -22,7 +23,7 @@ export default function App() {
     <BrowserRouter>
       <header>
         <b>HomeWallet</b>
-        {isLoggedIn() && (
+        {(USE_MOCK || isLoggedIn()) && (
           <nav>
             <Link to="/">Hộ gia đình</Link>
             <Link to="/upload">Tải hóa đơn</Link>
@@ -30,6 +31,7 @@ export default function App() {
           </nav>
         )}
       </header>
+      {USE_MOCK && <p role="status">D? li?u gi?: c?c thao t?c th? kh?ng g?i l?n AWS.</p>}
       <main>
         <Routes>
           <Route path="/auth/callback" element={<Callback />} />

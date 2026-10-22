@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 680" role="img" aria-labelledby="title desc">
+  <title id="title">Hóa đơn minh họa HomeWallet</title>
+  <desc id="desc">Dữ liệu giả cho giao diện, không phải ảnh hóa đơn thật.</desc>
+  <rect width="480" height="680" fill="#f1f5f9"/>
+  <rect x="35" y="25" width="410" height="620" rx="6" fill="white" stroke="#cbd5e1"/>
+  <g font-family="Arial, sans-serif" fill="#1f2937" font-size="19">
+    <text x="240" y="88" text-anchor="middle" font-size="25" font-weight="bold">CÀ PHÊ GIA ĐÌNH</text>
+    <text x="240" y="124" text-anchor="middle">HÓA ĐƠN MINH HỌA</text>
+    <text x="65" y="184">Cà phê sữa × 2</text><text x="415" y="184" text-anchor="end">98.000</text>
+    <text x="65" y="232">Bánh ngọt × 1</text><text x="415" y="232" text-anchor="end">49.000</text>
+    <path d="M65 270H415" stroke="#94a3b8" stroke-dasharray="5 5"/>
+    <text x="65" y="316" font-weight="bold">TỔNG</text><text x="415" y="316" text-anchor="end" font-weight="bold">147.000 ₫</text>
+    <text x="240" y="400" text-anchor="middle" fill="#475569">Dùng để kiểm tra giao diện</text>
+    <text x="240" y="434" text-anchor="middle" fill="#475569">Không phải dữ liệu OCR thật</text>
+    <text x="240" y="586" text-anchor="middle" font-size="16" fill="#64748b">HomeWallet · Dữ liệu mẫu</text>
+  </g>
+</svg>
