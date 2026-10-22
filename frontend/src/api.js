@@ -1,4 +1,5 @@
 import { getToken, login } from "./auth/auth";
+import { USE_MOCK } from "./mode";
 
 export class ApiError extends Error {
   constructor(status, code, message) {
@@ -8,7 +9,14 @@ export class ApiError extends Error {
   }
 }
 
-export async function api(path, { method = "GET", body } = {}) {
+export async function api(path, { method = "GET", body, headers, signal } = {}) {
+  if (USE_MOCK) {
+    signal?.throwIfAborted();
+    const { mockApi } = await import("./mocks/index.js");
+    const result = await mockApi(path, { method, body, headers });
+    signal?.throwIfAborted();
+    return result;
+  }
   const token = getToken();
   if (!token) {
     await login(); 
