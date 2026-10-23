@@ -8,7 +8,9 @@ if (-not $env:HW_TEST_PASSWORD) {
 
 $global:ApiBase = "http://localhost:5000"
 function Use-LocalApi { $global:ApiBase = "http://localhost:5000" }
-function Use-AlbApi   { $global:ApiBase = "http://" + (Get-TfOutput alb_dns_name) }
+# Hạ tầng đã chuyển từ ALB công khai sang API Gateway + VPC link; đích ECS nay là endpoint HTTPS của API Gateway.
+function Use-CloudApi { $global:ApiBase = (Get-TfOutput api_gateway_endpoint).Trim() }
+function Use-AlbApi   { Use-CloudApi } # tên cũ trong hướng dẫn, giữ lại để kịch bản cũ chạy được
 
 function Get-TfOutput($Name) {
   Push-Location $TfDir
@@ -55,6 +57,9 @@ function Get-DevToken($Email) {
   $client = Get-TfOutput cognito_dev_client_id
   $r = aws cognito-idp initiate-auth --auth-flow USER_PASSWORD_AUTH --client-id $client `
     --auth-parameters "USERNAME=$Email,PASSWORD=$env:HW_TEST_PASSWORD" --region $Region | ConvertFrom-Json
+  if (-not $r.PSObject.Properties["AuthenticationResult"]) {
+    throw "Đăng nhập Cognito thất bại cho $Email. Chạy lại New-TestUsers trong cùng phiên (mật khẩu test đổi theo mỗi phiên)."
+  }
   $r.AuthenticationResult.AccessToken
 }
 
@@ -65,8 +70,19 @@ function Invoke-Api($Method, $Path, $Token, $Body) {
     $p.ContentType = "application/json; charset=utf-8"
     $p.Body = [Text.Encoding]::UTF8.GetBytes(($Body | ConvertTo-Json))
   }
-  try { Invoke-RestMethod @p }
-  catch { Write-Host "Lỗi HTTP:" $_.ErrorDetails.Message -ForegroundColor Yellow }
+  try {
+    Invoke-RestMethod @p
+  } catch {
+    $status = if ($_.Exception.Response) { [int]$_.Exception.Response.StatusCode } else { $null }
+    $detail = $_.Exception.Message
+    if ($_.ErrorDetails -and $_.ErrorDetails.Message) {
+      $detail = $_.ErrorDetails.Message
+    }
+    if ($status) {
+      throw "HTTP $status khi gọi $Method $Path tại $global:ApiBase`: $detail"
+    }
+    throw "Không thể gọi $Method $Path tại $global:ApiBase`: $detail"
+  }
 }
 
 function Test-DevSetup {
