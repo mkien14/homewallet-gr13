@@ -5,6 +5,18 @@ import { todayIso } from "../src/format.js";
 
 beforeEach(() => resetMockData());
 
+test("dashboard mock requires a valid period just like the new Flask endpoint", async () => {
+  for (const path of ["/api/dashboard", "/api/dashboard?period=2026-13", "/api/dashboard?period=0000-01", "/api/dashboard?period=9999-12"]) {
+    await assert.rejects(mockApi(path), { status: 422 });
+  }
+  const empty = await mockApi("/api/dashboard?period=2000-01");
+  assert.equal(empty.total, 0);
+  assert.deepEqual(empty.by_category, []);
+  assert.deepEqual(empty.by_member, []);
+  assert.deepEqual(empty.by_week, []);
+});
+
+const dashboardPath = () => `/api/dashboard?period=${todayIso().slice(0, 7)}`;
 const manual = () => ({ occurred_on: todayIso(), total_amount: 42000, category_id: 1, note: "Bữa trưa" });
 const createManual = (body, key = "test-key") => mockApi("/api/transactions", { method: "POST", headers: { "Idempotency-Key": key }, body });
 
@@ -20,13 +32,13 @@ test("all receipt states and correctly shaped household/category fixtures are av
 });
 
 test("dashboard excludes OCR drafts and member filters follow member_id", async () => {
-  const dashboard = await mockApi("/api/dashboard");
+  const dashboard = await mockApi(dashboardPath());
   assert.equal(dashboard.total, 227000);
   assert.equal(dashboard.by_category.reduce((sum, item) => sum + item.amount, 0), dashboard.total);
   assert.equal(dashboard.by_member.reduce((sum, item) => sum + item.amount, 0), dashboard.total);
   assert.equal(dashboard.by_week.reduce((sum, item) => sum + item.amount, 0), dashboard.total);
-  const filtered = await mockApi("/api/dashboard?member_id=2");
-  assert.equal(filtered.total, 80000);
+  const filtered = await mockApi(`${dashboardPath()}&member_id=2`);
+  assert.equal(filtered.total, dashboard.total);
   const { items } = await mockApi("/api/transactions?member_id=2");
   assert.ok(items.every((transaction) => transaction.member_id === 2));
 });
@@ -39,13 +51,13 @@ test("manual transaction repeated with the same key creates one confirmed record
   assert.equal(first.transaction.member_id, 1);
   const { items } = await mockApi("/api/transactions");
   assert.equal(items.filter((item) => item.id === first.transaction.id).length, 1);
-  assert.equal((await mockApi("/api/dashboard")).total, 269000);
+  assert.equal((await mockApi(dashboardPath())).total, 269000);
 });
 
 test("idempotency replays the original transaction even if valid input changes, as the real API does", async () => {
   const original = await createManual(manual());
   assert.deepEqual(await createManual({ ...manual(), total_amount: 10000 }), original);
-  assert.equal((await mockApi("/api/dashboard")).total, 269000);
+  assert.equal((await mockApi(dashboardPath())).total, 269000);
   await assert.rejects(mockApi("/api/transactions", { method: "POST", body: manual() }), { status: 422 });
   await assert.rejects(createManual(manual(), "x".repeat(65)), { status: 422 });
 });
@@ -81,7 +93,7 @@ test("invalid amounts, dates and categories leave dashboard unchanged", async ()
     { ...manual(), occurred_on: "2026-02-30" },
     { ...manual(), category_id: 999 },
   ]) await assert.rejects(createManual(body), { status: 422, code: "VALIDATION" });
-  assert.equal((await mockApi("/api/dashboard")).total, 227000);
+  assert.equal((await mockApi(dashboardPath())).total, 227000);
 });
 
 test("confirming an edited receipt updates its existing draft exactly once", async () => {
@@ -92,16 +104,16 @@ test("confirming an edited receipt updates its existing draft exactly once", asy
   assert.equal(result.transaction.status, "CONFIRMED");
   assert.equal(result.transaction.merchant, "Cửa hàng đã sửa");
   assert.equal((await mockApi("/api/receipts/5")).status, "CONFIRMED");
-  assert.equal((await mockApi("/api/dashboard")).total, 374000);
+  assert.equal((await mockApi(dashboardPath())).total, 374000);
   await assert.rejects(mockApi("/api/receipts/5/confirm", { method: "POST", body }), { status: 409 });
-  assert.equal((await mockApi("/api/dashboard")).total, 374000);
+  assert.equal((await mockApi(dashboardPath())).total, 374000);
 });
 
 test("receipt confirmation rejects invalid lines and non-ready receipts", async () => {
   const { draft } = await mockApi("/api/receipts/4");
   await assert.rejects(mockApi("/api/receipts/4/confirm", { method: "POST", body: { ...draft, items: [{ ...draft.items[0], quantity: -1 }] } }), { status: 422 });
   await assert.rejects(mockApi("/api/receipts/6/confirm", { method: "POST", body: draft }), { status: 409 });
-  assert.equal((await mockApi("/api/dashboard")).total, 227000);
+  assert.equal((await mockApi(dashboardPath())).total, 227000);
 });
 
 test("receipt pagination returns each item once and filter preserves status", async () => {
