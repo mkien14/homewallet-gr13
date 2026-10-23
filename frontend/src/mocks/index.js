@@ -253,9 +253,12 @@ function filteredTransactions(state, params) {
 }
 
 function dashboard(state, params) {
-  const transactions = filteredTransactions(state, params).filter((transaction) => transaction.status === "CONFIRMED");
+  if (!params.get("period")) fail(422, "VALIDATION", "Cần chọn kỳ báo cáo dạng YYYY-MM.");
+  const period = periodValue(params);
+  if (period.startsWith("0000") || period === "9999-12") fail(422, "VALIDATION", "Kỳ báo cáo không hợp lệ.");
+  const transactions = state.transactions.filter((transaction) => transaction.occurred_on.startsWith(`${period}-`) && transaction.status === "CONFIRMED");
   const categories = [...state.categories];
-  if (transactions.some((transaction) => transaction.category_id == null)) categories.push({ id: null, name: "Chưa phân loại" });
+  if (transactions.some((transaction) => transaction.category_id == null)) categories.push({ id: null, name: null });
   const members = [...state.members];
   for (const transaction of transactions) {
     if (!members.some((member) => member.id === transaction.member_id)) members.push({ id: transaction.member_id, display_name: "Thành viên" });
@@ -268,18 +271,18 @@ function dashboard(state, params) {
     weeks.set(week, (weeks.get(week) ?? 0) + transaction.total_amount);
   }
   return {
-    period: periodValue(params),
+    period,
     total: transactions.reduce((sum, transaction) => sum + transaction.total_amount, 0),
     by_category: categories.map((category) => ({
       category_id: category.id,
       name: category.name,
       amount: transactions.filter((transaction) => transaction.category_id === category.id).reduce((sum, transaction) => sum + transaction.total_amount, 0),
-    })),
+    })).filter((row) => transactions.some((transaction) => transaction.category_id === row.category_id)),
     by_member: members.map((member) => ({
       user_id: member.id,
       display_name: member.display_name,
       amount: transactions.filter((transaction) => transaction.member_id === member.id).reduce((sum, transaction) => sum + transaction.total_amount, 0),
-    })),
+    })).filter((row) => transactions.some((transaction) => transaction.member_id === row.user_id)),
     by_week: [...weeks.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([week_start, amount]) => ({ week_start, amount })),
   };
 }

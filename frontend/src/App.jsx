@@ -1,9 +1,12 @@
-import { BrowserRouter, Link, Navigate, Route, Routes } from "react-router-dom";
+import { lazy, Suspense } from "react";
+import { BrowserRouter, Link, NavLink, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { isLoggedIn, login, logout } from "./auth/auth";
 import { USE_MOCK } from "./mode";
 import Callback from "./pages/Callback";
 import Home from "./pages/Home";
 import Upload from "./pages/Upload";
+
+const Dashboard = lazy(() => import("./pages/Dashboard"));
 
 function Protected({ children }) {
   if (!USE_MOCK && !isLoggedIn()) {
@@ -18,28 +21,49 @@ function Protected({ children }) {
   return children;
 }
 
-export default function App() {
+function AppContent() {
+  useLocation();
+  const authenticated = USE_MOCK || isLoggedIn();
   return (
-    <BrowserRouter>
-      <header>
-        <b>HomeWallet</b>
-        {(USE_MOCK || isLoggedIn()) && (
-          <nav>
-            <Link to="/">Hộ gia đình</Link>
-            <Link to="/upload">Tải hóa đơn</Link>
-            <button onClick={logout}>Đăng xuất</button>
+    <>
+      <a className="skip-link" href="#main-content">Đến nội dung chính</a>
+      <header className="app-header">
+        <Link className="brand" to={authenticated ? "/dashboard" : "/"}>HomeWallet</Link>
+        {authenticated && (
+          <nav aria-label="Điều hướng chính">
+            <NavLink to="/dashboard">Tổng quan</NavLink>
+            <NavLink to="/upload">Tải ảnh</NavLink>
+            <NavLink to="/" end>Hộ gia đình</NavLink>
+            {!USE_MOCK && <button className="button-secondary" onClick={logout}>Đăng xuất</button>}
           </nav>
         )}
       </header>
-      {USE_MOCK && <p role="status">D? li?u gi?: c?c thao t?c th? kh?ng g?i l?n AWS.</p>}
-      <main>
+      {USE_MOCK && (
+        <aside className="mock-banner" aria-label="Chế độ thử nghiệm">
+          <strong>Dữ liệu giả</strong>
+          <span>Bạn đang thử giao diện. Hóa đơn và chi tiêu được lưu riêng trên trình duyệt, không gửi lên AWS.</span>
+          <button className="button-secondary" type="button" onClick={async () => {
+            const { resetMockData } = await import("./mocks/index.js");
+            resetMockData();
+            window.location.reload();
+          }}>Đặt lại dữ liệu mẫu</button>
+        </aside>
+      )}
+      <main id="main-content">
+        <Suspense fallback={<p role="status">Đang tải trang…</p>}>
         <Routes>
           <Route path="/auth/callback" element={<Callback />} />
           <Route path="/" element={<Protected><Home /></Protected>} />
           <Route path="/upload" element={<Protected><Upload /></Protected>} />
+          <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </Suspense>
       </main>
-    </BrowserRouter>
+    </>
   );
+}
+
+export default function App() {
+  return <BrowserRouter><AppContent /></BrowserRouter>;
 }
