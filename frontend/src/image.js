@@ -1,4 +1,5 @@
 import { api } from "./api";
+import { USE_MOCK } from "./mode";
 
 const MAX_BYTES = 5 * 1024 * 1024; 
 const MAX_SIDE = 2000;
@@ -12,7 +13,12 @@ export async function prepareFile(file) {
     throw new Error("Chỉ nhận JPEG, PNG hoặc PDF");
   }
 
-  const bmp = await createImageBitmap(file, { imageOrientation: "from-image" });
+  let bmp;
+  try {
+    bmp = await createImageBitmap(file, { imageOrientation: "from-image" });
+  } catch {
+    throw new Error("Không đọc được ảnh. Hãy chọn tệp JPEG hoặc PNG hợp lệ.");
+  }
   let scale = Math.min(1, MAX_SIDE / Math.max(bmp.width, bmp.height));
 
   for (let attempt = 0; attempt < 4; attempt++) {
@@ -39,33 +45,52 @@ export async function prepareFile(file) {
   throw new Error("Không nén được ảnh xuống dưới 5 MB");
 }
 
-export async function uploadReceipt(file, onStage) {
+export async function uploadReceipt(file, onStage, { signal } = {}) {
+  signal?.throwIfAborted();
   onStage("Đang nén ảnh");
   const blob = await prepareFile(file);
+  signal?.throwIfAborted();
 
   onStage("Đang xin phép tải lên");
   const { receipt, upload } = await api("/api/receipts", {
     method: "POST",
     body: { content_type: blob.type, size: blob.size },
+    signal,
   });
 
   onStage("Đang tải lên");
+  if (USE_MOCK) {
+    const { completeMockUpload } = await import("./mocks/index.js");
+    await completeMockUpload(receipt.id, blob);
+    return receipt.id;
+  }
   const form = new FormData();
   Object.entries(upload.fields).forEach(([k, v]) => form.append(k, v));
   form.append("file", blob); 
-  const res = await fetch(upload.url, { method: "POST", body: form });
+  const res = await fetch(upload.url, { method: "POST", body: form, signal });
   if (!res.ok) throw new Error(`Kho lưu trữ từ chối tệp (${res.status})`);
   return receipt.id;
 }
 
-const FINISHED = ["UPLOADED", "DRAFT_READY", "NEEDS_REVIEW", "FAILED", "CONFIRMED"];
+const FINISHED = ["DRAFT_READY", "NEEDS_REVIEW", "FAILED", "CONFIRMED"];
 
-export async function waitForStatus(id, onUpdate, tries = 60) {
+export async function waitForStatus(id, onUpdate, tries = 60, { signal } = {}) {
   for (let i = 0; i < tries; i++) {
-    const r = await api(`/api/receipts/${id}`);
+    const r = await api(`/api/receipts/${id}`, { signal });
     onUpdate(r.status);
     if (FINISHED.includes(r.status)) return r.status;
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await new Promise((resolve, reject) => {
+      signal?.throwIfAborted();
+      const timer = setTimeout(() => {
+        signal?.removeEventListener("abort", abort);
+        resolve();
+      }, 2000);
+      function abort() {
+        clearTimeout(timer);
+        reject(signal.reason);
+      }
+      signal?.addEventListener("abort", abort, { once: true });
+    });
   }
   return "TIMEOUT";
 }
