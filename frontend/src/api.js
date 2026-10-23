@@ -1,18 +1,14 @@
 import { getToken, login } from "./auth/auth";
 import { USE_MOCK } from "./mode";
+import { ApiError, readApiResponse } from "./apiResponse";
 
-export class ApiError extends Error {
-  constructor(status, code, message) {
-    super(message);
-    this.status = status;
-    this.code = code;
-  }
-}
+export { ApiError } from "./apiResponse";
 
 export async function api(path, { method = "GET", body, headers, signal } = {}) {
+  signal?.throwIfAborted();
   if (USE_MOCK) {
-    signal?.throwIfAborted();
     const { mockApi } = await import("./mocks/index.js");
+    signal?.throwIfAborted();
     const result = await mockApi(path, { method, body, headers });
     signal?.throwIfAborted();
     return result;
@@ -23,25 +19,29 @@ export async function api(path, { method = "GET", body, headers, signal } = {}) 
     throw new ApiError(401, "UNAUTHENTICATED", "Cần đăng nhập");
   }
 
-  const res = await fetch(path, {
-    method,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      ...(body ? { "Content-Type": "application/json" } : {}),
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-
-  if (res.status === 204) return null;
-  const data = await res.json().catch(() => null);
-
-  if (!res.ok) {
-    const err = data?.error;
-    if (res.status === 401 && err?.code === "TOKEN_EXPIRED") {
+  const requestHeaders = new Headers(headers);
+  requestHeaders.set("Authorization", `Bearer ${token}`);
+  if (body !== undefined) requestHeaders.set("Content-Type", "application/json");
+  try {
+    let response;
+    try {
+      response = await fetch(path, {
+        method,
+        headers: requestHeaders,
+        body: body !== undefined ? JSON.stringify(body) : undefined,
+        signal,
+      });
+    } catch (error) {
+      if (signal?.aborted) throw error;
+      throw new ApiError(0, "NETWORK_ERROR", "Không kết nối được máy chủ API. Hãy kiểm tra kết nối và backend đang chạy.");
+    }
+    return await readApiResponse(response, { signal });
+  } catch (error) {
+    if (error.status === 401 && error.code === "TOKEN_EXPIRED") {
       sessionStorage.removeItem("hw.token");
       await login();
     }
-    throw new ApiError(res.status, err?.code, err?.message || "Có lỗi xảy ra");
+    error.path = path;
+    throw error;
   }
-  return data;
 }
