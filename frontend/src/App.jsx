@@ -6,7 +6,8 @@ import Callback from "./pages/Callback";
 import Home from "./pages/Home";
 import Upload from "./pages/Upload";
 
-const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Receipts = lazy(() => import("./pages/Receipts"));
+const ReceiptDetail = lazy(() => import("./pages/ReceiptDetail"));
 
 function Protected({ children }) {
   if (!USE_MOCK && !isLoggedIn()) {
@@ -28,10 +29,10 @@ function AppContent() {
     <>
       <a className="skip-link" href="#main-content">Đến nội dung chính</a>
       <header className="app-header">
-        <Link className="brand" to={authenticated ? "/dashboard" : "/"}>HomeWallet</Link>
+        <Link className="brand" to="/">HomeWallet</Link>
         {authenticated && (
           <nav aria-label="Điều hướng chính">
-            <NavLink to="/dashboard">Tổng quan</NavLink>
+            <NavLink to="/receipts">Hóa đơn</NavLink>
             <NavLink to="/upload">Tải ảnh</NavLink>
             <NavLink to="/" end>Hộ gia đình</NavLink>
             {!USE_MOCK && <button className="button-secondary" onClick={logout}>Đăng xuất</button>}
@@ -55,7 +56,8 @@ function AppContent() {
           <Route path="/auth/callback" element={<Callback />} />
           <Route path="/" element={<Protected><Home /></Protected>} />
           <Route path="/upload" element={<Protected><Upload /></Protected>} />
-          <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
+          <Route path="/receipts" element={<Protected><Receipts /></Protected>} />
+          <Route path="/receipts/:id" element={<Protected><ReceiptDetail /></Protected>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         </Suspense>
