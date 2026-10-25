@@ -33,20 +33,17 @@ resource "aws_security_group" "endpoints" {
   tags        = { Name = "${var.name}-sg-endpoints" }
 }
 
-resource "aws_vpc_security_group_ingress_rule" "alb_http" {
-  security_group_id = aws_security_group.alb.id
-  cidr_ipv4         = var.alb_ingress_cidr
-  ip_protocol       = "tcp"
-  from_port         = 80
-  to_port           = 80
+data "aws_ec2_managed_prefix_list" "cloudfront" {
+  name = "com.amazonaws.global.cloudfront.origin-facing"
 }
 
-resource "aws_vpc_security_group_ingress_rule" "alb_https" {
+resource "aws_vpc_security_group_ingress_rule" "alb_from_cloudfront" {
   security_group_id = aws_security_group.alb.id
-  cidr_ipv4         = var.alb_ingress_cidr
-  ip_protocol       = "tcp"
-  from_port         = 443
-  to_port           = 443
+  prefix_list_id    = data.aws_ec2_managed_prefix_list.cloudfront.id
+
+  ip_protocol = "tcp"
+  from_port   = 80
+  to_port     = 80
 }
 
 resource "aws_vpc_security_group_egress_rule" "alb_to_app" {

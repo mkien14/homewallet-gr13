@@ -67,6 +67,8 @@ module "compute" {
   image               = local.image
   receipts_bucket_arn = module.storage.bucket_arn
 
+  origin_verify_header = random_password.origin_verify.result
+
   secret_arns = [
     module.data.secret_arn,
     aws_secretsmanager_secret.gemini.arn
