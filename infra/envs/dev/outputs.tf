@@ -28,3 +28,11 @@ output "dlq_url" {
 output "dlq_arn" {
   value = module.queue.dlq_arn
 }
+
+output "worker_service_name" {
+  value = module.compute.worker_service_name
+}
+
+output "worker_task_definition_arn" {
+  value = module.compute.worker_task_definition_arn
+}
