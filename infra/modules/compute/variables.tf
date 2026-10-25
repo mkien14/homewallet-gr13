@@ -57,3 +57,8 @@ variable "worker_secrets" {
   type    = map(string)
   default = {}
 }
+
+variable "origin_verify_header" {
+  type      = string
+  sensitive = true
+}
