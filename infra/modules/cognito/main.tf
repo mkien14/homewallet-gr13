@@ -39,7 +39,7 @@ resource "aws_cognito_user_pool" "this" {
   }
 
   admin_create_user_config {
-    allow_admin_create_user_only = false 
+    allow_admin_create_user_only = false
   }
 
   verification_message_template {

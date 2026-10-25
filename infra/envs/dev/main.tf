@@ -57,7 +57,6 @@ module "compute" {
   image               = local.image
   receipts_bucket_arn = module.storage.bucket_arn
 
-
   secret_arns = [module.data.secret_arn]
 
   api_environment = {
@@ -117,11 +116,17 @@ module "storage" {
   cors_origins  = ["http://localhost:5173"]
   force_destroy = true
 }
-module "team_access" {
-  source = "../../modules/team-access"
+module "queue" {
+  source = "../../modules/queue"
 
-  name                = "homewallet-dev"
-  state_bucket        = "hw-tfstate-homewallet-gr13"
-  receipts_bucket_arn = module.storage.bucket_arn
-  user_pool_arn       = module.cognito.user_pool_arn
+  bucket_id  = module.storage.bucket_name
+  bucket_arn = module.storage.bucket_arn
+}
+
+resource "aws_secretsmanager_secret" "gemini" {
+  name = "hw/dev/gemini-api-key"
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }

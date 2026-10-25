@@ -1,7 +1,7 @@
 provider "aws" { region = "ap-southeast-1" }
 
 resource "aws_s3_bucket" "tfstate" {
-  bucket = "hw-tfstate-homewallet-gr13"  
+  bucket = "hw-tfstate-homewallet-gr13"
 }
 resource "aws_s3_bucket_versioning" "v" {
   bucket = aws_s3_bucket.tfstate.id

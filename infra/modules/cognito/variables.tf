@@ -5,7 +5,7 @@ variable "logout_urls" { type = list(string) }
 
 variable "domain_prefix" {
   type    = string
-  default = null 
+  default = null
 }
 
 variable "user_pool_tier" {
