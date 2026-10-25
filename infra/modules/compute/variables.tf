@@ -37,3 +37,23 @@ variable "secret_arns" {
   type    = list(string)
   default = []
 }
+
+variable "worker_image" {
+  description = "Container image for receipt worker"
+  type        = string
+}
+
+variable "worker_queue_arn" {
+  description = "SQS queue consumed by worker"
+  type        = string
+}
+
+variable "worker_environment" {
+  type    = map(string)
+  default = {}
+}
+
+variable "worker_secrets" {
+  type    = map(string)
+  default = {}
+}
