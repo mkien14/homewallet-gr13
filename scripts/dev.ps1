@@ -1,4 +1,4 @@
-$Region   = "ap-southeast-1"
+﻿$Region   = "ap-southeast-1"
 $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
 $TfDir    = Join-Path $RepoRoot "infra\envs\dev"
 
@@ -8,8 +8,8 @@ if (-not $env:HW_TEST_PASSWORD) {
 
 $global:ApiBase = "http://localhost:5000"
 function Use-LocalApi { $global:ApiBase = "http://localhost:5000" }
-# Hạ tầng đã chuyển từ ALB công khai sang API Gateway + VPC link; đích ECS nay là endpoint HTTPS của API Gateway.
-function Use-CloudApi { $global:ApiBase = (Get-TfOutput api_gateway_endpoint).Trim() }
+# API chạy trên ECS, vào qua CloudFront (ALB chỉ nhận request có header xác thực từ CloudFront).
+function Use-CloudApi { $global:ApiBase = (Get-TfOutput cloudfront_url).Trim() }
 function Use-AlbApi   { Use-CloudApi } # tên cũ trong hướng dẫn, giữ lại để kịch bản cũ chạy được
 
 function Get-TfOutput($Name) {
@@ -18,24 +18,37 @@ function Get-TfOutput($Name) {
 }
 
 function Write-DevEnvFiles {
-  $issuer = Get-TfOutput cognito_issuer
-  $jwks   = Get-TfOutput cognito_jwks_uri
-  $spa    = Get-TfOutput cognito_spa_client_id
-  $dev    = Get-TfOutput cognito_dev_client_id
-  $hosted = Get-TfOutput cognito_hosted_ui
-  $bucket = Get-TfOutput receipts_bucket
+  # Ghi backend\.env + frontend\.env.local từ terraform output.
+  # Mặc định: UI cục bộ gọi API trên ECS (qua CloudFront). -LocalApi: gọi backend chạy máy mình.
+  # Nếu terraform output lỗi thì dừng và KHÔNG ghi, để không bao giờ để lại file env rỗng.
+  param([switch]$LocalApi)
+
+  $out = @{}
+  foreach ($name in "cognito_issuer", "cognito_jwks_uri", "cognito_spa_client_id",
+           "cognito_dev_client_id", "cognito_hosted_ui", "receipts_bucket", "cloudfront_url") {
+    $value = (Get-TfOutput $name 2>$null)
+    if ([string]::IsNullOrWhiteSpace("$value")) {
+      throw "Terraform output '$name' trống hoặc lỗi. Chạy 'terraform init' trong infra\envs\dev rồi thử lại (không ghi file env khi thiếu giá trị)."
+    }
+    $out[$name] = "$value".Trim()
+  }
+
+  $apiTarget = if ($LocalApi) { "http://localhost:5000" } else { $out.cloudfront_url }
 
   Set-Content -Encoding ascii -Path (Join-Path $RepoRoot "backend\.env") -Value @(
-    "COGNITO_ISSUER=$issuer", "COGNITO_JWKS_URI=$jwks",
-    "COGNITO_CLIENT_IDS=$spa,$dev", "COGNITO_HOSTED_UI=$hosted",
+    "COGNITO_ISSUER=$($out.cognito_issuer)", "COGNITO_JWKS_URI=$($out.cognito_jwks_uri)",
+    "COGNITO_CLIENT_IDS=$($out.cognito_spa_client_id),$($out.cognito_dev_client_id)",
+    "COGNITO_HOSTED_UI=$($out.cognito_hosted_ui)",
     "DB_HOST=localhost", "DB_PORT=3307", "DB_USER=root", "DB_PASSWORD=devpass",
-    "S3_BUCKET=$bucket", "AWS_REGION=$Region")
+    "S3_BUCKET=$($out.receipts_bucket)", "AWS_REGION=$Region")
 
   Set-Content -Encoding ascii -Path (Join-Path $RepoRoot "frontend\.env.local") -Value @(
-    "VITE_COGNITO_DOMAIN=$hosted", "VITE_COGNITO_CLIENT_ID=$spa",
-    "VITE_API_TARGET=http://localhost:5000")
+    "VITE_COGNITO_DOMAIN=$($out.cognito_hosted_ui)", "VITE_COGNITO_CLIENT_ID=$($out.cognito_spa_client_id)",
+    "VITE_API_TARGET=$apiTarget")
 
-  Write-Host "Đã ghi backend\.env và frontend\.env.local"
+  $mode = if ($LocalApi) { "backend cục bộ localhost:5000" } else { "ECS qua CloudFront" }
+  Write-Host "Đã ghi backend\.env và frontend\.env.local (API: $mode)."
+  Write-Host "Nếu dev server đang chạy: Ctrl+C rồi 'npm run dev' lại để nạp cấu hình mới."
 }
 
 function New-TestUsers {
@@ -106,6 +119,11 @@ function Test-DevSetup {
   }
   foreach ($f in "backend\.env", "frontend\.env.local") {
     "{0,-22} {1}" -f $f, $(if (Test-Path (Join-Path $RepoRoot $f)) { "có" } else { "THIẾU (chạy Write-DevEnvFiles)" })
+  }
+  $envLocal = Join-Path $RepoRoot "frontend\.env.local"
+  if (Test-Path $envLocal) {
+    $target = (Get-Content $envLocal | Where-Object { $_ -like "VITE_API_TARGET=*" }) -replace "^VITE_API_TARGET=", ""
+    "{0,-22} {1}" -f "API target", $(if ($target) { $target } else { "THIẾU trong frontend\.env.local" })
   }
   $mysql = docker ps --filter name=hw-mysql --format "{{.Status}}" 2>$null
   "{0,-22} {1}" -f "MySQL hw-mysql", $(if ($mysql) { $mysql } else { "chưa chạy (docker start hw-mysql)" })
