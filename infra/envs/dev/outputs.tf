@@ -36,3 +36,16 @@ output "worker_service_name" {
 output "worker_task_definition_arn" {
   value = module.compute.worker_task_definition_arn
 }
+
+output "frontend_bucket" {
+  value = module.frontend.bucket_id
+}
+
+output "cloudfront_url" {
+  value = module.edge.url
+}
+
+output "cloudfront_distribution_id" {
+  value = module.edge.distribution_id
+}
+
