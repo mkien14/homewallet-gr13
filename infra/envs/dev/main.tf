@@ -57,8 +57,31 @@ module "compute" {
   image               = local.image
   receipts_bucket_arn = module.storage.bucket_arn
 
+  worker_image     = "${module.ecr.repository_url}:${var.worker_image_tag}"
+  worker_queue_arn = module.queue.queue_arn
 
-  secret_arns = [module.data.secret_arn]
+  worker_environment = {
+    DB_HOST   = module.data.address
+    DB_PORT   = "3306"
+    DB_NAME   = "homewallet"
+    DB_SSL_CA = "/etc/ssl/rds-global-bundle.pem"
+
+    S3_BUCKET     = module.storage.bucket_name
+    SQS_QUEUE_URL = module.queue.queue_url
+    AWS_REGION    = "ap-southeast-1"
+    GEMINI_MODEL  = var.gemini_model
+  }
+
+  worker_secrets = {
+    DB_USER        = "${module.data.secret_arn}:username::"
+    DB_PASSWORD    = "${module.data.secret_arn}:password::"
+    GEMINI_API_KEY = aws_secretsmanager_secret.gemini.arn
+  }
+
+  secret_arns = [
+    module.data.secret_arn,
+    aws_secretsmanager_secret.gemini.arn
+  ]
 
   api_environment = {
     COGNITO_ISSUER     = module.cognito.issuer
@@ -124,4 +147,19 @@ module "team_access" {
   state_bucket        = "hw-tfstate-homewallet-gr13"
   receipts_bucket_arn = module.storage.bucket_arn
   user_pool_arn       = module.cognito.user_pool_arn
+}
+
+module "queue" {
+  source = "../../modules/queue"
+
+  bucket_id  = module.storage.bucket_name
+  bucket_arn = module.storage.bucket_arn
+}
+
+resource "aws_secretsmanager_secret" "gemini" {
+  name = "hw/dev/gemini-api-key"
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }

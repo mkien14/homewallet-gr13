@@ -13,3 +13,26 @@ output "cognito_issuer" { value = module.cognito.issuer }
 output "cognito_jwks_uri" { value = module.cognito.jwks_uri }
 output "cognito_hosted_ui" { value = module.cognito.hosted_ui_base }
 output "receipts_bucket" { value = module.storage.bucket_name }
+output "queue_url" {
+  value = module.queue.queue_url
+}
+
+output "queue_arn" {
+  value = module.queue.queue_arn
+}
+
+output "dlq_url" {
+  value = module.queue.dlq_url
+}
+
+output "dlq_arn" {
+  value = module.queue.dlq_arn
+}
+
+output "worker_service_name" {
+  value = module.compute.worker_service_name
+}
+
+output "worker_task_definition_arn" {
+  value = module.compute.worker_task_definition_arn
+}

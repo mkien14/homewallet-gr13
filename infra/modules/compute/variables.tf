@@ -1,10 +1,10 @@
-variable "name"              { type = string }
-variable "vpc_id"            { type = string }
+variable "name" { type = string }
+variable "vpc_id" { type = string }
 variable "public_subnet_ids" { type = list(string) }
-variable "app_subnet_ids"    { type = list(string) }
-variable "sg_alb_id"         { type = string }
-variable "sg_app_id"         { type = string }
-variable "image"             { type = string } 
+variable "app_subnet_ids" { type = list(string) }
+variable "sg_alb_id" { type = string }
+variable "sg_app_id" { type = string }
+variable "image" { type = string }
 variable "receipts_bucket_arn" { type = string }
 
 variable "container_port" {
@@ -17,11 +17,11 @@ variable "desired_count" {
 }
 variable "cpu" {
   type    = number
-  default = 512 
+  default = 512
 }
 variable "memory" {
   type    = number
-  default = 1024 
+  default = 1024
 }
 variable "api_environment" {
   type    = map(string)
@@ -36,4 +36,23 @@ variable "api_secrets" {
 variable "secret_arns" {
   type    = list(string)
   default = []
+}
+variable "worker_image" {
+  description = "Container image for receipt worker"
+  type        = string
+}
+
+variable "worker_queue_arn" {
+  description = "SQS queue consumed by worker"
+  type        = string
+}
+
+variable "worker_environment" {
+  type    = map(string)
+  default = {}
+}
+
+variable "worker_secrets" {
+  type    = map(string)
+  default = {}
 }
