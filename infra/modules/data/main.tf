@@ -30,7 +30,7 @@ resource "aws_db_instance" "this" {
   allocated_storage     = 20
   max_allocated_storage = 50
   storage_type          = "gp3"
-  storage_encrypted     = true 
+  storage_encrypted     = true
 
   username                    = "hwadmin"
   manage_master_user_password = true # RDS tự sinh, lưu vào Secrets Manager
@@ -49,6 +49,6 @@ resource "aws_db_instance" "this" {
   apply_immediately          = true
 
   lifecycle {
-    ignore_changes = [engine_version] 
+    ignore_changes = [engine_version]
   }
 }

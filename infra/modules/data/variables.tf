@@ -1,6 +1,6 @@
-variable "name"               { type = string }
-variable "data_subnet_ids"    { type = list(string) }
-variable "sg_db_id"           { type = string }
+variable "name" { type = string }
+variable "data_subnet_ids" { type = list(string) }
+variable "sg_db_id" { type = string }
 
 variable "instance_class" {
   type    = string
