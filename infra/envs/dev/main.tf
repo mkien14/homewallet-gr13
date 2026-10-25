@@ -6,6 +6,11 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.80"
     }
+
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.6"
+    }
   }
 
   backend "s3" {
@@ -26,6 +31,11 @@ provider "aws" {
       env     = "dev"
     }
   }
+}
+
+resource "random_password" "origin_verify" {
+  length  = 40
+  special = false
 }
 
 module "network" {
@@ -127,17 +137,31 @@ module "migrate" {
 module "cognito" {
   source = "../../modules/cognito"
 
-  name                = "homewallet-dev"
-  callback_urls       = ["http://localhost:5173/auth/callback"]
-  logout_urls         = ["http://localhost:5173/"]
+  name = "homewallet-dev"
+  callback_urls = [
+    "http://localhost:5173/auth/callback",
+    "${module.edge.url}/auth/callback"
+  ]
+
+  logout_urls = [
+    "http://localhost:5173/",
+    "${module.edge.url}/"
+  ]
+
   enable_dev_client   = true
   deletion_protection = "INACTIVE"
+
+
 }
 module "storage" {
   source = "../../modules/storage"
 
-  env           = "dev"
-  cors_origins  = ["http://localhost:5173"]
+  env = "dev"
+  cors_origins = [
+    "http://localhost:5173",
+    module.edge.url
+  ]
+
   force_destroy = true
 }
 module "queue" {
@@ -168,4 +192,17 @@ module "frontend" {
   source = "../../modules/frontend"
 
   env = "dev"
+}
+
+module "edge" {
+  source = "../../modules/edge"
+
+  name = "homewallet-dev"
+
+  frontend_bucket_id     = module.frontend.bucket_id
+  frontend_bucket_arn    = module.frontend.bucket_arn
+  frontend_bucket_domain = module.frontend.bucket_regional_domain_name
+
+  alb_domain_name      = module.compute.alb_dns_name
+  origin_verify_header = random_password.origin_verify.result
 }
