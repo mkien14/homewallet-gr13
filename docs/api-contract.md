@@ -56,7 +56,9 @@ POST /api/budgets/{period}/suggest
   -> 200 {"suggestion":{"period":"2026-10","income_estimate":20000000,
       "savings_goal":2000000,"source":"RULE","status":"DRAFT",
       "allocations":[{"category_id":1,"name":"Ăn uống","amount":5000000}]}}
-  Gợi ý dựa trên giao dịch CONFIRMED của ba tháng lịch hoàn chỉnh ngay trước period đích.
+  Gợi ý theo luật lấy mức chi CONFIRMED trung bình của từng danh mục trong ba tháng lịch
+  hoàn chỉnh ngay trước period đích (hệ số 1,0); nếu tổng vượt phần thu nhập còn lại sau
+  tiết kiệm, các khoản được co tỷ lệ để tổng không vượt giới hạn.
   Gợi ý không được ghi vào budgets/budget_lines; người dùng xem/chỉnh sửa rồi gọi PUT riêng.
   Server phải kiểm chứng gợi ý bằng quy tắc ngân sách trước khi trả về. Nếu LLM lỗi hoặc
   trả dữ liệu không hợp lệ, dùng gợi ý theo luật và trả source=RULE; nếu dùng LLM hợp lệ,
