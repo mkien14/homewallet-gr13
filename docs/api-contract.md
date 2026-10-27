@@ -78,4 +78,27 @@ Quy tắc ngân sách và lỗi:
     trong docs/test-cases-budget.md là các ca chấp nhận; riêng BUD-10 áp dụng semantics PUT
     cập nhật kỳ đã tồn tại như mô tả trên.
 
+Hóa đơn định kỳ: household_id lấy từ membership; mọi thao tác chỉ truy vấn trong hộ hiện tại.
+Member và Owner được xem; chỉ Owner được tạo, sửa hoặc xóa. Hóa đơn tạm dừng vẫn xuất hiện
+trong danh sách với active=false nhưng không được job nhắc hạn xử lý.
+
+GET /api/recurring-bills
+  -> {"items":[{"id":4,"name":"Internet","category_id":4,"due_day":15,
+      "expected_amount":450000,"remind_days_before":3,"active":true}]}
+  Bao gồm cả hóa đơn active và tạm dừng; sắp xếp theo due_day rồi id.
+
+POST /api/recurring-bills
+  body: {"name":"Internet","category_id":4,"due_day":15,
+         "expected_amount":450000,"remind_days_before":3,"active":true}
+  Bắt buộc name và due_day; category_id/expected_amount có thể null; mặc định
+  remind_days_before=3, active=true. -> 201 {"bill":{...}}.
+
+PATCH /api/recurring-bills/{id}
+  Nhận một hoặc nhiều trường trong body POST để cập nhật một phần; -> 200 {"bill":{...}}.
+DELETE /api/recurring-bills/{id} -> 204.
+  name phải dài 1–100 ký tự; due_day từ 1–31; expected_amount là số nguyên không âm hoặc null;
+  remind_days_before từ 0–30; active là boolean; category_id phải là danh mục hệ thống hoặc
+  thuộc hộ hiện tại. Trường không hỗ trợ/sai kiểu/sai giá trị trả 422 VALIDATION; không có
+  household hoặc không tìm thấy bill trong hộ trả 404; Member ghi dữ liệu trả 403.
+
 Lỗi: {"error":{"code","message","request_id"}}; hộ khác luôn trả 404.

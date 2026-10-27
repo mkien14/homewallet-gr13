@@ -26,3 +26,31 @@ chỉ bị xóa sau khi xử lý thành công hoặc nhận được sự kiện
 Nếu xử lý thất bại, message được giữ lại để thử lại sau visibility timeout;
 từ lần nhận thứ ba, receipt được đánh dấu `FAILED` và lỗi được ném tiếp để SQS
 có thể chuyển message vào DLQ theo redrive policy.
+
+## Tác vụ nhắc hạn và cảnh báo ngân sách
+
+Chạy lệnh từ thư mục `backend`. Hai entrypoint dùng ngày tại
+`Asia/Ho_Chi_Minh` khi không truyền `--period-key`; có thể truyền ngày để chạy
+lặp lại có kiểm soát:
+
+```powershell
+python -m jobs.recurring_alerts reminders --period-key 2026-10-28
+python -m jobs.recurring_alerts budget-alerts --period-key 2026-10-28
+```
+
+`reminders` gửi email cho thành viên hộ khi hóa đơn định kỳ đến ngày nhắc,
+điều chỉnh ngày đến hạn về ngày cuối tháng nếu `due_day` lớn hơn số ngày trong
+tháng. `budget-alerts` tính chi tiêu `CONFIRMED` trong kỳ hiện tại và gửi một
+cảnh báo khi từng danh mục chạm 80% hoặc 100% ngân sách đang `ACTIVE`.
+
+Các lần chạy được ghi trong `job_runs`; trạng thái `FAILED` có thể chạy lại,
+`RUNNING` cũ hơn 30 phút có thể được claim lại. Bảng `alert_state` đảm bảo mỗi
+mốc 80%/100% chỉ gửi một lần cho mỗi hộ, kỳ và danh mục. Alert state chỉ commit
+sau khi SES chấp nhận email; nếu gửi lỗi, transaction rollback và job trả mã lỗi
+để Scheduler có thể retry. SES gửi qua AWS task role, không dùng credential nhúng.
+
+Cấu hình `SES_FROM_ADDRESS` bằng địa chỉ đã xác minh trong SES. Trong SES
+sandbox, mọi địa chỉ nhận cũng phải được xác minh. Nếu hộ chưa có địa chỉ email,
+job ghi log skip; log chỉ chứa mã hộ/danh mục và số lượng, không ghi email hay số
+tiền. `AWS_REGION` mặc định là `ap-southeast-1`. Scheduler nên gọi một trong hai
+command trên mỗi ngày; `--period-key` chỉ cần dùng cho chạy lại/đối chiếu thủ công.
