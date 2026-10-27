@@ -39,3 +39,19 @@ Các quyết định dưới đây là baseline của HomeWallet cho giai đoạ
   biến lỗi API thành response chung của CDN.
 - **Ảnh hưởng:** Client và kiểm thử phải dựa trên contract lỗi của backend; các
   route API lỗi không được phụ thuộc vào trang lỗi HTML của CloudFront.
+
+## DEC-005: Redis là cache tùy chọn cho dashboard
+
+- **Ngày:** 2026-10-28
+- **Trạng thái:** Đã chốt
+- **Quyết định:** Dùng cache-aside Redis cho kết quả dashboard với TTL mặc định
+  5 phút; MySQL vẫn là nguồn dữ liệu chính.
+- **Lý do:** Giảm truy vấn tổng hợp lặp lại mà không làm tính đúng đắn của nghiệp vụ
+  phụ thuộc vào cache.
+- **Ảnh hưởng:** Cache key phải chứa household, kỳ, filter và generation của household.
+  Tạo/sửa/xóa giao dịch hoặc xác nhận hóa đơn tăng generation để vô hiệu hóa các kết
+  quả cũ. Redis chỉ được kết nối khi có endpoint và auth token, luôn dùng TLS với xác
+  minh chứng chỉ. Redis thiếu cấu hình, lỗi kết nối, timeout hoặc dữ liệu hỏng thì API
+  đọc MySQL và tiếp tục phục vụ bình thường. Cấu hình runtime: `REDIS_HOST`,
+  `REDIS_PORT`, `REDIS_USERNAME` (tùy chọn), `REDIS_AUTH_TOKEN`, `REDIS_SSL_CA`
+  (tùy chọn), `REDIS_SOCKET_TIMEOUT` và `DASHBOARD_CACHE_TTL`.
