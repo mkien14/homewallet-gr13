@@ -7,3 +7,4 @@ PyJWT>=2.8
 boto3
 pillow>=10
 google-genai>=1.0
+tzdata

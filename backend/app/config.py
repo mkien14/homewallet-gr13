@@ -27,6 +27,7 @@ def load_config():
         "REDIS_SSL_CA": os.getenv("REDIS_SSL_CA"),
         "REDIS_SOCKET_TIMEOUT": float(os.getenv("REDIS_SOCKET_TIMEOUT", "0.5")),
         "DASHBOARD_CACHE_TTL": int(os.getenv("DASHBOARD_CACHE_TTL", "300")),
+        "SES_FROM_ADDRESS": os.getenv("SES_FROM_ADDRESS"),
         "S3_BUCKET": os.getenv("S3_BUCKET"),
         "AWS_REGION": os.getenv("AWS_REGION", "ap-southeast-1"),
         "MAX_RECEIPT_BYTES": int(os.getenv("MAX_RECEIPT_BYTES", str(5 * 1024 * 1024))),
