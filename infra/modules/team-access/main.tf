@@ -61,6 +61,41 @@ resource "aws_iam_group_policy" "developers" {
   policy = data.aws_iam_policy_document.dev.json
 }
 
+data "aws_iam_policy_document" "cognito_branding" {
+  statement {
+    sid       = "DiscoverPools"
+    actions   = ["cognito-idp:ListUserPools"]
+    resources = ["*"]
+  }
+
+  statement {
+    sid = "ReadAndEditDevPoolBranding"
+    actions = [
+      "cognito-idp:DescribeUserPool",
+      "cognito-idp:DescribeUserPoolClient",
+      "cognito-idp:DescribeUserPoolDomain",
+      "cognito-idp:ListUserPoolClients",
+      "cognito-idp:GetUICustomization",
+      "cognito-idp:SetUICustomization",
+      "cognito-idp:DescribeManagedLoginBranding",
+      "cognito-idp:DescribeManagedLoginBrandingByClient",
+      "cognito-idp:CreateManagedLoginBranding",
+      "cognito-idp:UpdateManagedLoginBranding",
+    ]
+    resources = [var.user_pool_arn]
+  }
+}
+
+resource "aws_iam_group" "cognito_branding" {
+  name = "${var.name}-cognito-branding"
+}
+
+resource "aws_iam_group_policy" "cognito_branding" {
+  name   = "cognito-dev-branding"
+  group  = aws_iam_group.cognito_branding.name
+  policy = data.aws_iam_policy_document.cognito_branding.json
+}
+
 
 resource "aws_iam_group" "ocr" {
   name = "${var.name}-ocr"
