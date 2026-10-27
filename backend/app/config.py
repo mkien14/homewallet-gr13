@@ -20,6 +20,8 @@ def load_config():
         "DB_PASSWORD": os.getenv("DB_PASSWORD", ""),
         "DB_NAME": os.getenv("DB_NAME", "homewallet"),
         "DB_SSL_CA": os.getenv("DB_SSL_CA"),
+        "GEMINI_API_KEY": os.getenv("GEMINI_API_KEY"),
+        "GEMINI_MODEL": os.getenv("GEMINI_MODEL"),
         "REDIS_HOST": os.getenv("REDIS_HOST"),
         "REDIS_PORT": int(os.getenv("REDIS_PORT", "6379")),
         "REDIS_USERNAME": os.getenv("REDIS_USERNAME"),

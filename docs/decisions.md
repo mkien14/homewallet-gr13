@@ -55,3 +55,18 @@ Các quyết định dưới đây là baseline của HomeWallet cho giai đoạ
   đọc MySQL và tiếp tục phục vụ bình thường. Cấu hình runtime: `REDIS_HOST`,
   `REDIS_PORT`, `REDIS_USERNAME` (tùy chọn), `REDIS_AUTH_TOKEN`, `REDIS_SSL_CA`
   (tùy chọn), `REDIS_SOCKET_TIMEOUT` và `DASHBOARD_CACHE_TTL`.
+
+## DEC-006: Gợi ý ngân sách dùng Gemini có kiểm chứng và fallback
+
+- **Ngày:** 2026-10-28
+- **Trạng thái:** Đã chốt
+- **Quyết định:** Gemini tạo phân bổ gợi ý từ dữ liệu chi tiêu đã tổng hợp; backend
+  kiểm tra schema, danh mục và giới hạn thu nhập bằng `budget_rules`. Nếu Gemini không
+  khả dụng hoặc đầu ra không hợp lệ, dùng gợi ý theo luật. Gợi ý luôn là `DRAFT` và
+  không được lưu trước khi người dùng chủ động gọi `PUT /api/budgets/{period}`.
+- **Lý do:** Tận dụng gợi ý LLM mà không để lỗi hoặc đầu ra của mô hình làm ngân sách
+  mất tính hợp lệ hay bị lưu tự động.
+- **Ảnh hưởng:** Chỉ gửi tên/id danh mục được phép và tổng chi `CONFIRMED` theo danh
+  mục/tháng; không gửi định danh người dùng, household id hoặc giao dịch thô. API key
+  được cấp cho ECS API từ Secrets Manager qua `GEMINI_API_KEY`; `GEMINI_MODEL` là cấu
+  hình không bí mật. Thiếu cấu hình thì endpoint vẫn trả gợi ý theo luật.
