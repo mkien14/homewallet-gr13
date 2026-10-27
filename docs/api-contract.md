@@ -27,4 +27,53 @@ GET  /api/dashboard?period=2026-10
   -> {"period":"2026-10","total":0,"by_category":[{"category_id":1,"name":"...","amount":0}],
       "by_member":[{"user_id":1,"display_name":"...","amount":0}],"by_week":[{"week_start":"2026-10-05","amount":0}]}
   period is required (YYYY-MM); totals include CONFIRMED transactions only.
+
+Ngân sách: period trong path phải có dạng YYYY-MM. household_id luôn được xác định
+từ người dùng đã xác thực và membership hiện tại; client không gửi household_id.
+Member và Owner được xem ngân sách; chỉ Owner được lưu ngân sách hoặc yêu cầu gợi ý.
+
+GET /api/budgets/{period}
+  -> {"budget":{"period":"2026-10","income_estimate":20000000,"savings_goal":2000000,
+      "source":"MANUAL","status":"ACTIVE","allocations":[
+        {"category_id":1,"name":"Ăn uống","amount":5000000}]}}
+  Nếu hộ chưa có ngân sách cho kỳ này: 200 {"budget":null}.
+  allocations chỉ gồm các dòng đã lưu; tên danh mục được trả để hiển thị.
+
+PUT /api/budgets/{period}
+  body: {"income_estimate":20000000,"savings_goal":2000000,
+         "allocations":[{"category_id":1,"amount":5000000},
+                        {"category_id":3,"amount":2000000}]}
+  -> 201 {"budget":{"period":"2026-10","income_estimate":20000000,"savings_goal":2000000,
+      "source":"MANUAL","status":"ACTIVE","allocations":[...]}} khi tạo mới;
+     200 với cùng schema khi thay thế ngân sách đã có.
+  PUT là thay thế toàn bộ ngân sách của kỳ: dòng phân bổ không có trong body sẽ bị xóa.
+  Gửi lại cùng body cho cùng kỳ là idempotent. Kỳ đã có được cập nhật, không trả 409.
+  Server đặt source=MANUAL và status=ACTIVE; client không được truyền hai trường này.
+  Lưu budget và toàn bộ budget_lines trong cùng transaction; nếu có lỗi thì rollback tất cả.
+
+POST /api/budgets/{period}/suggest
+  body: {"income_estimate":20000000,"savings_goal":2000000}
+  -> 200 {"suggestion":{"period":"2026-10","income_estimate":20000000,
+      "savings_goal":2000000,"source":"RULE","status":"DRAFT",
+      "allocations":[{"category_id":1,"name":"Ăn uống","amount":5000000}]}}
+  Gợi ý dựa trên giao dịch CONFIRMED của ba tháng lịch hoàn chỉnh ngay trước period đích.
+  Gợi ý không được ghi vào budgets/budget_lines; người dùng xem/chỉnh sửa rồi gọi PUT riêng.
+  Server phải kiểm chứng gợi ý bằng quy tắc ngân sách trước khi trả về. Nếu LLM lỗi hoặc
+  trả dữ liệu không hợp lệ, dùng gợi ý theo luật và trả source=RULE; nếu dùng LLM hợp lệ,
+  trả source=LLM. Cả hai trường hợp đều trả status=DRAFT.
+
+Quy tắc ngân sách và lỗi:
+  - income_estimate, savings_goal và allocations[].amount là số nguyên VND không âm;
+    boolean, số thập phân và chuỗi số không hợp lệ.
+  - Tổng allocations[].amount + savings_goal không được vượt income_estimate.
+  - category_id phải là số nguyên dương, không lặp trong request, và phải trỏ tới danh mục
+    hệ thống (household_id IS NULL) hoặc danh mục thuộc đúng household. Không tự tạo danh mục.
+  - period sai định dạng, thiếu trường, kiểu dữ liệu sai, số âm, danh mục không hợp lệ hoặc
+    tổng vượt giới hạn: 422 VALIDATION.
+  - Chưa đăng nhập: 401; Member gọi PUT hoặc suggest: 403; không có household/không tìm thấy
+    dữ liệu trong phạm vi household: 404 NOT_FOUND.
+  - Lỗi dùng chung theo envelope {"error":{"code","message","request_id"}}. BUD-01…10
+    trong docs/test-cases-budget.md là các ca chấp nhận; riêng BUD-10 áp dụng semantics PUT
+    cập nhật kỳ đã tồn tại như mô tả trên.
+
 Lỗi: {"error":{"code","message","request_id"}}; hộ khác luôn trả 404.
