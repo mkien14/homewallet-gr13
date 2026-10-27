@@ -1,9 +1,10 @@
 import re
 from datetime import date
 
-from flask import Blueprint, g, jsonify, request
+from flask import Blueprint, current_app, g, jsonify, request
 
 from .auth import require_auth
+from .cache import get_dashboard as get_cached_dashboard, set_dashboard
 from .db import get_db
 from .errors import ApiError
 from .households import membership
@@ -39,6 +40,13 @@ def get_dashboard():
     if not household:
         raise ApiError(404, "NOT_FOUND", "Không tìm thấy")
     household_id = household["household_id"]
+    cache_config = current_app.config
+    filters = {}
+    cached, generation = get_cached_dashboard(
+        household_id, period, filters=filters, config=cache_config
+    )
+    if cached is not None:
+        return jsonify(cached)
 
     with db.cursor() as cur:
         cur.execute(
@@ -101,10 +109,20 @@ def get_dashboard():
             for row in cur.fetchall()
         ]
 
-    return jsonify(
+    payload = dict(
         period=period,
         total=total,
         by_category=by_category,
         by_member=by_member,
         by_week=by_week,
     )
+    set_dashboard(
+        household_id,
+        period,
+        payload,
+        generation,
+        filters=filters,
+        ttl=cache_config.get("DASHBOARD_CACHE_TTL", 300),
+        config=cache_config,
+    )
+    return jsonify(payload)
