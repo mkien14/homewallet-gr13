@@ -104,13 +104,15 @@ module "compute" {
     DB_PORT            = "3306"
     DB_NAME            = "homewallet"
     DB_SSL_CA          = "/etc/ssl/rds-global-bundle.pem"
+    GEMINI_MODEL       = var.gemini_model
     S3_BUCKET          = module.storage.bucket_name
     AWS_REGION         = "ap-southeast-1"
   }
 
   api_secrets = {
-    DB_USER     = "${module.data.secret_arn}:username::"
-    DB_PASSWORD = "${module.data.secret_arn}:password::"
+    DB_USER        = "${module.data.secret_arn}:username::"
+    DB_PASSWORD    = "${module.data.secret_arn}:password::"
+    GEMINI_API_KEY = aws_secretsmanager_secret.gemini.arn
   }
 }
 

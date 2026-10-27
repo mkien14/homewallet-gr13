@@ -63,6 +63,11 @@ POST /api/budgets/{period}/suggest
   Server phải kiểm chứng gợi ý bằng quy tắc ngân sách trước khi trả về. Nếu LLM lỗi hoặc
   trả dữ liệu không hợp lệ, dùng gợi ý theo luật và trả source=RULE; nếu dùng LLM hợp lệ,
   trả source=LLM. Cả hai trường hợp đều trả status=DRAFT.
+  Gemini chỉ nhận income_estimate, savings_goal, danh mục được phép và tổng CONFIRMED theo
+  danh mục/tháng trong ba kỳ trước; không gửi household_id, user identity hoặc giao dịch thô.
+  Đầu ra phải là JSON {"allocations":[{"category_id":1,"amount":1000000}]}; category lạ,
+  amount không nguyên/âm/trùng hoặc tổng vượt thu nhập khả dụng làm toàn bộ gợi ý chuyển
+  sang fallback RULE.
 
 Quy tắc ngân sách và lỗi:
   - income_estimate, savings_goal và allocations[].amount là số nguyên VND không âm;

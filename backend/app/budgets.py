@@ -2,9 +2,10 @@ import re
 from datetime import date
 from decimal import Decimal
 
-from flask import Blueprint, g, jsonify, request
+from flask import Blueprint, current_app, g, jsonify, request
 
 from .auth import require_auth
+from .budget_suggestions import BudgetSuggestionError, suggest_with_gemini
 from .budget_rules import suggest_budget, validate_budget
 from .db import get_db
 from .errors import ApiError
@@ -259,19 +260,35 @@ def suggest_budget_for_period(period):
         )
 
     categories = _valid_categories(db, household["household_id"])
+    previous_periods = _previous_periods(period)
     historical = _historical_spending(db, household["household_id"], period)
     try:
-        allocations = suggest_budget(historical, Decimal("1"))
-        allocations = _fit_to_available_income(allocations, available)
-        validate_budget(income_estimate, savings_goal, allocations, categories.keys())
-    except ValueError as exc:
-        raise ApiError(422, "VALIDATION", str(exc)) from exc
+        allocations = suggest_with_gemini(
+            period=period,
+            income_estimate=income_estimate,
+            savings_goal=savings_goal,
+            categories=categories,
+            monthly_spending=list(zip(previous_periods, historical)),
+            config=current_app.config,
+        )
+        source = "LLM"
+    except BudgetSuggestionError as exc:
+        current_app.logger.warning(
+            "budget suggestion using rule fallback (%s)", type(exc.__cause__ or exc).__name__
+        )
+        try:
+            allocations = suggest_budget(historical, Decimal("1"))
+            allocations = _fit_to_available_income(allocations, available)
+            validate_budget(income_estimate, savings_goal, allocations, categories.keys())
+        except ValueError as rule_error:
+            raise ApiError(422, "VALIDATION", str(rule_error)) from rule_error
+        source = "RULE"
 
     suggestion = {
         "period": period,
         "income_estimate": income_estimate,
         "savings_goal": savings_goal,
-        "source": "RULE",
+        "source": source,
         "status": "DRAFT",
         "allocations": [
             {
