@@ -151,6 +151,20 @@ def _series_to_csv_bytes(rows, fieldnames):
     return buffer.getvalue().encode("utf-8-sig")
 
 
+def _delete_household_db(db, hid):
+    with db.cursor() as cur:
+        cur.execute("DELETE FROM household_members WHERE household_id = %s", (hid,))
+        cur.execute("DELETE FROM recurring_bills WHERE household_id = %s", (hid,))
+        cur.execute("DELETE FROM budget_lines WHERE budget_id IN (SELECT id FROM budgets WHERE household_id = %s)", (hid,))
+        cur.execute("DELETE FROM budgets WHERE household_id = %s", (hid,))
+        cur.execute("DELETE FROM transaction_items WHERE transaction_id IN (SELECT id FROM transactions WHERE household_id = %s)", (hid,))
+        cur.execute("DELETE FROM transactions WHERE household_id = %s", (hid,))
+        cur.execute("DELETE FROM receipts WHERE household_id = %s", (hid,))
+        cur.execute("DELETE FROM categories WHERE household_id = %s", (hid,))
+        cur.execute("DELETE FROM households WHERE id = %s", (hid,))
+    db.commit()
+
+
 @bp.get("/me")
 @require_auth
 def me():
@@ -294,3 +308,55 @@ def export_household_csv(hid):
     response.headers["Content-Type"] = "text/csv; charset=utf-8-sig"
     response.headers["Content-Disposition"] = f'attachment; filename="household-{hid}.csv"'
     return response
+
+
+@bp.post("/households/<int:hid>/delete")
+@require_auth
+def delete_household(hid):
+    db = get_db()
+    require_owner(require_household(db, hid))
+    data = json_body()
+    if data.get("confirm") is not True:
+        raise ApiError(400, "CONFIRMATION_REQUIRED", "Cần xác nhận xóa vĩnh viễn hộ này")
+    if data.get("household_id") not in (None, hid):
+        raise ApiError(422, "VALIDATION", "household_id không khớp")
+
+    with db.cursor() as cur:
+        cur.execute(
+            "SELECT s3_key FROM receipts WHERE household_id = %s AND s3_key IS NOT NULL ORDER BY id",
+            (hid,),
+        )
+        receipt_keys = [row["s3_key"] for row in cur.fetchall()]
+
+    try:
+        from . import storage
+        storage.delete_s3_objects(receipt_keys)
+    except ApiError as exc:
+        raise ApiError(
+            502,
+            "S3_DELETE_FAILED",
+            "Xóa S3 thất bại; hộ chưa bị xóa. Kiểm tra bucket/versioning và thử lại sau.",
+        ) from exc
+    except Exception as exc:  # pragma: no cover - defensive path
+        raise ApiError(
+            502,
+            "S3_DELETE_FAILED",
+            f"Không thể dọn sạch S3: {exc}",
+        ) from exc
+
+    try:
+        _delete_household_db(db, hid)
+    except Exception as exc:
+        db.rollback()
+        raise ApiError(
+            500,
+            "HOUSEHOLD_DELETE_PARTIAL",
+            "Xóa S3 đã hoàn tất nhưng xóa DB thất bại. Hộ chưa bị xóa hoàn toàn; cần retry hoặc kiểm tra trạng thái dữ liệu.",
+        ) from exc
+
+    return jsonify({
+        "deleted": True,
+        "household_id": hid,
+        "s3_deleted": len(receipt_keys),
+        "status": "deleted",
+    })

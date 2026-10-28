@@ -85,3 +85,43 @@ def test_owner_can_export_household_csv(db_app, make_token):
 
     other = c.get(f"/api/households/{h['id']}/export.csv", headers=H(make_token, "sub-c"))
     assert other.status_code == 404
+
+
+def test_owner_delete_requires_confirmation_and_only_deletes_after_s3_cleanup(db_app, make_token, monkeypatch):
+    from app import storage
+
+    c = db_app.test_client()
+    h = c.post("/api/households", json={"name": "Nhà A"}, headers=H(make_token, "sub-a")).get_json()
+    c.post("/api/households/join", json={"invite_code": h["invite_code"]}, headers=H(make_token, "sub-b"))
+    monkeypatch.setattr(storage, "delete_s3_objects", lambda keys: {"deleted": len(keys), "keys": keys})
+
+    no_confirm = c.post(f"/api/households/{h['id']}/delete", json={"household_id": h['id']}, headers=H(make_token, "sub-a"))
+    assert no_confirm.status_code == 400
+    assert no_confirm.get_json()["error"]["code"] == "CONFIRMATION_REQUIRED"
+
+    denied = c.post(f"/api/households/{h['id']}/delete", json={"confirm": True}, headers=H(make_token, "sub-b"))
+    assert denied.status_code == 403
+
+    wrong_household = c.post(f"/api/households/{h['id']}/delete", json={"confirm": True, "household_id": h['id'] + 999}, headers=H(make_token, "sub-a"))
+    assert wrong_household.status_code == 422
+
+    success = c.post(f"/api/households/{h['id']}/delete", json={"confirm": True, "household_id": h['id']}, headers=H(make_token, "sub-a"))
+    assert success.status_code == 200
+    assert success.get_json()["deleted"] is True
+
+    assert c.get(f"/api/households/{h['id']}/members", headers=H(make_token, "sub-a")).status_code == 404
+
+
+def test_delete_abort_when_s3_cleanup_fails(db_app, make_token, monkeypatch):
+    from app import storage
+    from app.errors import ApiError
+
+    c = db_app.test_client()
+    h = c.post("/api/households", json={"name": "Nhà A"}, headers=H(make_token, "sub-a")).get_json()
+    monkeypatch.setattr(storage, "delete_s3_objects", lambda keys: (_ for _ in ()).throw(ApiError(502, "S3_DELETE_FAILED", "bucket unavailable")))
+
+    r = c.post(f"/api/households/{h['id']}/delete", json={"confirm": True, "household_id": h['id']}, headers=H(make_token, "sub-a"))
+    assert r.status_code == 502
+    assert r.get_json()["error"]["code"] == "S3_DELETE_FAILED"
+
+    assert c.get(f"/api/households/{h['id']}/members", headers=H(make_token, "sub-a")).status_code == 200
