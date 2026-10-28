@@ -1,7 +1,9 @@
+import csv
+import io
 import secrets
 
 import pymysql
-from flask import Blueprint, g, jsonify, request
+from flask import Blueprint, g, jsonify, make_response, request
 
 from .auth import require_auth
 from .db import get_db
@@ -49,7 +51,104 @@ def require_owner(m):
 
 
 def new_code():
-    return secrets.token_hex(4).upper()  
+    return secrets.token_hex(4).upper()
+
+
+def _iter_household_export_rows(db, hid):
+    with db.cursor() as cur:
+        cur.execute(
+            "SELECT id, name, owner_user_id, invite_code, currency, created_at "
+            "FROM households WHERE id = %s",
+            (hid,),
+        )
+        household = cur.fetchone()
+        if not household:
+            raise ApiError(404, "NOT_FOUND", "Không tìm thấy")
+
+        cur.execute(
+            "SELECT u.id, u.display_name, u.email, m.role, m.joined_at "
+            "FROM household_members m JOIN users u ON u.id = m.user_id "
+            "WHERE m.household_id = %s ORDER BY m.joined_at, u.id",
+            (hid,),
+        )
+        members = cur.fetchall()
+
+        cur.execute(
+            "SELECT id, household_id, name, icon, is_fixed FROM categories "
+            "WHERE household_id IS NULL OR household_id = %s ORDER BY id",
+            (hid,),
+        )
+        categories = cur.fetchall()
+
+        cur.execute(
+            "SELECT id, household_id, member_id, receipt_id, occurred_on, merchant, "
+            "total_amount, category_id, status, source, note, created_at "
+            "FROM transactions WHERE household_id = %s ORDER BY occurred_on, id",
+            (hid,),
+        )
+        transactions = cur.fetchall()
+
+        cur.execute(
+            "SELECT ti.id, ti.transaction_id, ti.description, ti.quantity, ti.unit_price, "
+            "ti.amount, ti.category_id, ti.confidence "
+            "FROM transaction_items ti "
+            "JOIN transactions t ON t.id = ti.transaction_id "
+            "WHERE t.household_id = %s ORDER BY ti.id",
+            (hid,),
+        )
+        transaction_items = cur.fetchall()
+
+        cur.execute(
+            "SELECT id, household_id, uploader_id, s3_key, content_sha256, status, "
+            "ocr_confidence, merchant_raw, error_code, created_at, processed_at "
+            "FROM receipts WHERE household_id = %s ORDER BY created_at, id",
+            (hid,),
+        )
+        receipts = cur.fetchall()
+
+        cur.execute(
+            "SELECT id, household_id, period, income_estimate, savings_goal, source, "
+            "status FROM budgets WHERE household_id = %s ORDER BY period, id",
+            (hid,),
+        )
+        budgets = cur.fetchall()
+
+        cur.execute(
+            "SELECT bl.budget_id, bl.category_id, bl.amount FROM budget_lines bl "
+            "JOIN budgets b ON b.id = bl.budget_id WHERE b.household_id = %s "
+            "ORDER BY bl.budget_id, bl.category_id",
+            (hid,),
+        )
+        budget_lines = cur.fetchall()
+
+        cur.execute(
+            "SELECT id, household_id, name, category_id, due_day, expected_amount, "
+            "remind_days_before, active FROM recurring_bills WHERE household_id = %s "
+            "ORDER BY due_day, id",
+            (hid,),
+        )
+        recurring_bills = cur.fetchall()
+
+    return {
+        "household": household,
+        "members": members,
+        "categories": categories,
+        "transactions": transactions,
+        "transaction_items": transaction_items,
+        "receipts": receipts,
+        "budgets": budgets,
+        "budget_lines": budget_lines,
+        "recurring_bills": recurring_bills,
+    }
+
+
+def _series_to_csv_bytes(rows, fieldnames):
+    buffer = io.StringIO(newline="")
+    writer = csv.DictWriter(buffer, fieldnames=fieldnames)
+    writer.writeheader()
+    for row in rows:
+        writer.writerow(row)
+    return buffer.getvalue().encode("utf-8-sig")
 
 
 @bp.get("/me")
@@ -157,3 +256,41 @@ def rotate_invite_code(hid):
         except pymysql.err.IntegrityError:
             db.rollback()
     raise ApiError(500, "INTERNAL", "Không tạo được mã mời")
+
+
+@bp.get("/households/<int:hid>/export.csv")
+@require_auth
+def export_household_csv(hid):
+    db = get_db()
+    require_owner(require_household(db, hid))
+
+    export = _iter_household_export_rows(db, hid)
+    output = io.StringIO(newline="")
+    for section_name, rows in (
+        ("households", [export["household"]]),
+        ("members", export["members"]),
+        ("categories", export["categories"]),
+        ("transactions", export["transactions"]),
+        ("transaction_items", export["transaction_items"]),
+        ("receipts", export["receipts"]),
+        ("budgets", export["budgets"]),
+        ("budget_lines", export["budget_lines"]),
+        ("recurring_bills", export["recurring_bills"]),
+    ):
+        if not rows:
+            continue
+        output.write(f"[{section_name}]\n")
+        fieldnames = list(rows[0].keys())
+        writer = csv.DictWriter(output, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({
+                key: (value.isoformat() if hasattr(value, "isoformat") else value)
+                for key, value in row.items()
+            })
+        output.write("\n")
+
+    response = make_response(output.getvalue().encode("utf-8-sig"))
+    response.headers["Content-Type"] = "text/csv; charset=utf-8-sig"
+    response.headers["Content-Disposition"] = f'attachment; filename="household-{hid}.csv"'
+    return response

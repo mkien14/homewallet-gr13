@@ -65,3 +65,23 @@ def test_rotate_invite_code(db_app, make_token):
     assert r.status_code == 200 and r.get_json()["invite_code"] != h["invite_code"]
     r = c.post("/api/households/join", json={"invite_code": h["invite_code"]}, headers=H(make_token, "sub-b"))
     assert r.status_code == 404
+
+
+def test_owner_can_export_household_csv(db_app, make_token):
+    c = db_app.test_client()
+    h = c.post("/api/households", json={"name": "Nhà A"}, headers=H(make_token, "sub-a")).get_json()
+    c.post("/api/households/join", json={"invite_code": h["invite_code"]}, headers=H(make_token, "sub-b"))
+
+    r = c.get(f"/api/households/{h['id']}/export.csv", headers=H(make_token, "sub-a"))
+    assert r.status_code == 200
+    assert r.headers["Content-Type"].startswith("text/csv")
+    assert r.data.startswith(b"\xef\xbb\xbf")
+    body = r.data.decode("utf-8-sig")
+    assert "[households]" in body
+    assert "Nhà A" in body
+
+    forbidden = c.get(f"/api/households/{h['id']}/export.csv", headers=H(make_token, "sub-b"))
+    assert forbidden.status_code == 403
+
+    other = c.get(f"/api/households/{h['id']}/export.csv", headers=H(make_token, "sub-c"))
+    assert other.status_code == 404
