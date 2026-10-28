@@ -3,8 +3,11 @@ import os
 import re
 import time
 
+import boto3
 from google import genai
 from google.genai import errors, types
+
+from app.parsing import parse_date, parse_vnd
 
 
 MAX_TRIES = 6
@@ -43,6 +46,123 @@ def wait_time(error, attempt):
     return 10 * attempt
 
 
+def _attach_source(payload, source, *, error=None):
+    if not isinstance(payload, dict):
+        return payload
+    result = dict(payload)
+    result["_source"] = source
+    if error is not None:
+        result["_error"] = {
+            "type": type(error).__name__,
+            "message": str(error),
+        }
+    return result
+
+
+def _should_fallback():
+    value = os.getenv("TEXTRACT_FALLBACK_ENABLED", "false").strip().lower()
+    return value in {"1", "true", "yes", "on"}
+
+
+def _summary_field(summary, wanted):
+    for field in summary or []:
+        if field.get("Type", {}).get("Text") == wanted:
+            text = field.get("ValueDetection", {}).get("Text")
+            if text:
+                return text
+    return None
+
+
+def _coerce_quantity(value):
+    if value is None:
+        return None
+    try:
+        qty = float(str(value).replace(",", "."))
+    except (TypeError, ValueError):
+        return None
+    return qty if qty > 0 else None
+
+
+def _normalize_textract_item(item, category_names):
+    fields = {}
+    for field in item.get("LineItemExpenseFields", []) or []:
+        field_type = field.get("Type", {}).get("Text")
+        value = field.get("ValueDetection", {}).get("Text")
+        if field_type and value is not None:
+            fields[field_type] = value
+
+    description = fields.get("DESCRIPTION") or fields.get("ITEM") or fields.get("TITLE")
+    total_value = fields.get("PRICE") or fields.get("AMOUNT") or fields.get("TOTAL")
+    unit_price = fields.get("UNIT_PRICE") or fields.get("PRICE")
+    quantity = _coerce_quantity(fields.get("QUANTITY"))
+    category = None
+    raw_category = fields.get("CATEGORY")
+    if raw_category:
+        normalized = str(raw_category).strip().casefold()
+        category = next(
+            (name for name in category_names if str(name).casefold() == normalized),
+            None,
+        )
+
+    amount = parse_vnd(total_value)
+    if amount is None and unit_price is not None and quantity is not None:
+        unit_amount = parse_vnd(unit_price)
+        if unit_amount is not None:
+            amount = int(unit_amount * quantity)
+
+    if description is None or amount is None:
+        return None
+
+    return {
+        "description": str(description).strip()[:255] or None,
+        "quantity": quantity,
+        "unit_price": parse_vnd(unit_price) if unit_price else None,
+        "amount": int(amount),
+        "category": category,
+    }
+
+
+def extract_invoice_textract(image_bytes, mime_type, category_names, *, client=None):
+    if mime_type not in {"image/jpeg", "image/png", "application/pdf"}:
+        raise ValueError("Textract fallback only supports JPEG, PNG, and PDF receipts")
+
+    region = os.getenv("TEXTRACT_REGION") or os.getenv("AWS_REGION") or "ap-southeast-1"
+    boto = client or boto3.client("textract", region_name=region)
+    response = boto.analyze_expense(Document={"Bytes": image_bytes})
+    documents = response.get("ExpenseDocuments") or []
+    if not documents:
+        raise ValueError("Textract returned no expense document")
+
+    doc = documents[0]
+    summary = doc.get("SummaryFields", [])
+    merchant = _summary_field(summary, "VENDOR_NAME") or _summary_field(summary, "RECEIPT_VENDOR_NAME")
+    date_value = _summary_field(summary, "INVOICE_RECEIPT_DATE") or _summary_field(summary, "DOCUMENT_DATE")
+    total_value = _summary_field(summary, "TOTAL") or _summary_field(summary, "AMOUNT_DUE")
+
+    items = []
+    for group in doc.get("LineItemGroups", []) or []:
+        for line in group.get("LineItems", []) or []:
+            item = _normalize_textract_item(line, category_names)
+            if item is not None:
+                items.append(item)
+
+    return {
+        "merchant": merchant,
+        "date": parse_date(date_value),
+        "total": parse_vnd(total_value),
+        "items": [
+            {
+                "description": item["description"],
+                "quantity": item["quantity"],
+                "unit_price": item["unit_price"],
+                "amount": item["amount"],
+                "category": item["category"],
+            }
+            for item in items
+        ],
+    }
+
+
 def extract_invoice(image_bytes, mime_type, category_names, *, client=None, sleep=None):
     api_key = os.getenv("GEMINI_API_KEY")
     model = os.getenv("GEMINI_MODEL")
@@ -59,6 +179,7 @@ def extract_invoice(image_bytes, mime_type, category_names, *, client=None, slee
     categories = ", ".join(category_names) if category_names else "không có danh mục"
     prompt = f"{PROMPT}\nDanh sách danh mục:\n{categories}"
 
+    last_error = None
     for attempt in range(1, MAX_TRIES + 1):
         global _last_request_at
         now = time.monotonic()
@@ -86,11 +207,26 @@ def extract_invoice(image_bytes, mime_type, category_names, *, client=None, slee
                 raise ValueError("Gemini receipt response must be a JSON object")
             return result
         except errors.APIError as exc:
+            last_error = exc
             code = getattr(exc, "code", None)
             if code not in (429, 503) or attempt == MAX_TRIES:
-                raise
+                break
             sleep(wait_time(exc, attempt))
         except json.JSONDecodeError as exc:
-            raise ValueError("Gemini returned invalid JSON for the receipt") from exc
+            last_error = exc
+            break
 
+    if _should_fallback():
+        try:
+            fallback = extract_invoice_textract(image_bytes, mime_type, category_names)
+            return _attach_source(fallback, "textract", error=last_error)
+        except Exception as exc:
+            if last_error is not None:
+                raise ValueError("Gemini failed and Textract fallback failed") from exc
+            raise
+
+    if isinstance(last_error, json.JSONDecodeError):
+        raise ValueError("Gemini returned invalid JSON for the receipt") from last_error
+    if last_error is not None:
+        raise last_error
     raise RuntimeError("Gemini request exhausted retries")
