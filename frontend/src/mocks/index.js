@@ -1,3 +1,4 @@
+import { dispatchRecurringMock } from "./recurring.js";
 import { todayIso } from "../format.js";
 import { dispatchFinance, setFinanceFailure } from "./finance.js";
 
@@ -410,6 +411,8 @@ function dispatch(path, { method = "GET", body, headers } = {}) {
     return { transaction };
   }
   if (route === "/api/dashboard" && verb === "GET") return dashboard(state, url.searchParams);
+  const recurring = dispatchRecurringMock(state, route, verb, body);
+  if (recurring.handled) return recurring.result;
   fail(404, "MOCK_NOT_FOUND", "Chưa có dữ liệu giả cho yêu cầu này.");
 }
 
