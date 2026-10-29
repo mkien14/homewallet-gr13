@@ -20,8 +20,9 @@ function BudgetWorkspace({ period, data, onReload, onBusyChange, onDirtyChange }
   const [busy, setBusy] = useState("");
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState("");
+  const [forbidden, setForbidden] = useState(false);
   const submitting = useRef(false);
-  const owner = household.role === "owner";
+  const owner = household.role === "owner" && !forbidden;
   const allocated = saved?.allocations.reduce((sum, line) => sum + line.amount, 0) ?? 0;
   const draftAllocated = categories.reduce((sum, category) => sum + (parseVnd(form.allocations[category.id]) ?? 0), 0);
   const remaining = (parseVnd(form.income) ?? 0) - (parseVnd(form.savings) ?? 0) - draftAllocated;
@@ -43,6 +44,7 @@ function BudgetWorkspace({ period, data, onReload, onBusyChange, onDirtyChange }
     try { await action(); }
     catch (err) {
       setError({ status: err.status, message: failureMessage(err), requestId: err.requestId });
+      if (err.status === 403) setForbidden(true);
     } finally { submitting.current = false; setBusy(""); onBusyChange(false); }
   }
 
