@@ -17,10 +17,12 @@ function BudgetWorkspace({ period, data, onReload, onBusyChange, onDirtyChange }
   const { household, categories, summary } = data;
   const [saved, setSaved] = useState(data.budget);
   const [form, setForm] = useState(() => budgetToForm(data.budget, categories));
+  const [suggestion, setSuggestion] = useState(null);
   const [busy, setBusy] = useState("");
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState("");
   const [forbidden, setForbidden] = useState(false);
+  const [draftSource, setDraftSource] = useState("");
   const submitting = useRef(false);
   const owner = household.role === "owner" && !forbidden;
   const allocated = saved?.allocations.reduce((sum, line) => sum + line.amount, 0) ?? 0;
@@ -31,6 +33,7 @@ function BudgetWorkspace({ period, data, onReload, onBusyChange, onDirtyChange }
 
   function update(patch) {
     setForm((previous) => ({ ...previous, ...patch }));
+    if (Object.hasOwn(patch, "income") || Object.hasOwn(patch, "savings")) setSuggestion(null);
     setSuccess("");
   }
 
@@ -56,7 +59,20 @@ function BudgetWorkspace({ period, data, onReload, onBusyChange, onDirtyChange }
       const budget = checkBudget(result?.budget, categories, period);
       setSaved(budget);
       setForm(budgetToForm(budget, categories));
+      setSuggestion(null);
+      setDraftSource("");
       setSuccess("Đã lưu ngân sách. Số liệu tổng quan đã được cập nhật.");
+    });
+  }
+
+  function suggest() {
+    return run("suggest", async () => {
+      const income_estimate = parseVnd(form.income);
+      const savings_goal = parseVnd(form.savings);
+      if (income_estimate === null || savings_goal === null || savings_goal > income_estimate) throw new Error("Nhập thu nhập và tiết kiệm hợp lệ trước khi lấy gợi ý.");
+      const result = await api(`/api/budgets/${period}/suggest`, { method: "POST", body: { income_estimate, savings_goal } });
+      const draft = checkBudget(result?.suggestion, categories, period, { suggestion: true });
+      setSuggestion(draft);
     });
   }
 
@@ -85,17 +101,27 @@ function BudgetWorkspace({ period, data, onReload, onBusyChange, onDirtyChange }
       </section>
     </> : <section className="card empty-state"><h2>Tháng này chưa có ngân sách</h2><p>{owner ? "Bắt đầu từ thu nhập dự kiến, đặt mục tiêu tiết kiệm rồi phân bổ cho từng danh mục bên dưới." : "Chủ hộ chưa tạo ngân sách cho kỳ này."}</p></section>}
     {owner && <form className="card budget-editor" onSubmit={save}>
-      <div className="budget-section-heading"><div><p className="eyebrow">Kế hoạch của bạn</p><h2>{saved ? "Điều chỉnh ngân sách" : "Tạo ngân sách tháng này"}</h2></div><span className="status-badge">{!saved || dirty ? "Bản nháp · Chưa lưu" : "Khớp bản đã lưu"}</span></div>
+      <div className="budget-section-heading"><div><p className="eyebrow">Kế hoạch của bạn</p><h2>{saved ? "Điều chỉnh ngân sách" : "Tạo ngân sách tháng này"}</h2></div><span className="status-badge">{!saved || dirty || draftSource ? "Bản nháp · Chưa lưu" : "Khớp bản đã lưu"}</span></div>
       <fieldset disabled={Boolean(busy)} className="budget-fields">
         <div className="form-grid">
           <label className="field" htmlFor="budget-income">Thu nhập dự kiến (đồng)<input id="budget-income" inputMode="numeric" value={form.income} onChange={(e) => update({ income: e.target.value })} placeholder="Ví dụ: 12.000.000" required /><small>{formatVnd(parseVnd(form.income) ?? 0)}</small></label>
           <label className="field" htmlFor="budget-savings">Mục tiêu tiết kiệm (đồng)<input id="budget-savings" inputMode="numeric" value={form.savings} onChange={(e) => update({ savings: e.target.value })} required /><small>{formatVnd(parseVnd(form.savings) ?? 0)}</small></label>
         </div>
+        <div className="suggestion-toolbar"><div><b>Cần một điểm bắt đầu?</b><p className="muted">Lấy gợi ý phân bổ rồi chỉnh theo nhu cầu gia đình.</p></div><button type="button" className="button-secondary" onClick={suggest}>{busy === "suggest" ? "Đang lấy gợi ý…" : "Gợi ý phân bổ"}</button></div>
+        {suggestion && <section className="suggestion-preview" aria-label="Bản nháp gợi ý" aria-live="polite">
+          <div className="budget-section-heading"><h3>Gợi ý để bạn cân nhắc</h3><span className="status-badge">{suggestion.source === "LLM" ? "Gợi ý AI" : "Theo quy tắc / dự phòng"}</span></div>
+          <p>{suggestion.source === "RULE" ? "Gợi ý dựa trên chi tiêu đã xác nhận của ba tháng trước. Phương án theo quy tắc cũng được dùng khi AI không trả được gợi ý hợp lệ." : "Gợi ý AI đã được máy chủ kiểm tra theo quy tắc ngân sách."} Bạn có thể điều chỉnh mọi khoản trước khi lưu.</p>
+          {!suggestion.allocations.length && <p className="muted">Chưa có khoản phân bổ được gợi ý. Bạn có thể tự nhập ngân sách theo danh mục bên dưới.</p>}
+          <ul className="suggestion-lines">{suggestion.allocations.map((line) => <li key={line.category_id}><span>{line.name}</span><b>{formatVnd(line.amount)}</b></li>)}</ul>
+          <button type="button" className="button-secondary" onClick={() => { setForm(budgetToForm(suggestion, categories)); setDraftSource("Đã đưa gợi ý vào form. Bạn có thể chỉnh sửa rồi bấm Lưu ngân sách."); setSuccess(""); }}>Dùng gợi ý trong bản nháp</button>
+          <p className="muted">Gợi ý chưa được lưu vào ngân sách.</p>
+        </section>}
         <h3>Phân bổ theo danh mục</h3>
         <div className="form-grid">{categories.map((category) => <label className="field" key={category.id} htmlFor={`budget-category-${category.id}`}>{category.name} (đồng)<input id={`budget-category-${category.id}`} inputMode="numeric" value={form.allocations[category.id]} onChange={(e) => update({ allocations: { ...form.allocations, [category.id]: e.target.value } })} required /><small>{formatVnd(parseVnd(form.allocations[category.id]) ?? 0)}</small></label>)}</div>
         {!categories.length && <p className="notice">Hộ chưa có danh mục. Bạn vẫn có thể đặt mục tiêu tiết kiệm.</p>}
         <div className={`budget-balance${remaining < 0 ? " budget-balance-over" : ""}`} aria-live="polite"><span>{remaining < 0 ? "Đang vượt thu nhập" : "Còn có thể phân bổ"}</span><strong>{formatVnd(Math.abs(remaining))}</strong></div>
-        <div className="actions"><button type="submit">{busy === "save" ? "Đang lưu…" : "Lưu ngân sách"}</button><button type="button" className="button-secondary" onClick={() => { setForm(budgetToForm(saved, categories)); setError(null); setSuccess(""); }}>Khôi phục form</button></div>
+        {draftSource && <p className="notice" role="status">{draftSource}</p>}
+        <div className="actions"><button type="submit">{busy === "save" ? "Đang lưu…" : "Lưu ngân sách"}</button><button type="button" className="button-secondary" onClick={() => { setForm(budgetToForm(saved, categories)); setSuggestion(null); setDraftSource(""); setError(null); setSuccess(""); }}>Khôi phục form</button></div>
       </fieldset>
       <p className="muted">Tổng chi tiêu và tiết kiệm không vượt thu nhập dự kiến. Chỉ nút “Lưu ngân sách” mới ghi thay đổi.</p>
     </form>}
