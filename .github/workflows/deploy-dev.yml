@@ -1,0 +1,132 @@
+name: Deploy Dev
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-dev
+  cancel-in-progress: false
+
+jobs:
+  build-and-push:
+    name: Build and push backend image
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    permissions:
+      contents: read
+      id-token: write
+
+    env:
+      ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+      ECS_CLUSTER: homewallet
+      ECS_SERVICE: api
+      ECS_CONTAINER: api
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v5
+
+      - name: Sign in to AWS using OIDC
+        uses: aws-actions/configure-aws-credentials@v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+          role-session-name: GitHubActions-DeployDev
+          allowed-account-ids: "179923444714"
+
+      - name: Set image URI
+        id: image
+        shell: bash
+        run: |
+          set -euo pipefail
+          : "${ECR_REPOSITORY:?Set repository variable ECR_REPOSITORY}"
+          ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
+          REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+          IMAGE_TAG="sha-${GITHUB_SHA}"
+          IMAGE_URI="${REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
+
+          echo "registry=${REGISTRY}" >> "$GITHUB_OUTPUT"
+          echo "tag=${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
+          echo "uri=${IMAGE_URI}" >> "$GITHUB_OUTPUT"
+
+      - name: Sign in to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.image.outputs.registry }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          aws ecr get-login-password --region "$AWS_REGION" \
+            | docker login --username AWS --password-stdin "$ECR_REGISTRY"
+
+      - name: Build backend image
+        env:
+          IMAGE_URI: ${{ steps.image.outputs.uri }}
+        run: |
+          docker build \
+            --platform linux/amd64 \
+            --file backend/Dockerfile \
+            --tag "$IMAGE_URI" \
+            backend
+
+      - name: Push backend image
+        env:
+          IMAGE_URI: ${{ steps.image.outputs.uri }}
+        run: docker push "$IMAGE_URI"
+      - name: Download current API task definition
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TASK_DEFINITION="$(aws ecs describe-services \
+            --cluster "$ECS_CLUSTER" \
+            --services "$ECS_SERVICE" \
+            --query 'services[0].taskDefinition' \
+            --output text)"
+
+          if [[ "$TASK_DEFINITION" != arn:aws:ecs:*:task-definition/hw-api:* ]]; then
+            echo "Expected an hw-api task definition, got: $TASK_DEFINITION"
+            exit 1
+          fi
+
+          aws ecs describe-task-definition \
+            --task-definition "$TASK_DEFINITION" \
+            --query taskDefinition \
+            --output json > task-definition.json
+
+          echo "Previous task definition: $TASK_DEFINITION" \
+            >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Set new API image
+        id: render-task
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.ECS_CONTAINER }}
+          image: ${{ steps.image.outputs.uri }}
+
+      - name: Deploy API to ECS
+        id: deploy-api
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-task.outputs.task-definition }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          service: ${{ env.ECS_SERVICE }}
+          wait-for-service-stability: true
+
+      - name: Write image summary
+        env:
+          IMAGE_URI: ${{ steps.image.outputs.uri }}
+          IMAGE_TAG: ${{ steps.image.outputs.tag }}
+        run: |
+          {
+            echo "### Backend image pushed"
+            echo
+            echo "- Commit: ${GITHUB_SHA}"
+            echo "- Image tag: ${IMAGE_TAG}"
+            echo "- Image URI: ${IMAGE_URI}"
+          } >> "$GITHUB_STEP_SUMMARY"

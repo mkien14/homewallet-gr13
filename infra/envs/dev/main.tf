@@ -52,7 +52,7 @@ module "ecr" {
 }
 
 locals {
-  image = "${module.ecr.repository_url}:v0.4"
+  image = "${module.ecr.repository_url}:${var.api_image_tag}"
 }
 
 module "compute" {

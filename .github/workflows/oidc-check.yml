@@ -1,0 +1,33 @@
+name: AWS OIDC Check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/oidc-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check AWS OIDC login
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Sign in to AWS using OIDC
+        uses: aws-actions/configure-aws-credentials@v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+          role-session-name: GitHubActions-OIDC-Check
+          allowed-account-ids: "179923444714"
+
+      - name: Show AWS identity
+        run: aws sts get-caller-identity
