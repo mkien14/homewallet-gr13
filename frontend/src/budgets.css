@@ -19,12 +19,6 @@
 .allocation-over small, .allocation-over .allocation-top span { color: #a53b29; }
 .budget-editor { max-width: 920px; }
 .budget-fields { padding: 0; border: 0; margin-bottom: 12px; }
-.suggestion-toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; padding: 18px 0; margin: 0 0 22px; border-block: 1px solid #e5ebf3; }
-.suggestion-toolbar p { margin: 4px 0 0; }
-.suggestion-preview { border-left: 3px solid #0d9488; padding: 4px 0 4px 18px; margin-bottom: 24px; }
-.suggestion-preview > p:last-child { margin: 10px 0 0; font-size: .88rem; }
-.suggestion-lines { list-style: none; padding: 0; }
-.suggestion-lines li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; border-bottom: 1px solid #e8edf4; padding: 8px 0; }
 .budget-balance { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; padding: 16px 0; border-top: 1px solid #dce4ee; margin-bottom: 12px; color: #17665d; }
 .budget-balance strong { font-size: 1.2rem; }
 .budget-balance-over { color: #a53b29; }
@@ -33,5 +27,4 @@
   .budget-metrics { grid-template-columns: minmax(0, 1fr); }
   .budget-section-heading { flex-direction: column; }
   .budget-editor .actions button { width: 100%; }
-  .suggestion-toolbar button { width: 100%; }
 }

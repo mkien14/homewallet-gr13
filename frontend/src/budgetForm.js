@@ -23,10 +23,10 @@ export function buildBudgetBody(form, categories) {
   return { income_estimate, savings_goal, allocations };
 }
 
-export function checkBudget(budget, categories, period, { suggestion = false } = {}) {
+export function checkBudget(budget, categories, period) {
   const money = (value) => Number.isSafeInteger(value) && value >= 0;
   if (!budget || budget.period !== period || !money(budget.income_estimate) || !money(budget.savings_goal) || !Array.isArray(budget.allocations) ||
-      (suggestion ? !["RULE", "LLM"].includes(budget.source) || budget.status !== "DRAFT" : !["MANUAL", "RULE", "LLM"].includes(budget.source) || budget.status !== "ACTIVE")) {
+      (!["MANUAL", "RULE", "LLM"].includes(budget.source) || budget.status !== "ACTIVE")) {
     throw new Error("API trả về ngân sách không hợp lệ. Hãy tải lại để kiểm tra.");
   }
   const seen = new Set();
