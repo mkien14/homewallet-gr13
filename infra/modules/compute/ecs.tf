@@ -68,5 +68,9 @@ resource "aws_ecs_service" "api" {
     rollback = true
   }
 
+  lifecycle {
+    ignore_changes = [task_definition]
+  }
+
   depends_on = [aws_lb_listener.http, aws_iam_role_policy.execution_read_secrets]
 }
