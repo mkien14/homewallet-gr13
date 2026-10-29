@@ -70,3 +70,12 @@ Các quyết định dưới đây là baseline của HomeWallet cho giai đoạ
   mục/tháng; không gửi định danh người dùng, household id hoặc giao dịch thô. API key
   được cấp cho ECS API từ Secrets Manager qua `GEMINI_API_KEY`; `GEMINI_MODEL` là cấu
   hình không bí mật. Thiếu cấu hình thì endpoint vẫn trả gợi ý theo luật.
+
+## DEC-007: Weekly report uses the previous complete local week
+
+- **Date:** 2026-10-30
+- **Status:** Accepted for the dev implementation
+- **Decision:** The dedicated `jobs.weekly_report` entry point reports the previous complete Monday-to-Sunday week in `Asia/Ho_Chi_Minh`. `--period-key YYYY-MM-DD` identifies the Monday starting the report week and is used for deterministic reruns. The query includes only `CONFIRMED` transactions in `[Monday, next Monday)` and groups totals/counts by category and household member.
+- **Idempotency:** Each household is claimed independently in `job_runs` with `job_name=WEEKLY_REPORT_HH_<household_id>` and the week-start date as `period_key`. A successful household is skipped on rerun; failed or stale attempts can be reclaimed. Households without confirmed spending or recipients are skipped.
+- **Delivery:** The job sends a text email by BCC to current household members using the SES task role and `SES_FROM_ADDRESS`. It excludes drafts and transaction-level details. In SES sandbox all recipients must be verified. A database failure after SES accepts a message can cause a duplicate on retry; delivery is not exactly-once.
+- **Impact:** EventBridge Scheduler should invoke `python -m jobs.weekly_report` each Monday at 08:00 in `Asia/Ho_Chi_Minh`. Scheduler, IAM and task-definition wiring remain separate infrastructure work.
