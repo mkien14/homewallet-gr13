@@ -38,6 +38,20 @@ test("malformed server response is rejected instead of reporting save success", 
   ]) assert.throws(() => checkBudget({ ...budget, ...patch }, categories, "2026-10"));
 });
 
+test("RULE and LLM suggestions are validated as drafts, not saved budgets", () => {
+  for (const source of ["RULE", "LLM"]) {
+    const suggestion = { ...budget, source, status: "DRAFT" };
+    assert.equal(checkBudget(suggestion, categories, "2026-10", { suggestion: true }), suggestion);
+    const form = budgetToForm(suggestion, categories);
+    assert.equal(buildBudgetBody(form, categories).allocations[0].amount, 500000);
+  }
+  const empty = { ...budget, source: "RULE", status: "DRAFT", allocations: [] };
+  assert.equal(checkBudget(empty, categories, "2026-10", { suggestion: true }), empty);
+  assert.throws(() => checkBudget({ ...empty, source: "MANUAL" }, categories, "2026-10", { suggestion: true }));
+  assert.throws(() => checkBudget({ ...empty, period: "2026-11" }, categories, "2026-10", { suggestion: true }));
+  assert.throws(() => checkBudget(empty, categories, "2026-10"));
+});
+
 test("saved budgets containing only some categories fill missing categories with zero", () => {
   const sparse = { ...budget, allocations: budget.allocations.slice(0, 1) };
   checkBudget(sparse, categories, "2026-10");
