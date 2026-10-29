@@ -96,18 +96,63 @@ function budgetBody(state, body) {
   if (total > BigInt(body.income_estimate)) fail(422, "VALIDATION", "Tổng phân bổ và tiết kiệm vượt quá thu nhập dự kiến.");
 }
 
+function previousPeriods(period) {
+  let [year, month] = period.split("-").map(Number);
+  const periods = [];
+  for (let count = 0; count < 3; count += 1) {
+    month -= 1;
+    if (month === 0) { year -= 1; month = 12; }
+    if (year > 0) periods.push(`${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}`);
+  }
+  return periods;
+}
+
+function suggestion(state, period, body) {
+  objectBody(body, ["income_estimate", "savings_goal"]);
+  nonnegative(body.income_estimate, "Thu nhập");
+  nonnegative(body.savings_goal, "Tiết kiệm");
+  if (body.savings_goal > body.income_estimate) fail(422, "VALIDATION", "Tiết kiệm vượt quá thu nhập dự kiến.");
+  const periods = previousPeriods(period);
+  const totals = new Map();
+  for (const item of state.transactions ?? []) {
+    if ((item.household_id ?? 1) === state.household.id && item.status === "CONFIRMED" && periods.includes(item.occurred_on?.slice(0, 7)) && state.categories.some((category) => category.id === item.category_id) && Number.isSafeInteger(item.total_amount) && item.total_amount >= 0) {
+      totals.set(item.category_id, (totals.get(item.category_id) ?? 0n) + BigInt(item.total_amount));
+    }
+  }
+  // Match budget_rules.suggest_budget coefficient 1.0 and ROUND_HALF_UP.
+  const averages = [...totals].map(([category_id, amount]) => ({ category_id, amount: (amount + 1n) / 3n }));
+  const total = averages.reduce((sum, item) => sum + item.amount, 0n);
+  const available = BigInt(body.income_estimate - body.savings_goal);
+  let allocations;
+  if (total <= available) allocations = averages.map(({ category_id, amount }) => ({ category_id, amount: Number(amount) }));
+  else {
+    const scaled = averages.map(({ category_id, amount }) => ({ category_id, amount: Number(amount * available / total), remainder: amount * available % total }));
+    const remainder = Number(available - scaled.reduce((sum, item) => sum + BigInt(item.amount), 0n));
+    const order = [...scaled].sort((left, right) => left.remainder === right.remainder ? left.category_id - right.category_id : left.remainder > right.remainder ? -1 : 1);
+    for (const item of order.slice(0, remainder)) item.amount += 1;
+    allocations = scaled;
+  }
+  return {
+    suggestion: {
+      period, income_estimate: body.income_estimate, savings_goal: body.savings_goal,
+      source: "RULE", status: "DRAFT", allocations: allocationPayload(state, allocations),
+    },
+  };
+}
+
 export function dispatchFinance(state, route, verb, body) {
-  const budget = /^\/api\/budgets\/([^/]+)$/.exec(route);
+  const budget = /^\/api\/budgets\/([^/]+)(\/suggest)?$/.exec(route);
   if (!budget) return { handled: false };
   const data = financeState(state);
   validPeriod(budget[1]);
   if (verb !== "GET") { owner(state); mutationFailure(); }
-  if (verb === "GET") return { handled: true, result: { budget: data.budgets[budget[1]] ?? null } };
-  if (verb === "PUT") {
+  if (!budget[2] && verb === "GET") return { handled: true, result: { budget: data.budgets[budget[1]] ?? null } };
+  if (!budget[2] && verb === "PUT") {
     budgetBody(state, body);
     const saved = budgetPayload(state, budget[1], body);
     data.budgets[budget[1]] = saved;
     return { handled: true, result: { budget: saved } };
   }
+  if (budget[2] && verb === "POST") return { handled: true, result: suggestion(state, budget[1], body) };
   fail(405, "METHOD_NOT_ALLOWED", "Thao tác không được hỗ trợ.");
 }
