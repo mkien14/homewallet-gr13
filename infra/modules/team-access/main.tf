@@ -23,7 +23,7 @@ data "aws_iam_policy_document" "dev" {
   }
   statement {
     sid       = "ReceiptsList"
-    actions   = ["s3:ListBucket"]
+    actions   = ["s3:ListBucket", "s3:GetBucketVersioning"]
     resources = [var.receipts_bucket_arn]
   }
   statement {
