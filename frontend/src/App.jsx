@@ -11,6 +11,7 @@ const ReceiptDetail = lazy(() => import("./pages/ReceiptDetail"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const TransactionNew = lazy(() => import("./pages/TransactionNew"));
 const Budgets = lazy(() => import("./pages/Budgets"));
+const MockFinanceTools = lazy(() => import("./components/MockFinanceTools"));
 
 function Protected({ children }) {
   if (!USE_MOCK && !isLoggedIn()) {
@@ -54,6 +55,7 @@ function AppContent() {
             resetMockData();
             window.location.reload();
           }}>Đặt lại dữ liệu mẫu</button>
+          <Suspense fallback={null}><MockFinanceTools /></Suspense>
         </aside>
       )}
       <main id="main-content">
