@@ -61,6 +61,32 @@ resource "aws_iam_group_policy" "developers" {
   policy = data.aws_iam_policy_document.dev.json
 }
 
+data "aws_iam_policy_document" "integration_test_receipts" {
+  statement {
+    sid       = "ListTestBucketVersions"
+    actions   = ["s3:ListBucketVersions"]
+    resources = [var.receipts_bucket_arn]
+
+    condition {
+      test     = "StringLike"
+      variable = "s3:prefix"
+      values   = ["receipts/uploads/integration-test/*"]
+    }
+  }
+
+  statement {
+    sid       = "DeleteTestObjectVersions"
+    actions   = ["s3:DeleteObject", "s3:DeleteObjectVersion"]
+    resources = ["${var.receipts_bucket_arn}/receipts/uploads/integration-test/*"]
+  }
+}
+
+resource "aws_iam_user_policy" "integration_test_receipts" {
+  name   = "${var.name}-receipt-integration-test"
+  user   = var.integration_test_user_name
+  policy = data.aws_iam_policy_document.integration_test_receipts.json
+}
+
 data "aws_iam_policy_document" "cognito_branding" {
   statement {
     sid       = "DiscoverPools"

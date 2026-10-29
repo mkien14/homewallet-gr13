@@ -186,10 +186,11 @@ resource "aws_secretsmanager_secret" "gemini" {
 module "team_access" {
   source = "../../modules/team-access"
 
-  name                = "homewallet-dev"
-  state_bucket        = "hw-tfstate-homewallet-gr13"
-  receipts_bucket_arn = module.storage.bucket_arn
-  user_pool_arn       = module.cognito.user_pool_arn
+  name                       = "homewallet-dev"
+  state_bucket               = "hw-tfstate-homewallet-gr13"
+  receipts_bucket_arn        = module.storage.bucket_arn
+  user_pool_arn              = module.cognito.user_pool_arn
+  integration_test_user_name = "hoang"
 }
 
 module "frontend" {
