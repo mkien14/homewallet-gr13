@@ -8,6 +8,9 @@ import Upload from "./pages/Upload";
 
 const Receipts = lazy(() => import("./pages/Receipts"));
 const ReceiptDetail = lazy(() => import("./pages/ReceiptDetail"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const TransactionNew = lazy(() => import("./pages/TransactionNew"));
+const Budgets = lazy(() => import("./pages/Budgets"));
 
 function Protected({ children }) {
   if (!USE_MOCK && !isLoggedIn()) {
@@ -32,6 +35,9 @@ function AppContent() {
         <Link className="brand" to="/">HomeWallet</Link>
         {authenticated && (
           <nav aria-label="Điều hướng chính">
+            <NavLink to="/dashboard">Thống kê</NavLink>
+            <NavLink to="/budgets">Ngân sách</NavLink>
+            <NavLink to="/transactions/new">Nhập chi tiêu</NavLink>
             <NavLink to="/receipts">Hóa đơn</NavLink>
             <NavLink to="/upload">Tải ảnh</NavLink>
             <NavLink to="/" end>Hộ gia đình</NavLink>
@@ -58,6 +64,9 @@ function AppContent() {
           <Route path="/upload" element={<Protected><Upload /></Protected>} />
           <Route path="/receipts" element={<Protected><Receipts /></Protected>} />
           <Route path="/receipts/:id" element={<Protected><ReceiptDetail /></Protected>} />
+          <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
+          <Route path="/budgets" element={<Protected><Budgets /></Protected>} />
+          <Route path="/transactions/new" element={<Protected><TransactionNew /></Protected>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         </Suspense>
