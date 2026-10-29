@@ -54,3 +54,34 @@ sandbox, mọi địa chỉ nhận cũng phải được xác minh. Nếu hộ c
 job ghi log skip; log chỉ chứa mã hộ/danh mục và số lượng, không ghi email hay số
 tiền. `AWS_REGION` mặc định là `ap-southeast-1`. Scheduler nên gọi một trong hai
 command trên mỗi ngày; `--period-key` chỉ cần dùng cho chạy lại/đối chiếu thủ công.
+
+## Weekly spending report
+
+Run from the `backend` directory:
+
+```powershell
+python -m jobs.weekly_report
+python -m jobs.weekly_report --period-key 2026-10-19
+```
+
+`period_key` is the Monday (`YYYY-MM-DD`) starting the report week. With no key, the job selects the previous complete week in `Asia/Ho_Chi_Minh`. The query uses `[Monday, next Monday)`, includes only `CONFIRMED` transactions, and produces total/count plus category and household-member breakdowns. It excludes drafts and transaction-level details.
+
+The report query data has this shape; `total_amount` values are integer VND:
+
+```json
+{
+  "transaction_count": 6,
+  "total_amount": 1250000,
+  "by_category": [
+    {"category_id": 2, "name": "Ăn uống", "transaction_count": 4, "total_amount": 900000},
+    {"category_id": null, "name": "Chưa phân loại", "transaction_count": 2, "total_amount": 350000}
+  ],
+  "by_member": [
+    {"user_id": 7, "display_name": "Kien", "transaction_count": 6, "total_amount": 1250000}
+  ]
+}
+```
+
+Each household is claimed independently in `job_runs` using `job_name=WEEKLY_REPORT_HH_<household_id>` and the week-start date as `period_key`. `SUCCEEDED` is skipped; `FAILED` or `RUNNING` older than 30 minutes can be reclaimed. Empty reports or households without recipient email are skipped. The job sends a text email with BCC through the ECS task role and `SES_FROM_ADDRESS`; in SES sandbox, every recipient must be verified.
+
+EventBridge Scheduler should invoke `python -m jobs.weekly_report` on Monday at 08:00 with timezone `Asia/Ho_Chi_Minh`. The ECS task needs `SES_FROM_ADDRESS`, DB credentials, and `ses:SendEmail` scoped to the verified SES identity. Scheduler and task-definition resources are Chi's infrastructure work. A database failure after SES accepts an email can cause a duplicate on retry; SES and MySQL cannot provide exactly-once delivery.

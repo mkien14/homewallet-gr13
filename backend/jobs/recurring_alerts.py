@@ -9,9 +9,10 @@ import pymysql
 
 from app.config import load_config
 from app.db import connect
+from jobs.job_runs import claim_job_run as _claim_job_run
+from jobs.job_runs import finish_job_run as _finish_job_run
 
 JOB_TIMEZONE = "Asia/Ho_Chi_Minh"
-RUNNING_STALE_AFTER_SECONDS = 1800
 ALERT_THRESHOLDS = (80, 100)
 
 
@@ -33,59 +34,6 @@ def _execution_date(period_key=None, timezone=JOB_TIMEZONE):
     if parsed.isoformat() != period_key:
         raise ValueError("period_key must use YYYY-MM-DD")
     return parsed
-
-
-def _claim_job_run(db, job_name, period_key):
-    try:
-        with db.cursor() as cur:
-            cur.execute(
-                "INSERT INTO job_runs (job_name, period_key, status) "
-                "VALUES (%s, %s, 'RUNNING')",
-                (job_name, period_key),
-            )
-        db.commit()
-        return True
-    except pymysql.err.IntegrityError as exc:
-        db.rollback()
-        if not exc.args or exc.args[0] != 1062:
-            raise
-
-    with db.cursor() as cur:
-        cur.execute(
-            "SELECT status, TIMESTAMPDIFF(SECOND, started_at, CURRENT_TIMESTAMP) AS age "
-            "FROM job_runs WHERE job_name = %s AND period_key = %s FOR UPDATE",
-            (job_name, period_key),
-        )
-        existing = cur.fetchone()
-        if existing is None:
-            db.rollback()
-            return _claim_job_run(db, job_name, period_key)
-        if existing["status"] == "SUCCEEDED" or (
-            existing["status"] == "RUNNING"
-            and existing["age"] < RUNNING_STALE_AFTER_SECONDS
-        ):
-            db.commit()
-            return False
-        cur.execute(
-            "UPDATE job_runs SET status = 'RUNNING', started_at = CURRENT_TIMESTAMP "
-            "WHERE job_name = %s AND period_key = %s",
-            (job_name, period_key),
-        )
-    db.commit()
-    return True
-
-
-def _finish_job_run(db, job_name, period_key, status):
-    try:
-        with db.cursor() as cur:
-            cur.execute(
-                "UPDATE job_runs SET status = %s WHERE job_name = %s AND period_key = %s",
-                (status, job_name, period_key),
-            )
-        db.commit()
-    except Exception:
-        db.rollback()
-        raise
 
 
 def _household_recipients(db, household_id):
