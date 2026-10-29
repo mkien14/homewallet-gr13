@@ -1,4 +1,7 @@
 import { todayIso } from "../format.js";
+import { dispatchFinance, setFinanceFailure } from "./finance.js";
+
+export { setFinanceFailure } from "./finance.js";
 
 const STORAGE_KEY = "homewallet.week2.mock.v1";
 const ACTIVE_STATUSES = ["UPLOADING", "UPLOADED", "PROCESSING"];
@@ -102,6 +105,17 @@ export function resetMockData() {
   for (const url of uploadedImages.values()) URL.revokeObjectURL(url);
   uploadedImages.clear();
   memoryState = seed();
+  setFinanceFailure("none");
+  saveState();
+}
+
+export function setMockRole(role) {
+  if (!["owner", "member"].includes(role)) throw new Error("Vai trò thử nghiệm không hợp lệ.");
+  const state = readState();
+  if (!state.household) throw new Error("Bạn cần một hộ để thử vai trò.");
+  state.household.role = role;
+  const member = state.members.find((item) => item.id === state.user.id);
+  if (member) member.role = role;
   saveState();
 }
 
@@ -307,6 +321,8 @@ function dispatch(path, { method = "GET", body, headers } = {}) {
   const url = new URL(path, "https://homewallet.mock");
   const route = url.pathname;
   const verb = method.toUpperCase();
+  const finance = dispatchFinance(state, route, verb, body, headers);
+  if (finance.handled) return finance.result;
   const detail = /^\/api\/receipts\/(\d+)$/.exec(route);
   const confirm = /^\/api\/receipts\/(\d+)\/confirm$/.exec(route);
   if (route === "/api/me" && verb === "GET") return { user: state.user, household: state.household };

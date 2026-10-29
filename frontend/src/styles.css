@@ -31,6 +31,11 @@ main { max-width: 1160px; margin: 30px auto; padding: 0 20px 36px; }
 .skip-link:focus { top: 10px; }
 .mock-banner { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 16px; padding: 10px 20px; background: #fff5da; color: #765117; font-size: .88rem; border-bottom: 1px solid #f1dda8; }
 .mock-banner strong { white-space: nowrap; }
+.mock-finance-tools { flex-basis: 100%; max-width: 1120px; }
+.mock-finance-tools summary { cursor: pointer; font-weight: 600; }
+.mock-finance-options { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; padding-top: 12px; }
+.mock-finance-options label { display: flex; flex: 1 1 220px; flex-direction: column; gap: 4px; min-width: 0; }
+.mock-finance-options p { flex-basis: 100%; margin: 0; }
 .card { background: #fff; border: 1px solid #dce4ee; border-radius: 12px; padding: 22px; margin-bottom: 20px; box-shadow: 0 2px 5px #18334d04; min-width: 0; }
 .page-heading { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; margin-bottom: 22px; }
 .page-heading p { margin-bottom: 0; color: #596d83; }

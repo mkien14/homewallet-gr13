@@ -98,7 +98,7 @@ export default function Dashboard() {
             <p className="muted">Bản nháp hóa đơn chưa được tính. <Link to="/receipts">Xem và xác nhận hóa đơn</Link>.</p>
             {transactions.length ? <div className="table-scroll"><table><thead><tr><th>Ngày</th><th>Khoản chi</th><th>Danh mục</th><th>Thành viên</th><th className="text-right">Số tiền</th></tr></thead><tbody>{transactions.map((transaction) => <tr key={transaction.id}><td>{formatDate(transaction.occurred_on)}</td><td>{transaction.merchant || transaction.note || "Chi tiêu thủ công"}<small className="muted">{transaction.source === "OCR" ? "Từ hóa đơn" : "Nhập tay"}</small></td><td>{categoryName(transaction.category_id)}</td><td>{memberName(transaction.member_id ?? transaction.user_id)}</td><td className="text-right money">{formatVnd(transaction.total_amount)}</td></tr>)}</tbody></table></div> : <div className="empty-state"><p>Chưa có giao dịch đã xác nhận trong tháng này.</p><Link to="/transactions/new">Nhập khoản chi đầu tiên</Link></div>}
           </section>
-          <section className="card budget-placeholder"><h2>Ngân sách</h2><p className="muted">Khu vực ngân sách sẽ được bổ sung trong giai đoạn tiếp theo.</p></section>
+          <section className="card"><h2>Kế hoạch chi tiêu</h2><p className="muted">Theo dõi kế hoạch chi tiêu theo tháng.</p><Link className="button" to={`/budgets?period=${period}`}>Xem ngân sách tháng này</Link></section>
         </>
       )}
     </>
