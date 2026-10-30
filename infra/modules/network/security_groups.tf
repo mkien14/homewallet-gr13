@@ -12,6 +12,15 @@ resource "aws_security_group" "app" {
   tags        = { Name = "${var.name}-sg-app" }
 }
 
+# Attached only to the API service. Cache ingress uses this SG as its source,
+# so receipt workers and scheduled jobs cannot connect to Redis through sg-app.
+resource "aws_security_group" "api_identity" {
+  name        = "${var.name}-sg-api"
+  description = "API task identity for Redis access"
+  vpc_id      = aws_vpc.this.id
+  tags        = { Name = "${var.name}-sg-api" }
+}
+
 resource "aws_security_group" "db" {
   name        = "${var.name}-sg-db"
   description = "RDS MySQL"
@@ -102,9 +111,9 @@ resource "aws_vpc_security_group_ingress_rule" "db_from_app" {
   to_port                      = 3306
 }
 
-resource "aws_vpc_security_group_ingress_rule" "cache_from_app" {
+resource "aws_vpc_security_group_ingress_rule" "cache_from_api" {
   security_group_id            = aws_security_group.cache.id
-  referenced_security_group_id = aws_security_group.app.id
+  referenced_security_group_id = aws_security_group.api_identity.id
   ip_protocol                  = "tcp"
   from_port                    = 6379
   to_port                      = 6379

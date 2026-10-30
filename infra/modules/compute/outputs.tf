@@ -11,3 +11,11 @@ output "worker_service_name" {
 output "worker_task_definition_arn" {
   value = aws_ecs_task_definition.worker.arn
 }
+
+output "jobs_task_definition_arn" {
+  value = aws_ecs_task_definition.jobs.arn
+}
+
+output "scheduled_job_names" {
+  value = { for key, schedule in aws_scheduler_schedule.jobs : key => schedule.name }
+}

@@ -6,6 +6,8 @@ output "sg_ids" { value = module.network.sg_ids }
 output "ecr_url" { value = module.ecr.repository_url }
 output "alb_dns_name" { value = module.compute.alb_dns_name }
 output "db_address" { value = module.data.address }
+output "redis_endpoint" { value = module.cache.endpoint_address }
+output "redis_auth_token_secret_arn" { value = module.cache.auth_token_secret_arn }
 output "cognito_user_pool_id" { value = module.cognito.user_pool_id }
 output "cognito_spa_client_id" { value = module.cognito.spa_client_id }
 output "cognito_dev_client_id" { value = module.cognito.dev_client_id }
@@ -35,6 +37,14 @@ output "worker_service_name" {
 
 output "worker_task_definition_arn" {
   value = module.compute.worker_task_definition_arn
+}
+
+output "scheduled_jobs_task_definition_arn" {
+  value = module.compute.jobs_task_definition_arn
+}
+
+output "scheduled_job_names" {
+  value = module.compute.scheduled_job_names
 }
 
 output "frontend_bucket" {
