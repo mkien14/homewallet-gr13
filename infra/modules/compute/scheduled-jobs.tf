@@ -177,7 +177,7 @@ resource "aws_scheduler_schedule" "jobs" {
       network_configuration {
         subnets          = var.app_subnet_ids
         security_groups  = [var.sg_app_id]
-        assign_public_ip = "DISABLED"
+        assign_public_ip = false
       }
     }
 
