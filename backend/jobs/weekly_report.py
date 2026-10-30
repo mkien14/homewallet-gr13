@@ -6,6 +6,7 @@ from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import boto3
+from botocore.exceptions import ClientError
 
 from app.config import load_config
 from app.db import connect
@@ -178,6 +179,16 @@ def _send_report(config, ses, household, report, recipients, start, end):
     )
 
 
+def _aws_error_fields(exc):
+    if not isinstance(exc, ClientError):
+        return {}
+    error = exc.response.get("Error", {})
+    return {
+        "aws_error_code": error.get("Code"),
+        "aws_error_message": error.get("Message"),
+    }
+
+
 def run_weekly_reports(
     *, config=None, ses_client=None, period_key=None, timezone=JOB_TIMEZONE, db=None
 ):
@@ -247,6 +258,7 @@ def run_weekly_reports(
                     household_id=household_id,
                     period_key=effective_period_key,
                     error=type(exc).__name__,
+                    **_aws_error_fields(exc),
                 )
 
         result = {
