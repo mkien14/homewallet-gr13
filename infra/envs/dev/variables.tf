@@ -13,3 +13,9 @@ variable "api_image_tag" {
   type        = string
   default     = "v0.4"
 }
+
+variable "weekly_report_sender" {
+  description = "Verified SES sender identity for recurring alerts and weekly reports"
+  type        = string
+  default     = "homewallet26@gmail.com"
+}

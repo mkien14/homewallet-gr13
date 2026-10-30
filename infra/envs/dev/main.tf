@@ -33,6 +33,12 @@ provider "aws" {
   }
 }
 
+data "aws_caller_identity" "current" {}
+
+locals {
+  weekly_report_identity_arn = "arn:aws:ses:ap-southeast-1:${data.aws_caller_identity.current.account_id}:identity/${var.weekly_report_sender}"
+}
+
 resource "random_password" "origin_verify" {
   length  = 40
   special = false
@@ -51,6 +57,14 @@ module "ecr" {
   name   = "homewallet-backend"
 }
 
+module "cache" {
+  source = "../../modules/cache"
+
+  name              = "homewallet-dev"
+  subnet_ids        = module.network.data_subnet_ids
+  security_group_id = module.network.sg_ids.cache
+}
+
 locals {
   image = "${module.ecr.repository_url}:${var.api_image_tag}"
 }
@@ -64,14 +78,20 @@ module "compute" {
   app_subnet_ids      = module.network.app_subnet_ids
   sg_alb_id           = module.network.sg_ids.alb
   sg_app_id           = module.network.sg_ids.app
+  sg_api_id           = module.network.sg_ids.api
   image               = local.image
   receipts_bucket_arn = module.storage.bucket_arn
+
+  jobs_image = "${module.ecr.repository_url}:dev"
+
+  ses_identity_arn = local.weekly_report_identity_arn
 
   origin_verify_header = random_password.origin_verify.result
 
   secret_arns = [
     module.data.secret_arn,
-    aws_secretsmanager_secret.gemini.arn
+    aws_secretsmanager_secret.gemini.arn,
+    module.cache.auth_token_secret_arn
   ]
 
   worker_image     = "${module.ecr.repository_url}:${var.worker_image_tag}"
@@ -95,6 +115,21 @@ module "compute" {
     GEMINI_API_KEY = aws_secretsmanager_secret.gemini.arn
   }
 
+  jobs_environment = {
+    DB_HOST          = module.data.address
+    DB_PORT          = "3306"
+    DB_NAME          = "homewallet"
+    DB_SSL_CA        = "/etc/ssl/rds-global-bundle.pem"
+    AWS_REGION       = "ap-southeast-1"
+    TZ               = "Asia/Ho_Chi_Minh"
+    SES_FROM_ADDRESS = var.weekly_report_sender
+  }
+
+  jobs_secrets = {
+    DB_USER     = "${module.data.secret_arn}:username::"
+    DB_PASSWORD = "${module.data.secret_arn}:password::"
+  }
+
   api_environment = {
     COGNITO_ISSUER     = module.cognito.issuer
     COGNITO_JWKS_URI   = module.cognito.jwks_uri
@@ -107,12 +142,16 @@ module "compute" {
     GEMINI_MODEL       = var.gemini_model
     S3_BUCKET          = module.storage.bucket_name
     AWS_REGION         = "ap-southeast-1"
+    REDIS_HOST         = module.cache.endpoint_address
+    REDIS_PORT         = tostring(module.cache.port)
+    REDIS_SSL_CA       = "/etc/ssl/certs/ca-certificates.crt"
   }
 
   api_secrets = {
-    DB_USER        = "${module.data.secret_arn}:username::"
-    DB_PASSWORD    = "${module.data.secret_arn}:password::"
-    GEMINI_API_KEY = aws_secretsmanager_secret.gemini.arn
+    DB_USER          = "${module.data.secret_arn}:username::"
+    DB_PASSWORD      = "${module.data.secret_arn}:password::"
+    GEMINI_API_KEY   = aws_secretsmanager_secret.gemini.arn
+    REDIS_AUTH_TOKEN = module.cache.auth_token_secret_arn
   }
 }
 

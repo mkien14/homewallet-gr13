@@ -77,28 +77,22 @@ jobs:
         env:
           IMAGE_URI: ${{ steps.image.outputs.uri }}
         run: docker push "$IMAGE_URI"
-      - name: Download current API task definition
+      - name: Download latest API task definition
         shell: bash
         run: |
           set -euo pipefail
 
-          TASK_DEFINITION="$(aws ecs describe-services \
-            --cluster "$ECS_CLUSTER" \
-            --services "$ECS_SERVICE" \
-            --query 'services[0].taskDefinition' \
-            --output text)"
-
-          if [[ "$TASK_DEFINITION" != arn:aws:ecs:*:task-definition/hw-api:* ]]; then
-            echo "Expected an hw-api task definition, got: $TASK_DEFINITION"
-            exit 1
-          fi
-
           aws ecs describe-task-definition \
-            --task-definition "$TASK_DEFINITION" \
+            --task-definition hw-api \
             --query taskDefinition \
             --output json > task-definition.json
 
-          echo "Previous task definition: $TASK_DEFINITION" \
+          TASK_DEFINITION_ARN="$(aws ecs describe-task-definition \
+            --task-definition hw-api \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)"
+
+          echo "Terraform/API task definition: $TASK_DEFINITION_ARN" \
             >> "$GITHUB_STEP_SUMMARY"
 
       - name: Set new API image
@@ -117,6 +111,20 @@ jobs:
           cluster: ${{ env.ECS_CLUSTER }}
           service: ${{ env.ECS_SERVICE }}
           wait-for-service-stability: true
+
+      - name: Promote deployed image for scheduled jobs
+        env:
+          IMAGE_URI: ${{ steps.image.outputs.uri }}
+          ECR_REGISTRY: ${{ steps.image.outputs.registry }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEV_IMAGE_URI="${ECR_REGISTRY}/${ECR_REPOSITORY}:dev"
+          docker tag "$IMAGE_URI" "$DEV_IMAGE_URI"
+          docker push "$DEV_IMAGE_URI"
+
+          echo "- Scheduled jobs image: ${DEV_IMAGE_URI}" \
+            >> "$GITHUB_STEP_SUMMARY"
 
       - name: Write image summary
         env:

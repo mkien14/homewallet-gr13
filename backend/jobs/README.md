@@ -84,4 +84,22 @@ The report query data has this shape; `total_amount` values are integer VND:
 
 Each household is claimed independently in `job_runs` using `job_name=WEEKLY_REPORT_HH_<household_id>` and the week-start date as `period_key`. `SUCCEEDED` is skipped; `FAILED` or `RUNNING` older than 30 minutes can be reclaimed. Empty reports or households without recipient email are skipped. The job sends a text email with BCC through the ECS task role and `SES_FROM_ADDRESS`; in SES sandbox, every recipient must be verified.
 
-EventBridge Scheduler should invoke `python -m jobs.weekly_report` on Monday at 08:00 with timezone `Asia/Ho_Chi_Minh`. The ECS task needs `SES_FROM_ADDRESS`, DB credentials, and `ses:SendEmail` scoped to the verified SES identity. Scheduler and task-definition resources are Chi's infrastructure work. A database failure after SES accepts an email can cause a duplicate on retry; SES and MySQL cannot provide exactly-once delivery.
+Terraform configures `python -m jobs.weekly_report` for Monday at 08:00 with timezone `Asia/Ho_Chi_Minh`. The ECS task receives `SES_FROM_ADDRESS` and DB credentials; its task role grants `ses:SendEmail` only on the verified SES identity. A database failure after SES accepts an email can cause a duplicate on a later rerun; SES and MySQL cannot provide exactly-once delivery.
+
+## AWS dev schedules and Redis cache
+
+The `hw-jobs` Fargate task definition runs the same backend image as the API. EventBridge Scheduler overrides its command and runs these schedules in `Asia/Ho_Chi_Minh`:
+
+| Schedule | Local time | Command |
+| --- | --- | --- |
+| `hw-recurring-reminders` | Daily 07:45 | `python -m jobs.recurring_alerts reminders` |
+| `hw-weekly-report` | Monday 08:00 | `python -m jobs.weekly_report` |
+| `hw-budget-alerts` | Daily 20:00 | `python -m jobs.recurring_alerts budget-alerts` |
+
+The jobs use the RDS-managed secret for `DB_USER` and `DB_PASSWORD`. Their task role is `hw-weekly-report-task-role`; its only application permission is `ses:SendEmail` on the configured verified SES identity. Container logs go to `/ecs/hw-jobs` with a 14-day retention period. Scheduler retries failed `RunTask` API invocations twice for up to one hour. Scheduler cannot observe a container's later exit code, so a job that starts and then exits non-zero must be diagnosed from ECS stopped-task details and CloudWatch logs; its failed `job_runs` entry can then be retried by running the command again.
+
+SES remains in sandbox. The sender identity is `homewallet26@gmail.com`; every household recipient must also be verified before SES will accept a scheduled email. Otherwise the task will log/fail at SES send time even though Scheduler started the task successfully.
+
+The jobs task uses the mutable ECR tag `dev`. The Deploy Dev workflow promotes the image to that tag only after the API service reaches stability, and the ECR lifecycle policy retains the current `dev` image. After applying Terraform, run Deploy Dev so the latest Terraform-created `hw-api` task definition (including Redis environment variables and Secrets Manager reference) is deployed and the matching image is promoted for jobs.
+
+Terraform provisions one private Redis 7.1 node in the data subnets with encryption at rest, TLS, and an AUTH token in Secrets Manager. Only the API service has the dedicated security group accepted by Redis; the receipt worker and scheduled jobs use the shared app security group without Redis ingress. The API receives the Redis endpoint and token at task start. Dashboard cache failures remain cache misses: MySQL stays authoritative and the dashboard query continues without Redis.

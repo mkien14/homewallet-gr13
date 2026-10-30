@@ -4,6 +4,7 @@ variable "public_subnet_ids" { type = list(string) }
 variable "app_subnet_ids" { type = list(string) }
 variable "sg_alb_id" { type = string }
 variable "sg_app_id" { type = string }
+variable "sg_api_id" { type = string }
 variable "image" { type = string }
 variable "receipts_bucket_arn" { type = string }
 
@@ -56,6 +57,26 @@ variable "worker_environment" {
 variable "worker_secrets" {
   type    = map(string)
   default = {}
+}
+
+variable "jobs_image" {
+  description = "Mutable dev image tag promoted only after the API deployment succeeds"
+  type        = string
+}
+
+variable "jobs_environment" {
+  type    = map(string)
+  default = {}
+}
+
+variable "jobs_secrets" {
+  type    = map(string)
+  default = {}
+}
+
+variable "ses_identity_arn" {
+  description = "Verified SES identity allowed to send scheduled job emails"
+  type        = string
 }
 
 variable "origin_verify_header" {

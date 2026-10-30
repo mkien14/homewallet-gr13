@@ -7,6 +7,7 @@ output "sg_ids" {
   value = {
     alb       = aws_security_group.alb.id
     app       = aws_security_group.app.id
+    api       = aws_security_group.api_identity.id
     db        = aws_security_group.db.id
     cache     = aws_security_group.cache.id
     endpoints = aws_security_group.endpoints.id
