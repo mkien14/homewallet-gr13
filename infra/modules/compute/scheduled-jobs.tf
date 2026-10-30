@@ -160,12 +160,10 @@ resource "aws_scheduler_schedule" "jobs" {
     arn      = aws_ecs_cluster.this.arn
     role_arn = aws_iam_role.scheduler.arn
     input = jsonencode({
-      overrides = {
-        containerOverrides = [{
-          name    = "jobs"
-          command = each.value.command
-        }]
-      }
+      containerOverrides = [{
+        name    = "jobs"
+        command = each.value.command
+      }]
     })
 
     ecs_parameters {
