@@ -103,10 +103,12 @@ module "compute" {
     DB_NAME   = "homewallet"
     DB_SSL_CA = "/etc/ssl/rds-global-bundle.pem"
 
-    S3_BUCKET     = module.storage.bucket_name
-    SQS_QUEUE_URL = module.queue.queue_url
-    AWS_REGION    = "ap-southeast-1"
-    GEMINI_MODEL  = var.gemini_model
+    S3_BUCKET                 = module.storage.bucket_name
+    SQS_QUEUE_URL             = module.queue.queue_url
+    AWS_REGION                = "ap-southeast-1"
+    GEMINI_MODEL              = var.gemini_model
+    TEXTRACT_FALLBACK_ENABLED = "true"
+    TEXTRACT_REGION           = "ap-southeast-1"
   }
 
   worker_secrets = {

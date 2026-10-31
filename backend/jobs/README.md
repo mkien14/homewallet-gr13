@@ -88,6 +88,23 @@ Terraform configures `python -m jobs.weekly_report` for Monday at 08:00 with tim
 
 ## AWS dev schedules and Redis cache
 
+The dev receipt worker has Textract fallback enabled. Its task role can call
+`textract:AnalyzeExpense`; do not grant that action to the API or user roles.
+The worker result log includes `ocr_source` (`gemini` or `textract`) so a fallback
+run can be distinguished from a normal Gemini run. The `worker_image_tag` Terraform
+variable defaults to `dev`; after Deploy Dev promotes the new backend image, that
+workflow restarts the worker service so it pulls the promoted image.
+The GitHub OIDC role is managed outside this Terraform stack. Its deploy policy
+must allow `ecs:DescribeServices` and `ecs:UpdateService` on
+`arn:aws:ecs:ap-southeast-1:179923444714:service/homewallet/worker` for that
+workflow step; it does not need `iam:PassRole` because the workflow reuses the
+existing worker task definition.
+
+The API task role can list and delete versions only under
+`receipts/uploads/*`. This is used by household deletion to remove all versions
+and delete markers for that household's uploaded receipts before deleting its DB
+records.
+
 The `hw-jobs` Fargate task definition runs the same backend image as the API. EventBridge Scheduler overrides its command and runs these schedules in `Asia/Ho_Chi_Minh`:
 
 | Schedule | Local time | Command |

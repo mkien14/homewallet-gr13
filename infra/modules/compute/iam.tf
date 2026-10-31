@@ -34,6 +34,22 @@ data "aws_iam_policy_document" "api_s3" {
     actions   = ["s3:GetObject"]
     resources = ["${var.receipts_bucket_arn}/receipts/*"]
   }
+  statement {
+    sid       = "ListReceiptUploadVersions"
+    actions   = ["s3:ListBucketVersions"]
+    resources = [var.receipts_bucket_arn]
+
+    condition {
+      test     = "StringLike"
+      variable = "s3:prefix"
+      values   = ["receipts/uploads/*"]
+    }
+  }
+  statement {
+    sid       = "DeleteReceiptUploadVersions"
+    actions   = ["s3:DeleteObject", "s3:DeleteObjectVersion"]
+    resources = ["${var.receipts_bucket_arn}/receipts/uploads/*"]
+  }
 }
 
 resource "aws_iam_role_policy" "api_s3" {

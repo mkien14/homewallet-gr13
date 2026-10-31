@@ -1,6 +1,7 @@
 variable "worker_image_tag" {
-  description = "ECR image tag containing jobs.worker"
+  description = "ECR image tag containing the receipt worker; Deploy Dev promotes the current backend image to dev"
   type        = string
+  default     = "dev"
 }
 
 variable "gemini_model" {
