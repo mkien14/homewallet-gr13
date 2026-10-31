@@ -1,3 +1,4 @@
+import os
 import time
 
 import jwt
@@ -19,14 +20,19 @@ def rsa_key():
 
 @pytest.fixture
 def app(monkeypatch, rsa_key):
+    test_db_name = os.getenv("HOMEWALLET_TEST_DB_NAME", "homewallet_test")
     app = create_app({
         "TESTING": True,
         "COGNITO_ISSUER": ISS,
         "COGNITO_JWKS_URI": "http://invalid.local/jwks.json",
         "COGNITO_CLIENT_IDS": [CLIENT],
         "COGNITO_HOSTED_UI": None,
-        "DB_HOST": "localhost", "DB_PORT": 3307, "DB_USER": "root",
-        "DB_PASSWORD": "devpass", "DB_NAME": "homewallet", "DB_SSL_CA": None,
+        "DB_HOST": os.getenv("HOMEWALLET_TEST_DB_HOST", "localhost"),
+        "DB_PORT": int(os.getenv("HOMEWALLET_TEST_DB_PORT", "3307")),
+        "DB_USER": os.getenv("HOMEWALLET_TEST_DB_USER", "root"),
+        "DB_PASSWORD": os.getenv("HOMEWALLET_TEST_DB_PASSWORD", "devpass"),
+        "DB_NAME": test_db_name,
+        "DB_SSL_CA": None,
     })
     monkeypatch.setattr(auth, "signing_key_for", lambda token, cfg: rsa_key.public_key())
     return app
@@ -51,6 +57,10 @@ def make_token(rsa_key):
 @pytest.fixture
 def db_app(app, monkeypatch):
     c = app.config
+    if not c["DB_NAME"].endswith("_test"):
+        pytest.skip(
+            "DB-backed tests require a dedicated database whose name ends in _test"
+        )
     if c["DB_HOST"] not in ("localhost", "127.0.0.1"):
         pytest.skip("Chỉ chạy kiểm thử DB trên máy cục bộ")
     try:
