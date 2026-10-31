@@ -216,6 +216,7 @@ def _persist_receipt(db, receipt, raw_bytes, duplicate):
 
     processed_bytes, processed_type = prepare_file(receipt["s3_key"], raw_bytes)
     raw = extract_invoice(processed_bytes, processed_type, category_names)
+    ocr_source = raw.get("_source", "gemini")
     raw["_duplicate_file"] = is_duplicate
     result = normalize_invoice(raw, categories, receipt["created_at"])
 
@@ -248,6 +249,7 @@ def _persist_receipt(db, receipt, raw_bytes, duplicate):
                     "status": result["status"],
                     "transaction_id": existing_transaction["id"],
                     "duplicate": True,
+                    "ocr_source": ocr_source,
                 }
 
         cursor.execute(
@@ -297,7 +299,12 @@ def _persist_receipt(db, receipt, raw_bytes, duplicate):
         )
     db.commit()
     invalidate_dashboard(receipt["household_id"])
-    return {"receipt_id": receipt["id"], "transaction_id": transaction_id, **result}
+    return {
+        "receipt_id": receipt["id"],
+        "transaction_id": transaction_id,
+        **result,
+        "ocr_source": ocr_source,
+    }
 
 
 def process_receipt(reference, *, config=None, s3_client=None, file_bytes=None):

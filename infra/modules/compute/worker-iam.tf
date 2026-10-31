@@ -62,6 +62,12 @@ data "aws_iam_policy_document" "worker" {
   }
 
   statement {
+    sid       = "AnalyzeReceiptsWithTextract"
+    actions   = ["textract:AnalyzeExpense"]
+    resources = ["*"]
+  }
+
+  statement {
     sid = "UseReceiptsEncryptionKey"
 
     actions = [

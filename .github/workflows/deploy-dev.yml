@@ -126,6 +126,24 @@ jobs:
           echo "- Scheduled jobs image: ${DEV_IMAGE_URI}" \
             >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Restart receipt worker on promoted image
+        shell: bash
+        run: |
+          set -euo pipefail
+          aws ecs update-service \
+            --cluster "$ECS_CLUSTER" \
+            --service worker \
+            --force-new-deployment \
+            --region "$AWS_REGION" \
+            --query 'service.serviceName' \
+            --output text
+          aws ecs wait services-stable \
+            --cluster "$ECS_CLUSTER" \
+            --services worker \
+            --region "$AWS_REGION"
+          echo "- Receipt worker: redeployed on the promoted dev image and stable" \
+            >> "$GITHUB_STEP_SUMMARY"
+
       - name: Write image summary
         env:
           IMAGE_URI: ${{ steps.image.outputs.uri }}
