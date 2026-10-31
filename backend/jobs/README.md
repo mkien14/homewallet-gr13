@@ -23,9 +23,11 @@ receipt cùng giao dịch nháp vào MySQL, không tạo client SQS hoặc S3.
 
 Worker nhận một message mỗi lần, chờ tối đa 20 giây và chạy tuần tự. Message
 chỉ bị xóa sau khi xử lý thành công hoặc nhận được sự kiện `s3:TestEvent`.
-Nếu xử lý thất bại, message được giữ lại để thử lại sau visibility timeout;
-từ lần nhận thứ ba, receipt được đánh dấu `FAILED` và lỗi được ném tiếp để SQS
-có thể chuyển message vào DLQ theo redrive policy.
+Nếu xử lý thất bại, message được giữ lại để thử lại sau visibility timeout.
+Khi đạt số lần nhận tối đa, worker đánh dấu các receipt đang xử lý là `FAILED`,
+không xóa message để SQS chuyển vào DLQ theo redrive policy, rồi tiếp tục poll.
+Message sai định dạng hoặc lỗi DB khi đánh dấu receipt cũng được để SQS redrive;
+chúng không làm dừng ECS worker chạy nền.
 
 ## Tác vụ nhắc hạn và cảnh báo ngân sách
 
