@@ -68,7 +68,7 @@ The encrypted Web Push data is limited to:
 {"event_type":"budget_alert","deep_link":"/budgets"}
 ```
 
-It must not contain an amount, member email, receipt text, or other household data. The in-app API returns generic copy and the internal link so the authenticated React app can display details after the user opens the page. Expired provider responses (`404`/`410`) mark a subscription `EXPIRED` and clear its endpoint and keys. A failure on one browser does not stop delivery to other browsers or fail the scheduled job.
+It must not contain an amount, member email, receipt text, or other household data. The in-app API returns generic copy in the user's `preferred_locale` and the internal link so the authenticated React app can display details after the user opens the page. Expired provider responses (`404`/`410`) mark a subscription `EXPIRED` and clear its endpoint and keys. A failure on one browser does not stop delivery to other browsers or fail the scheduled job.
 
 ## VAPID deployment configuration
 

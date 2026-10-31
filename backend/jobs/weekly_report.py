@@ -10,6 +10,7 @@ from botocore.exceptions import ClientError
 
 from app.config import load_config
 from app.db import connect
+from app.localization import group_recipients_by_locale
 from jobs.job_runs import claim_job_run, finish_job_run
 
 JOB_TIMEZONE = "Asia/Ho_Chi_Minh"
@@ -116,21 +117,50 @@ def build_weekly_report_data(db, household_id, start, end):
 def _household_recipients(db, household_id):
     with db.cursor() as cur:
         cur.execute(
-            "SELECT DISTINCT u.email FROM household_members m "
+            "SELECT DISTINCT u.email, u.preferred_locale FROM household_members m "
             "JOIN users u ON u.id = m.user_id "
             "WHERE m.household_id = %s AND u.email IS NOT NULL AND u.email <> '' "
             "ORDER BY u.email",
             (household_id,),
         )
-        return [row["email"] for row in cur.fetchall()]
+        return cur.fetchall()
 
 
 def _format_vnd(amount):
     return f"{int(amount):,}".replace(",", ".") + " VND"
 
 
-def _report_email(household_name, report, start, end):
+def _report_email(household_name, report, start, end, locale="vi"):
     last_day = end - timedelta(days=1)
+    if locale == "en":
+        subject = (
+            f"HomeWallet: Weekly spending report "
+            f"{start.strftime('%d/%m/%Y')}–{last_day.strftime('%d/%m/%Y')}"
+        )
+        lines = [
+            f"Weekly spending report for household {household_name}",
+            f"Period: {start.strftime('%d/%m/%Y')} to {last_day.strftime('%d/%m/%Y')}",
+            f"Total spending: {_format_vnd(report['total_amount'])}",
+            f"Confirmed transactions: {report['transaction_count']}",
+            "",
+            "By category:",
+        ]
+        lines.extend(
+            f"- {row['name']}: {_format_vnd(row['total_amount'])} "
+            f"({row['transaction_count']} transaction(s))"
+            for row in report["by_category"]
+        )
+        lines.extend(("", "By member:"))
+        lines.extend(
+            f"- {row['display_name']}: {_format_vnd(row['total_amount'])} "
+            f"({row['transaction_count']} transaction(s))"
+            for row in report["by_member"]
+        )
+        lines.extend(
+            ("", "This summary includes confirmed transactions only.")
+        )
+        return subject, "\n".join(lines)
+
     subject = (
         f"HomeWallet: Báo cáo chi tiêu tuần "
         f"{start.strftime('%d/%m/%Y')}–{last_day.strftime('%d/%m/%Y')}"
@@ -168,15 +198,19 @@ def _send_report(config, ses, household, report, recipients, start, end):
     sender = config.get("SES_FROM_ADDRESS")
     if not sender:
         raise RuntimeError("SES_FROM_ADDRESS is not configured")
-    subject, body = _report_email(household["name"], report, start, end)
-    ses.send_email(
-        Source=sender,
-        Destination={"BccAddresses": recipients},
-        Message={
-            "Subject": {"Data": subject, "Charset": "UTF-8"},
-            "Body": {"Text": {"Data": body, "Charset": "UTF-8"}},
-        },
-    )
+    recipient_groups = group_recipients_by_locale(recipients)
+    for locale, addresses in recipient_groups.items():
+        subject, body = _report_email(
+            household["name"], report, start, end, locale
+        )
+        ses.send_email(
+            Source=sender,
+            Destination={"BccAddresses": addresses},
+            Message={
+                "Subject": {"Data": subject, "Charset": "UTF-8"},
+                "Body": {"Text": {"Data": body, "Charset": "UTF-8"}},
+            },
+        )
 
 
 def _aws_error_fields(exc):
