@@ -9,6 +9,7 @@ import pymysql
 
 from app.config import load_config
 from app.db import connect
+from app.localization import group_recipients_by_locale
 from app.notifications import create_household_notifications, send_push_to_users
 from jobs.job_runs import claim_job_run as _claim_job_run
 from jobs.job_runs import finish_job_run as _finish_job_run
@@ -40,13 +41,13 @@ def _execution_date(period_key=None, timezone=JOB_TIMEZONE):
 def _household_recipients(db, household_id):
     with db.cursor() as cur:
         cur.execute(
-            "SELECT DISTINCT u.email FROM household_members m "
+            "SELECT DISTINCT u.email, u.preferred_locale FROM household_members m "
             "JOIN users u ON u.id = m.user_id "
             "WHERE m.household_id = %s AND u.email IS NOT NULL AND u.email <> '' "
             "ORDER BY u.email",
             (household_id,),
         )
-        return [row["email"] for row in cur.fetchall()]
+        return cur.fetchall()
 
 
 def _ses_client(config, ses_client=None):
@@ -55,22 +56,26 @@ def _ses_client(config, ses_client=None):
     return boto3.client("ses", region_name=config.get("AWS_REGION", "ap-southeast-1"))
 
 
-def _send_email(db, config, ses_client, household_id, subject, body):
-    recipients = _household_recipients(db, household_id)
-    if not recipients:
+def _send_email(db, config, ses_client, household_id, bill, due_date):
+    recipient_groups = group_recipients_by_locale(
+        _household_recipients(db, household_id)
+    )
+    if not recipient_groups:
         _log("email_skipped_no_recipients", household_id=household_id)
         return False
     sender = config.get("SES_FROM_ADDRESS")
     if not sender:
         raise RuntimeError("SES_FROM_ADDRESS is not configured")
-    ses_client.send_email(
-        Source=sender,
-        Destination={"BccAddresses": recipients},
-        Message={
-            "Subject": {"Data": subject, "Charset": "UTF-8"},
-            "Body": {"Text": {"Data": body, "Charset": "UTF-8"}},
-        },
-    )
+    for locale, recipients in recipient_groups.items():
+        subject, body = _reminder_message(bill, due_date, locale)
+        ses_client.send_email(
+            Source=sender,
+            Destination={"BccAddresses": recipients},
+            Message={
+                "Subject": {"Data": subject, "Charset": "UTF-8"},
+                "Body": {"Text": {"Data": body, "Charset": "UTF-8"}},
+            },
+        )
     return True
 
 
@@ -95,19 +100,39 @@ def _list_active_bills(db):
         return cur.fetchall()
 
 
-def _reminder_message(bill, due_date):
-    amount = (
-        f" Số tiền dự kiến: {int(bill['expected_amount']):,} VND."
-        if bill["expected_amount"] is not None
-        else ""
-    )
-    subject = f"Nhắc hạn hóa đơn: {bill['name']}"
-    body = (
+def _reminder_message(bill, due_date, locale="vi"):
+    amount = int(bill["expected_amount"]) if bill["expected_amount"] is not None else None
+    date_text = due_date.strftime("%d/%m/%Y")
+    if locale == "en":
+        amount_text = f" Estimated amount: {amount:,} VND." if amount is not None else ""
+        return (
+            f"Upcoming bill reminder: {bill['name']}",
+            f"Your recurring bill {bill['name']} is expected to be due on "
+            f"{date_text}.{amount_text}\n"
+            "Open HomeWallet to review it and record the expense after payment.",
+        )
+
+    amount_text = f" Số tiền dự kiến: {amount:,} VND." if amount is not None else ""
+    return (
+        f"Nhắc hạn hóa đơn: {bill['name']}",
         f"Hóa đơn {bill['name']} của hộ gia đình dự kiến đến hạn ngày "
-        f"{due_date.strftime('%d/%m/%Y')}.{amount}\n"
-        "Mở HomeWallet để xem thông tin và ghi nhận khoản chi khi thanh toán."
+        f"{date_text}.{amount_text}\n"
+        "Mở HomeWallet để xem thông tin và ghi nhận khoản chi khi thanh toán.",
     )
-    return subject, body
+
+
+def _budget_alert_message(row, period, threshold, locale):
+    if locale == "en":
+        return (
+            f"Budget alert {threshold}%: {row['category_name']}",
+            f"Spending in category {row['category_name']} for period {period} has "
+            f"reached the {threshold}% budget threshold. Open HomeWallet to review details.",
+        )
+    return (
+        f"Cảnh báo ngân sách {threshold}%: {row['category_name']}",
+        f"Chi tiêu danh mục {row['category_name']} trong kỳ {period} "
+        f"đã đạt ngưỡng {threshold}% ngân sách. Mở HomeWallet để xem chi tiết.",
+    )
 
 
 def run_recurring_reminders(
@@ -135,8 +160,14 @@ def run_recurring_reminders(
                     bill["household_id"],
                     event_key=f"recurring-bill:{bill['id']}:{due_date.isoformat()}",
                     event_type=event_type,
-                    title="Hóa đơn sắp đến hạn",
-                    body="Một hóa đơn định kỳ sắp đến hạn. Mở HomeWallet để xem chi tiết.",
+                    title={
+                        "vi": "Hóa đơn sắp đến hạn",
+                        "en": "Upcoming bill reminder",
+                    },
+                    body={
+                        "vi": "Một hóa đơn định kỳ sắp đến hạn. Mở HomeWallet để xem chi tiết.",
+                        "en": "A recurring bill is due soon. Open HomeWallet to review it.",
+                    },
                     deep_link="/recurring-bills",
                 )
                 push_stats = send_push_to_users(
@@ -154,14 +185,13 @@ def run_recurring_reminders(
                 )
                 if ses is None:
                     ses = _ses_client(config, ses_client)
-                subject, body = _reminder_message(bill, due_date)
                 delivered = _send_email(
                     db,
                     config,
                     ses,
                     bill["household_id"],
-                    subject,
-                    body,
+                    bill,
+                    due_date,
                 )
                 _finish_job_run(db, "RECURRING_BILL_REMINDER", job_key, "SUCCEEDED")
                 sent += int(delivered)
@@ -234,7 +264,9 @@ def _send_budget_alert(db, ses, config, row, period, threshold):
                 "VALUES (%s, %s, %s, %s)",
                 (row["household_id"], period, row["category_id"], threshold),
             )
-        recipients = _household_recipients(db, row["household_id"])
+        recipients = group_recipients_by_locale(
+            _household_recipients(db, row["household_id"])
+        )
         event_type = "budget_alert"
         notification_users = create_household_notifications(
             db,
@@ -244,8 +276,14 @@ def _send_budget_alert(db, ses, config, row, period, threshold):
                 f"{row['category_id']}:{threshold}"
             ),
             event_type=event_type,
-            title="Cảnh báo ngân sách",
-            body="Một danh mục chi tiêu đã chạm ngưỡng thiết lập. Mở HomeWallet để xem chi tiết.",
+            title={
+                "vi": "Cảnh báo ngân sách",
+                "en": "Budget alert",
+            },
+            body={
+                "vi": "Một danh mục chi tiêu đã chạm ngưỡng thiết lập. Mở HomeWallet để xem chi tiết.",
+                "en": "A spending category has reached its configured threshold. Open HomeWallet to review it.",
+            },
             deep_link="/budgets",
             commit=False,
         )
@@ -253,26 +291,18 @@ def _send_budget_alert(db, ses, config, row, period, threshold):
             sender = config.get("SES_FROM_ADDRESS")
             if not sender:
                 raise RuntimeError("SES_FROM_ADDRESS is not configured")
-            ses.send_email(
-                Source=sender,
-                Destination={"BccAddresses": recipients},
-                Message={
-                    "Subject": {
-                        "Data": f"Cảnh báo ngân sách {threshold}%: {row['category_name']}",
-                        "Charset": "UTF-8",
+            for locale, addresses in recipients.items():
+                subject, body = _budget_alert_message(
+                    row, period, threshold, locale
+                )
+                ses.send_email(
+                    Source=sender,
+                    Destination={"BccAddresses": addresses},
+                    Message={
+                        "Subject": {"Data": subject, "Charset": "UTF-8"},
+                        "Body": {"Text": {"Data": body, "Charset": "UTF-8"}},
                     },
-                    "Body": {
-                        "Text": {
-                            "Data": (
-                                f"Chi tiêu danh mục {row['category_name']} trong kỳ {period} "
-                                f"đã đạt ngưỡng {threshold}% ngân sách. "
-                                "Mở HomeWallet để xem chi tiết."
-                            ),
-                            "Charset": "UTF-8",
-                        }
-                    },
-                },
-            )
+                )
         else:
             _log(
                 "budget_alert_email_skipped_no_recipients",

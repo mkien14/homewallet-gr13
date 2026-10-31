@@ -13,6 +13,7 @@ from .auth import require_auth
 from .db import get_db
 from .errors import ApiError
 from .households import json_body
+from .localization import normalize_locale
 
 bp = Blueprint("notifications", __name__, url_prefix="/api")
 logger = logging.getLogger(__name__)
@@ -113,6 +114,12 @@ def _payload_dict(value):
             return {}
         return decoded if isinstance(decoded, dict) else {}
     return {}
+
+
+def _localized_text(value, locale):
+    if isinstance(value, dict):
+        return value.get(locale) or value.get("vi") or ""
+    return value
 
 
 def _isoformat(value):
@@ -240,25 +247,29 @@ def create_household_notifications(
     """Insert one idempotent in-app notification per current household member."""
     with db.cursor() as cur:
         cur.execute(
-            "SELECT user_id FROM household_members WHERE household_id = %s ORDER BY user_id",
+            "SELECT u.id AS user_id, u.preferred_locale "
+            "FROM household_members m JOIN users u ON u.id = m.user_id "
+            "WHERE m.household_id = %s ORDER BY u.id",
             (household_id,),
         )
-        user_ids = [int(row["user_id"]) for row in cur.fetchall()]
+        members = cur.fetchall()
 
-    payload = json.dumps(
-        {
-            "title": title,
-            "body": body,
-            "deep_link": deep_link,
-            "event_type": event_type,
-        },
-        ensure_ascii=False,
-        separators=(",", ":"),
-    )
     inserted_user_ids = []
     try:
         with db.cursor() as cur:
-            for user_id in user_ids:
+            for member in members:
+                user_id = int(member["user_id"])
+                locale = normalize_locale(member.get("preferred_locale"))
+                payload = json.dumps(
+                    {
+                        "title": _localized_text(title, locale),
+                        "body": _localized_text(body, locale),
+                        "deep_link": deep_link,
+                        "event_type": event_type,
+                    },
+                    ensure_ascii=False,
+                    separators=(",", ":"),
+                )
                 cur.execute(
                     "INSERT INTO notifications "
                     "(user_id, type, channel, payload_json, event_key) "

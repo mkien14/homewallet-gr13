@@ -8,6 +8,7 @@ from flask import Blueprint, g, jsonify, make_response, request
 from .auth import require_auth
 from .db import get_db
 from .errors import ApiError
+from .localization import SUPPORTED_LOCALES
 
 bp = Blueprint("households", __name__, url_prefix="/api")
 
@@ -170,6 +171,36 @@ def _delete_household_db(db, hid):
 def me():
     db = get_db()
     return jsonify(user=g.user, household=household_payload(membership(db, g.user["id"])))
+
+
+@bp.patch("/me")
+@require_auth
+def update_me():
+    data = json_body()
+    if set(data) != {"preferred_locale"}:
+        raise ApiError(422, "VALIDATION", "Chỉ hỗ trợ cập nhật preferred_locale")
+    preferred_locale = data["preferred_locale"]
+    if not isinstance(preferred_locale, str) or preferred_locale not in SUPPORTED_LOCALES:
+        raise ApiError(422, "VALIDATION", "preferred_locale phải là vi hoặc en")
+
+    db = get_db()
+    try:
+        with db.cursor() as cur:
+            cur.execute(
+                "UPDATE users SET preferred_locale = %s WHERE id = %s",
+                (preferred_locale, g.user["id"]),
+            )
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+    user = dict(g.user)
+    user["preferred_locale"] = preferred_locale
+    return jsonify(
+        user=user,
+        household=household_payload(membership(db, g.user["id"])),
+    )
 
 
 @bp.post("/households")
