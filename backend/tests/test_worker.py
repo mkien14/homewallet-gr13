@@ -459,14 +459,25 @@ def test_third_failure_marks_receipt_failed_and_does_not_delete(
     fake_gemini(monkeypatch, "{invalid")
     sqs = FakeSqs(s3_event(), receive_count=3)
 
-    with pytest.raises(ValueError, match="invalid JSON"):
-        worker.poll_once(sqs, "https://sqs.example.test/receipts", config=config)
+    processed = worker.poll_once(
+        sqs, "https://sqs.example.test/receipts", config=config
+    )
 
+    assert processed == 1
     assert sqs.deletes == []
     assert state.receipt["status"] == "FAILED"
     assert state.receipt["error_code"] == "WORKER_MAX_ATTEMPTS"
     assert state.failures == [("WORKER_MAX_ATTEMPTS", "receipts/receipt one.jpg")]
-    assert json.loads(capsys.readouterr().out)["receive_count"] == 3
+    events = [json.loads(line) for line in capsys.readouterr().out.splitlines()]
+    assert events[0]["event"] == "sqs_message_failed"
+    assert events[0]["receive_count"] == 3
+    assert events[1] == {
+        "event": "sqs_message_max_attempts",
+        "message_id": "message-1",
+        "receive_count": 3,
+        "receipt_mark_attempts": 1,
+        "left_for_redrive": True,
+    }
 
 
 def test_local_file_mode_processes_real_image_with_db_but_no_s3(
