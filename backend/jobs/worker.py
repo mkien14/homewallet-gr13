@@ -96,9 +96,9 @@ def poll_once(sqs, queue_url, *, config=None, s3_client=None):
             "message_id": message_id,
             "receive_count": receive_count,
             "error": type(exc).__name__,
-            "message": str(exc)[:300],
         })
         if receive_count >= MAX_RECEIVE_COUNT:
+            receipt_mark_attempts = 0
             try:
                 body = _decode_message(message.get("Body", ""))
                 for key in _message_keys(body):
@@ -107,15 +107,22 @@ def poll_once(sqs, queue_url, *, config=None, s3_client=None):
                         "WORKER_MAX_ATTEMPTS",
                         config=config,
                     )
+                    receipt_mark_attempts += 1
             except Exception as mark_error:
                 log_json({
                     "event": "receipt_failure_mark_failed",
                     "message_id": message_id,
                     "error": type(mark_error).__name__,
-                    "message": str(mark_error)[:300],
                 })
-                raise
-            raise
+            # Keep the message undeleted so SQS can apply its redrive policy.
+            # Do not terminate the long-running ECS worker for a poison message.
+            log_json({
+                "event": "sqs_message_max_attempts",
+                "message_id": message_id,
+                "receive_count": receive_count,
+                "receipt_mark_attempts": receipt_mark_attempts,
+                "left_for_redrive": True,
+            })
         return 1
 
     log_json({
@@ -123,10 +130,19 @@ def poll_once(sqs, queue_url, *, config=None, s3_client=None):
         "message_id": message_id,
         "result": result,
     })
-    sqs.delete_message(
-        QueueUrl=queue_url,
-        ReceiptHandle=message["ReceiptHandle"],
-    )
+    try:
+        sqs.delete_message(
+            QueueUrl=queue_url,
+            ReceiptHandle=message["ReceiptHandle"],
+        )
+    except Exception as exc:
+        # The receipt is already persisted. Leave the SQS message for redelivery;
+        # processing is idempotent for finished receipts and the service survives.
+        log_json({
+            "event": "sqs_message_delete_failed",
+            "message_id": message_id,
+            "error": type(exc).__name__,
+        })
     return 1
 
 
