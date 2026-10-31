@@ -9,6 +9,7 @@ import pymysql
 
 from app.config import load_config
 from app.db import connect
+from app.notifications import create_household_notifications, send_push_to_users
 from jobs.job_runs import claim_job_run as _claim_job_run
 from jobs.job_runs import finish_job_run as _finish_job_run
 
@@ -128,6 +129,29 @@ def run_recurring_reminders(
                 skipped += 1
                 continue
             try:
+                event_type = "recurring_bill_reminder"
+                notification_users = create_household_notifications(
+                    db,
+                    bill["household_id"],
+                    event_key=f"recurring-bill:{bill['id']}:{due_date.isoformat()}",
+                    event_type=event_type,
+                    title="Hóa đơn sắp đến hạn",
+                    body="Một hóa đơn định kỳ sắp đến hạn. Mở HomeWallet để xem chi tiết.",
+                    deep_link="/recurring-bills",
+                )
+                push_stats = send_push_to_users(
+                    db,
+                    notification_users,
+                    event_type=event_type,
+                    deep_link="/recurring-bills",
+                    config=config,
+                )
+                _log(
+                    "push_delivery_summary",
+                    event_type=event_type,
+                    notification_count=len(notification_users),
+                    **push_stats,
+                )
                 if ses is None:
                     ses = _ses_client(config, ses_client)
                 subject, body = _reminder_message(bill, due_date)
@@ -211,38 +235,51 @@ def _send_budget_alert(db, ses, config, row, period, threshold):
                 (row["household_id"], period, row["category_id"], threshold),
             )
         recipients = _household_recipients(db, row["household_id"])
-        if not recipients:
-            db.rollback()
+        event_type = "budget_alert"
+        notification_users = create_household_notifications(
+            db,
+            row["household_id"],
+            event_key=(
+                f"budget-alert:{row['household_id']}:{period}:"
+                f"{row['category_id']}:{threshold}"
+            ),
+            event_type=event_type,
+            title="Cảnh báo ngân sách",
+            body="Một danh mục chi tiêu đã chạm ngưỡng thiết lập. Mở HomeWallet để xem chi tiết.",
+            deep_link="/budgets",
+            commit=False,
+        )
+        if recipients:
+            sender = config.get("SES_FROM_ADDRESS")
+            if not sender:
+                raise RuntimeError("SES_FROM_ADDRESS is not configured")
+            ses.send_email(
+                Source=sender,
+                Destination={"BccAddresses": recipients},
+                Message={
+                    "Subject": {
+                        "Data": f"Cảnh báo ngân sách {threshold}%: {row['category_name']}",
+                        "Charset": "UTF-8",
+                    },
+                    "Body": {
+                        "Text": {
+                            "Data": (
+                                f"Chi tiêu danh mục {row['category_name']} trong kỳ {period} "
+                                f"đã đạt ngưỡng {threshold}% ngân sách. "
+                                "Mở HomeWallet để xem chi tiết."
+                            ),
+                            "Charset": "UTF-8",
+                        }
+                    },
+                },
+            )
+        else:
             _log(
-                "budget_alert_skipped_no_recipients",
+                "budget_alert_email_skipped_no_recipients",
                 household_id=row["household_id"],
                 category_id=row["category_id"],
                 threshold=threshold,
             )
-            return False
-        sender = config.get("SES_FROM_ADDRESS")
-        if not sender:
-            raise RuntimeError("SES_FROM_ADDRESS is not configured")
-        ses.send_email(
-            Source=sender,
-            Destination={"BccAddresses": recipients},
-            Message={
-                "Subject": {
-                    "Data": f"Cảnh báo ngân sách {threshold}%: {row['category_name']}",
-                    "Charset": "UTF-8",
-                },
-                "Body": {
-                    "Text": {
-                        "Data": (
-                            f"Chi tiêu danh mục {row['category_name']} trong kỳ {period} "
-                            f"đã đạt ngưỡng {threshold}% ngân sách. "
-                            "Mở HomeWallet để xem chi tiết."
-                        ),
-                        "Charset": "UTF-8",
-                    }
-                },
-            },
-        )
         with db.cursor() as cur:
             cur.execute(
                 "UPDATE alert_state SET sent_at = CURRENT_TIMESTAMP "
@@ -256,6 +293,19 @@ def _send_budget_alert(db, ses, config, row, period, threshold):
                 ),
             )
         db.commit()
+        push_stats = send_push_to_users(
+            db,
+            notification_users,
+            event_type=event_type,
+            deep_link="/budgets",
+            config=config,
+        )
+        _log(
+            "push_delivery_summary",
+            event_type=event_type,
+            notification_count=len(notification_users),
+            **push_stats,
+        )
         return True
     except pymysql.err.IntegrityError as exc:
         db.rollback()

@@ -5,7 +5,15 @@ import uuid
 from flask import Flask, g, jsonify, request
 from flask.json.provider import DefaultJSONProvider
 
-from . import budgets, dashboard, households, receipts, recurring_bills, transactions
+from . import (
+    budgets,
+    dashboard,
+    households,
+    notifications,
+    receipts,
+    recurring_bills,
+    transactions,
+)
 from .config import load_config
 from .db import close_db
 from .errors import register_error_handlers
@@ -40,6 +48,7 @@ def create_app(test_config=None) -> Flask:
     app.teardown_appcontext(close_db)
     register_error_handlers(app)
     app.register_blueprint(households.bp)
+    app.register_blueprint(notifications.bp)
     app.register_blueprint(budgets.bp)
     app.register_blueprint(receipts.bp)
     app.register_blueprint(recurring_bills.bp)

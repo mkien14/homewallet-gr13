@@ -9,6 +9,7 @@ except ImportError:
 
 def load_config():
     ids = [x.strip() for x in os.getenv("COGNITO_CLIENT_IDS", "").split(",") if x.strip()]
+    ses_from_address = os.getenv("SES_FROM_ADDRESS")
     return {
         "COGNITO_ISSUER": os.getenv("COGNITO_ISSUER"),
         "COGNITO_JWKS_URI": os.getenv("COGNITO_JWKS_URI"),
@@ -29,7 +30,10 @@ def load_config():
         "REDIS_SSL_CA": os.getenv("REDIS_SSL_CA"),
         "REDIS_SOCKET_TIMEOUT": float(os.getenv("REDIS_SOCKET_TIMEOUT", "0.5")),
         "DASHBOARD_CACHE_TTL": int(os.getenv("DASHBOARD_CACHE_TTL", "300")),
-        "SES_FROM_ADDRESS": os.getenv("SES_FROM_ADDRESS"),
+        "SES_FROM_ADDRESS": ses_from_address,
+        "VAPID_PRIVATE_KEY": os.getenv("VAPID_PRIVATE_KEY"),
+        "VAPID_CLAIMS_SUB": os.getenv("VAPID_CLAIMS_SUB")
+        or (f"mailto:{ses_from_address}" if ses_from_address else None),
         "S3_BUCKET": os.getenv("S3_BUCKET"),
         "AWS_REGION": os.getenv("AWS_REGION", "ap-southeast-1"),
         "MAX_RECEIPT_BYTES": int(os.getenv("MAX_RECEIPT_BYTES", str(5 * 1024 * 1024))),
