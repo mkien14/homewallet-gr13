@@ -1,0 +1,130 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "GuardOnlyApSoutheast1",
+      "Effect": "Deny",
+      "Action": "*",
+      "Resource": "*",
+      "Condition": {
+        "StringNotEquals": {
+          "aws:RequestedRegion": "ap-southeast-1"
+        }
+      }
+    },
+    {
+      "Sid": "IdentifySelf",
+      "Effect": "Allow",
+      "Action": ["sts:GetCallerIdentity"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ReadHwJobsLogs",
+      "Effect": "Allow",
+      "Action": [
+        "logs:DescribeLogStreams",
+        "logs:GetLogEvents",
+        "logs:FilterLogEvents"
+      ],
+      "Resource": "arn:aws:logs:ap-southeast-1:179923444714:log-group:/ecs/hw-jobs:*"
+    },
+    {
+      "Sid": "ListLogGroupNames",
+      "Effect": "Allow",
+      "Action": ["logs:DescribeLogGroups"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ViewHomewalletClusterTasks",
+      "Effect": "Allow",
+      "Action": [
+        "ecs:DescribeClusters",
+        "ecs:ListTasks",
+        "ecs:DescribeTasks"
+      ],
+      "Resource": [
+        "arn:aws:ecs:ap-southeast-1:179923444714:cluster/homewallet",
+        "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/*"
+      ]
+    },
+    {
+      "Sid": "ViewHwJobsTaskDefinition",
+      "Effect": "Allow",
+      "Action": ["ecs:DescribeTaskDefinition"],
+      "Resource": [
+        "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs",
+        "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:*"
+      ]
+    },
+    {
+      "Sid": "RunHwJobsOnHomewalletClusterOnly",
+      "Effect": "Allow",
+      "Action": ["ecs:RunTask"],
+      "Resource": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:*",
+      "Condition": {
+        "ArnEquals": {
+          "ecs:cluster": "arn:aws:ecs:ap-southeast-1:179923444714:cluster/homewallet"
+        }
+      }
+    },
+    {
+      "Sid": "PassOnlyHwJobsRolesToEcs",
+      "Effect": "Allow",
+      "Action": ["iam:PassRole"],
+      "Resource": [
+        "arn:aws:iam::179923444714:role/homewallet-dev-task-execution-role",
+        "arn:aws:iam::179923444714:role/hw-weekly-report-task-role"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "iam:PassedToService": "ecs-tasks.amazonaws.com"
+        }
+      }
+    },
+    {
+      "Sid": "FindJobNetworkConfig",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeSubnets",
+        "ec2:DescribeSecurityGroups"
+      ],
+      "Resource": [
+        "arn:aws:ec2:ap-southeast-1:179923444714:subnet/*",
+        "arn:aws:ec2:ap-southeast-1:179923444714:security-group/*"
+      ]
+    },
+    {
+      "Sid": "ReadSesIdentityStatus",
+      "Effect": "Allow",
+      "Action": [
+        "ses:GetIdentityVerificationAttributes",
+        "ses:GetIdentityNotificationAttributes"
+      ],
+      "Resource": "arn:aws:ses:ap-southeast-1:179923444714:identity/*"
+    },
+    {
+      "Sid": "ViewJobSchedules",
+      "Effect": "Allow",
+      "Action": [
+        "scheduler:GetSchedule",
+        "scheduler:ListSchedules"
+      ],
+      "Resource": [
+        "arn:aws:scheduler:ap-southeast-1:179923444714:schedule/homewallet-dev-jobs/*",
+        "arn:aws:scheduler:ap-southeast-1:179923444714:schedule-group/homewallet-dev-jobs"
+      ]
+    },
+    {
+      "Sid": "ListScheduleGroupNames",
+      "Effect": "Allow",
+      "Action": ["scheduler:ListScheduleGroups"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ViewRdsMetadata",
+      "Effect": "Allow",
+      "Action": ["rds:DescribeDBInstances"],
+      "Resource": "arn:aws:rds:ap-southeast-1:179923444714:db:homewallet-dev-mysql"
+    }
+  ]
+}
