@@ -1,0 +1,8 @@
+{
+  "containerOverrides": [
+    {
+      "name": "jobs",
+      "command": ["python", "-m", "jobs.recurring_alerts", "budget-alerts"]
+    }
+  ]
+}
