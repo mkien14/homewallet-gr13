@@ -74,8 +74,8 @@ variable "jobs_secrets" {
   default = {}
 }
 
-variable "ses_identity_arn" {
-  description = "Verified SES identity allowed to send scheduled job emails"
+variable "ses_from_address" {
+  description = "Verified SES From address allowed for scheduled job emails"
   type        = string
 }
 
