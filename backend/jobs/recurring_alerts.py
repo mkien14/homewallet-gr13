@@ -1,6 +1,7 @@
 import argparse
 import calendar
 import json
+import re
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
@@ -33,6 +34,15 @@ def _aws_error_fields(exc):
     fields = {}
     if error.get("Code"):
         fields["aws_error_code"] = error["Code"]
+    message = error.get("Message") or error.get("message")
+    if isinstance(message, str) and message:
+        message = re.sub(
+            r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b",
+            "[redacted-email]",
+            message,
+            flags=re.IGNORECASE,
+        )
+        fields["aws_error_message"] = message[:1000]
     if metadata.get("RequestId"):
         fields["aws_request_id"] = metadata["RequestId"]
     return fields
