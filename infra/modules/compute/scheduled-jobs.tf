@@ -18,7 +18,13 @@ data "aws_iam_policy_document" "weekly_report_ses" {
   statement {
     sid       = "SendFromVerifiedHomeWalletIdentity"
     actions   = ["ses:SendEmail"]
-    resources = [var.ses_identity_arn]
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "ses:FromAddress"
+      values   = [var.ses_from_address]
+    }
   }
 }
 

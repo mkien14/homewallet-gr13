@@ -33,12 +33,6 @@ provider "aws" {
   }
 }
 
-data "aws_caller_identity" "current" {}
-
-locals {
-  weekly_report_identity_arn = "arn:aws:ses:ap-southeast-1:${data.aws_caller_identity.current.account_id}:identity/${var.weekly_report_sender}"
-}
-
 resource "random_password" "origin_verify" {
   length  = 40
   special = false
@@ -84,7 +78,7 @@ module "compute" {
 
   jobs_image = "${module.ecr.repository_url}:dev"
 
-  ses_identity_arn = local.weekly_report_identity_arn
+  ses_from_address = var.weekly_report_sender
 
   origin_verify_header = random_password.origin_verify.result
 
