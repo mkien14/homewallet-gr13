@@ -22,6 +22,22 @@ def _log(event, **fields):
     print(json.dumps({"event": event, **fields}, ensure_ascii=False, default=str))
 
 
+def _aws_error_fields(exc):
+    """Return safe AWS diagnostics without logging provider messages or PII."""
+    response = getattr(exc, "response", None)
+    if not isinstance(response, dict):
+        return {}
+
+    error = response.get("Error") or {}
+    metadata = response.get("ResponseMetadata") or {}
+    fields = {}
+    if error.get("Code"):
+        fields["aws_error_code"] = error["Code"]
+    if metadata.get("RequestId"):
+        fields["aws_request_id"] = metadata["RequestId"]
+    return fields
+
+
 def _execution_date(period_key=None, timezone=JOB_TIMEZONE):
     try:
         local_zone = ZoneInfo(timezone)
@@ -205,6 +221,7 @@ def run_recurring_reminders(
                     bill_id=bill["id"],
                     period_key=run_date.isoformat(),
                     error=type(exc).__name__,
+                    **_aws_error_fields(exc),
                 )
         result = {
             "job": "recurring-reminders",
@@ -388,6 +405,7 @@ def run_budget_alerts(
                                 threshold=threshold,
                                 period_key=day_key,
                                 error=type(exc).__name__,
+                                **_aws_error_fields(exc),
                             )
             status = "FAILED" if failed else "SUCCEEDED"
             _finish_job_run(db, job_name, day_key, status)
