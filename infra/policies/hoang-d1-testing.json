@@ -100,7 +100,7 @@
         "ses:GetIdentityVerificationAttributes",
         "ses:GetIdentityNotificationAttributes"
       ],
-      "Resource": "arn:aws:ses:ap-southeast-1:179923444714:identity/*"
+      "Resource": "*"
     },
     {
       "Sid": "ViewJobSchedules",
