@@ -158,6 +158,7 @@ def normalize_invoice(raw, category_rows, uploaded_at, *, today=None):
 
     return {
         "merchant": raw.get("merchant"),
+        "note": str(raw.get("note") or "")[:500] or None,
         "occurred_on": occurred_on.isoformat(),
         "total_amount": total_amount,
         "category_id": default_category_id,
@@ -221,6 +222,10 @@ def _persist_receipt(db, receipt, raw_bytes, duplicate):
     result = normalize_invoice(raw, categories, receipt["created_at"])
 
     with db.cursor() as cursor:
+        cursor.execute("SELECT id FROM receipts WHERE id = %s FOR UPDATE", (receipt["id"],))
+        if cursor.fetchone() is None:
+            db.rollback()
+            return {"receipt_id": receipt["id"], "skipped": True}
         cursor.execute(
             "SELECT id FROM transactions WHERE receipt_id = %s",
             (receipt["id"],),
@@ -255,8 +260,8 @@ def _persist_receipt(db, receipt, raw_bytes, duplicate):
         cursor.execute(
             "INSERT INTO transactions "
             "(household_id, member_id, receipt_id, occurred_on, merchant, "
-            "total_amount, category_id, status, source) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s, 'DRAFT', 'OCR')",
+            "total_amount, category_id, note, status, source) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'DRAFT', 'OCR')",
             (
                 receipt["household_id"],
                 receipt["uploader_id"],
@@ -265,6 +270,7 @@ def _persist_receipt(db, receipt, raw_bytes, duplicate):
                 result["merchant"],
                 result["total_amount"],
                 result["category_id"],
+                result["note"],
             ),
         )
         transaction_id = cursor.lastrowid
@@ -345,7 +351,8 @@ def process_receipt(reference, *, config=None, s3_client=None, file_bytes=None):
                 "s3", region_name=config.get("AWS_REGION", "ap-southeast-1")
             )
             response = s3_client.get_object(Bucket=bucket, Key=receipt["s3_key"])
-            file_bytes = response["Body"].read()
+            with response["Body"] as body:
+                file_bytes = body.read()
 
         return _persist_receipt(db, receipt, file_bytes, False)
     except ReceiptNotFound:

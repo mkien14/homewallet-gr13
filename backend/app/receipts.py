@@ -198,7 +198,7 @@ def get_receipt(rid):
         row["status"] = "UPLOADED"
     with db.cursor() as cur:
         cur.execute(
-            "SELECT id, occurred_on, merchant, total_amount, category_id "
+            "SELECT id, occurred_on, merchant, total_amount, category_id, note "
             "FROM transactions WHERE receipt_id = %s",
             (rid,),
         )
@@ -282,6 +282,29 @@ def list_receipts():
         })
     next_cursor = str(rows[-1]["id"]) if has_more and rows else None
     return jsonify(items=items, next_cursor=next_cursor)
+
+
+@bp.delete("/receipts/<int:rid>")
+@require_auth
+def delete_receipt(rid):
+    db = get_db()
+    m = membership(db, g.user["id"])
+    if not m:
+        raise ApiError(404, "NOT_FOUND", "Không tìm thấy")
+    try:
+        with db.cursor() as cur:
+            cur.execute("SELECT status FROM receipts WHERE id = %s AND household_id = %s FOR UPDATE", (rid, m["household_id"]))
+            receipt = cur.fetchone()
+            if not receipt:
+                raise ApiError(404, "NOT_FOUND", "Không tìm thấy hóa đơn")
+            cur.execute("DELETE FROM transactions WHERE receipt_id = %s", (rid,))
+            cur.execute("DELETE FROM receipts WHERE id = %s AND household_id = %s", (rid, m["household_id"]))
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    invalidate_dashboard(m["household_id"])
+    return jsonify(deleted=True)
 
 
 @bp.post("/receipts/<int:rid>/confirm")

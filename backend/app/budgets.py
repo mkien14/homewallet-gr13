@@ -150,7 +150,7 @@ def _historical_spending(db, household_id, period):
     end = _period_start(period)
     with db.cursor() as cur:
         cur.execute(
-            "SELECT DATE_FORMAT(occurred_on, '%Y-%m') AS period, category_id, "
+            "SELECT DATE_FORMAT(occurred_on, '%%Y-%%m') AS period, category_id, "
             "SUM(total_amount) AS amount FROM transactions "
             "WHERE household_id = %s AND status = 'CONFIRMED' "
             "AND category_id IS NOT NULL AND occurred_on >= %s AND occurred_on < %s "
