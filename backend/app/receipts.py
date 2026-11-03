@@ -289,19 +289,34 @@ def list_receipts():
 def delete_receipt(rid):
     db = get_db()
     m = membership(db, g.user["id"])
+    s3_deleted = False
     if not m:
         raise ApiError(404, "NOT_FOUND", "Không tìm thấy")
     try:
         with db.cursor() as cur:
-            cur.execute("SELECT status FROM receipts WHERE id = %s AND household_id = %s FOR UPDATE", (rid, m["household_id"]))
+            cur.execute(
+                "SELECT s3_key FROM receipts WHERE id = %s AND household_id = %s FOR UPDATE",
+                (rid, m["household_id"]),
+            )
             receipt = cur.fetchone()
             if not receipt:
                 raise ApiError(404, "NOT_FOUND", "Không tìm thấy hóa đơn")
+        # Remove every version and delete marker from the versioned receipts bucket.
+        storage.delete_s3_objects([receipt["s3_key"]])
+        s3_deleted = True
+
+        with db.cursor() as cur:
             cur.execute("DELETE FROM transactions WHERE receipt_id = %s", (rid,))
             cur.execute("DELETE FROM receipts WHERE id = %s AND household_id = %s", (rid, m["household_id"]))
         db.commit()
     except Exception:
         db.rollback()
+        if s3_deleted:
+            raise ApiError(
+                500,
+                "RECEIPT_DELETE_PARTIAL",
+                "Ảnh đã bị xóa khỏi S3 nhưng không xóa được bản ghi hóa đơn; hãy thử lại hoặc liên hệ quản trị.",
+            )
         raise
     invalidate_dashboard(m["household_id"])
     return jsonify(deleted=True)
