@@ -28,6 +28,10 @@
 .budget-balance { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; padding: 16px 0; border-top: 1px solid #dce4ee; margin-bottom: 12px; color: #17665d; }
 .budget-balance strong { font-size: 1.2rem; }
 .budget-balance-over { color: #a53b29; }
+.budget-workspace.budget-setup { grid-template-columns: minmax(0, 1fr); }
+.budget-workspace.budget-setup .budget-editor,
+.budget-workspace.budget-setup .empty-state { grid-column: 1; grid-row: auto; max-width: none; }
+.budget-workspace.budget-setup .budget-editor .form-grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
 @media (max-width: 600px) {
   .allocation-grid { grid-template-columns: minmax(0, 1fr); }
   .budget-metrics { grid-template-columns: minmax(0, 1fr); }

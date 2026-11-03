@@ -3,10 +3,12 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../api";
 import { formatDate, formatVnd, parseVnd } from "../format";
 import { STATUS_LABEL } from "../image";
+import { t } from "../preferences";
 import { createReceiptForm, receiptConfirmationBody, receiptDateLimit } from "../receiptForm";
 
 const PENDING = new Set(["UPLOADING", "UPLOADED", "PROCESSING"]);
 const WARNINGS = {
+  AUTO_REVIEW_REQUIRED: "Chưa đủ điều kiện tự xác nhận. Hãy đối chiếu danh sách món và tổng tiền với hóa đơn gốc.",
   TOTAL_MISMATCH: "Tổng các dòng hàng khác tổng hóa đơn. Hãy đối chiếu ảnh gốc và sửa số tiền.",
   DUPLICATE_FILE: "Ảnh này có thể trùng với một hóa đơn đã tải lên trong hộ.",
   POSSIBLE_DUPLICATE: "Thông tin hóa đơn có thể trùng với một giao dịch đã có.",
@@ -40,7 +42,7 @@ function ConfirmationForm({ receipt, categories, categoriesReady }) {
     try {
       body = receiptConfirmationBody(form, categories);
     } catch (err) {
-      setError(err.message);
+      setError(t(err.message));
       return;
     }
     submission.current = true;
@@ -53,11 +55,12 @@ function ConfirmationForm({ receipt, categories, categoriesReady }) {
       if (!result?.transaction?.id || result.transaction.status !== "CONFIRMED") {
         throw new Error("Máy chủ chưa trả về xác nhận hợp lệ. Hãy tải lại hóa đơn để kiểm tra trạng thái.");
       }
-      navigate("/receipts", { replace: true, state: { message: `Đã xác nhận hóa đơn #${receipt.id}. Giao dịch đã được cập nhật trên dashboard.` } });
+      const confirmedDate = result.transaction.occurred_on || body.occurred_on;
+      navigate(`/dashboard?period=${confirmedDate.slice(0, 7)}`, { replace: true, state: { receiptConfirmedId: receipt.id } });
     } catch (err) {
-      setError(err.code === "ALREADY_CONFIRMED"
+      setError(t(err.code === "ALREADY_CONFIRMED"
         ? "Hóa đơn đã được xác nhận. Hãy quay về danh sách để xem trạng thái mới nhất."
-        : err.status === 409 ? "Bản nháp không còn ở trạng thái có thể xác nhận. Hãy tải lại thông tin hóa đơn." : err.message);
+        : err.status === 409 ? "Bản nháp không còn ở trạng thái có thể xác nhận. Hãy tải lại thông tin hóa đơn." : err.message));
     } finally {
       submission.current = false;
       setSubmitting(false);
@@ -121,7 +124,7 @@ function ReceiptContent({ id }) {
         setReceipt(result);
         setError("");
         if (PENDING.has(result.status)) {
-          timer = window.setTimeout(load, 3000);
+          timer = window.setTimeout(load, 1000);
         } else if (["DRAFT_READY", "NEEDS_REVIEW"].includes(result.status) && result.draft) {
           try {
             const resultCategories = await api("/api/categories", { signal: controller.signal });
@@ -131,13 +134,13 @@ function ReceiptContent({ id }) {
               setCategoriesReady(true);
             }
           } catch (err) {
-            if (!controller.signal.aborted) setError(`Không tải được danh mục: ${err.message}`);
+            if (!controller.signal.aborted) setError(t(`Không tải được danh mục: ${err.message}`));
           }
         }
       } catch (err) {
         if (!controller.signal.aborted) {
           if (err.status === 404) setReceipt(null);
-          setError(err.status === 404 ? "Không tìm thấy hóa đơn trong hộ của bạn, hoặc bạn không có quyền truy cập hóa đơn này." : err.message);
+          setError(t(err.status === 404 ? "Không tìm thấy hóa đơn trong hộ của bạn, hoặc bạn không có quyền truy cập hóa đơn này." : err.message));
         }
       }
     }
@@ -152,11 +155,11 @@ function ReceiptContent({ id }) {
 
   return (
     <>
-      <div className="page-heading"><div><Link to="/receipts">← Danh sách hóa đơn</Link><h1>Hóa đơn #{id}</h1></div>{receipt && <span className={`status-badge status-${String(receipt.status).toLowerCase()}`}>{STATUS_LABEL[receipt.status] || receipt.status}</span>}</div>
+      <div className="page-heading"><div><Link to="/receipts">← Danh sách hóa đơn</Link><h1>Hóa đơn #{id}</h1></div>{receipt && <span className={`status-badge status-${String(receipt.status).toLowerCase()}`}>{t(STATUS_LABEL[receipt.status] || receipt.status)}</span>}</div>
       {error && <div className="notice" role="alert"><p className="error">{error}</p><button type="button" className="button-secondary" onClick={() => setReload((value) => value + 1)}>Thử tải lại</button></div>}
       {!receipt && !error && <p role="status">Đang tải hóa đơn…</p>}
       {receipt && <>
-        {receipt.warnings?.length > 0 && <div className="notice"><h2>Cần kiểm tra</h2><ul className="warning-list">{receipt.warnings.map((warning) => <li key={warning}>{WARNINGS[warning] || warning}</li>)}</ul></div>}
+        {receipt.warnings?.length > 0 && <div className="notice"><h2>Cần kiểm tra</h2><ul className="warning-list">{receipt.warnings.map((warning) => <li key={warning}>{t(WARNINGS[warning] || warning)}</li>)}</ul></div>}
         {PENDING.has(receipt.status) && <p className="notice" role="status">Hóa đơn đang được xử lý. Trang tự cập nhật mỗi 3 giây; bản nháp sẽ xuất hiện khi đọc xong.</p>}
         {receipt.status === "FAILED" && <div className="notice"><h2>Chưa đọc được hóa đơn</h2><p>{receipt.error_code ? `Mã lỗi: ${receipt.error_code}. ` : ""}Bạn có thể nhập thông tin giao dịch thủ công.</p><Link className="button-link" to="/transactions/new">Nhập tay</Link></div>}
         {receipt.status === "CONFIRMED" && <p className="notice success">Hóa đơn đã được xác nhận. <Link to="/dashboard">Xem dashboard</Link></p>}
@@ -167,6 +170,13 @@ function ReceiptContent({ id }) {
             {safePreview ? <>{isPdf ? <p>Tệp PDF: mở bản gốc để kiểm tra các trang.</p> : <img src={safePreview} alt={`Ảnh gốc của hóa đơn ${id}`} onError={(event) => { event.currentTarget.alt = "Ảnh không tải được. Liên kết có thể đã hết hạn; hãy làm mới ảnh."; }} />}<p><a href={safePreview} target="_blank" rel="noopener noreferrer">Mở tệp gốc trong tab mới</a></p><button type="button" className="button-secondary" onClick={() => setReload((value) => value + 1)}>Làm mới liên kết ảnh</button><p className="muted">Liên kết ảnh có thời hạn. Làm mới nếu không mở được.</p></> : <p className="muted">Ảnh gốc chưa sẵn sàng. API cần cung cấp liên kết xem tệp khi xử lý xong.</p>}
           </section>
           <section className="card">
+            {receipt.draft?.note && <p><strong>Ghi chú trên hóa đơn:</strong> {receipt.draft.note}</p>}
+            {receipt.status === "CONFIRMED" && receipt.draft?.items?.length > 0 && <>
+              <h2>Các khoản đã chi</h2>
+              <ul>{receipt.draft.items.map((item, index) => <li key={index}>
+                {item.description || "Mặt hàng"} · Số lượng: {item.quantity ?? "—"} · {formatVnd(item.amount)}
+              </li>)}</ul>
+            </>}
             {editable ? <ConfirmationForm receipt={receipt} categories={categories} categoriesReady={categoriesReady} /> : <><h2>Thông tin hóa đơn</h2><p>{receipt.merchant || receipt.draft?.merchant || "Chưa có thông tin cửa hàng"}</p><p>{receipt.occurred_on || receipt.draft?.occurred_on ? formatDate(receipt.occurred_on || receipt.draft.occurred_on) : "Chưa xác định ngày"}</p>{(receipt.total_amount ?? receipt.draft?.total_amount) != null && <p><strong>{formatVnd(receipt.total_amount ?? receipt.draft.total_amount)}</strong></p>}{["DRAFT_READY", "NEEDS_REVIEW"].includes(receipt.status) && !receipt.draft && <p className="error">Backend chưa cung cấp bản nháp để xác nhận.</p>}</>}
           </section>
         </div>

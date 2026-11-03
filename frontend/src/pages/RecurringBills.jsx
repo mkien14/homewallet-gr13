@@ -2,12 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api";
 import { formatVnd, parseVnd } from "../format";
+import { t } from "../preferences";
 import { buildRecurringBody, createNeedsReconciliation, matchingRecurringBills, recurringError, recurringFields, validRecurringBill } from "../recurringForm";
 import "../recurring.css";
 
 function ErrorNotice({ error }) {
   if (!error) return null;
-  return <div className="notice error" role="alert"><p>{error.message}</p>{error.requestId && <p>Mã yêu cầu: <code>{error.requestId}</code></p>}</div>;
+  return <div className="notice error" role="alert"><p>{t(error.message)}</p>{error.requestId && <p>{t("Mã yêu cầu:")} <code>{error.requestId}</code></p>}</div>;
 }
 
 export default function RecurringBills() {
@@ -78,7 +79,7 @@ export default function RecurringBills() {
       if (!validRecurringBill(result?.bill, setup.categories)) throw new Error("Chưa xác nhận được kết quả lưu. Nội dung bạn nhập vẫn được giữ lại.");
       setSetup((current) => ({ ...current, items: [...current.items.filter((item) => item.id !== result.bill.id), result.bill] }));
       setEditor(null);
-      setSuccess(editor.id ? "Đã cập nhật hóa đơn định kỳ." : "Đã thêm hóa đơn định kỳ.");
+      setSuccess(t(editor.id ? "Đã cập nhật hóa đơn định kỳ." : "Đã thêm hóa đơn định kỳ."));
     } catch (err) {
       if (err.status === 403) setForbidden(true);
       if (!editor.id && createNeedsReconciliation(err)) {
@@ -98,7 +99,7 @@ export default function RecurringBills() {
       const result = await api(`/api/recurring-bills/${bill.id}`, { method: "PATCH", body: { active: !bill.active } });
       if (!validRecurringBill(result?.bill, setup.categories)) throw new Error("Chưa xác nhận được trạng thái hóa đơn. Hãy tải lại trang để kiểm tra.");
       setSetup((current) => ({ ...current, items: current.items.map((item) => item.id === bill.id ? result.bill : item) }));
-      setSuccess(result.bill.active ? `Đã bật lại “${bill.name}”.` : `Đã tạm dừng “${bill.name}”.`);
+      setSuccess(`${t(result.bill.active ? "Đã bật lại" : "Đã tạm dừng")} “${bill.name}”.`);
     } catch (err) {
       if (err.status === 403) setForbidden(true);
       setError(recurringError(err));
@@ -133,7 +134,7 @@ export default function RecurringBills() {
   const unknownAmountCount = activeBills.length - pricedBills.length;
   const shown = setup.items.filter((item) => filter === "all" || item.active === (filter === "active"))
     .sort((a, b) => a.due_day - b.due_day || a.id - b.id);
-  const categoryName = (id) => id === null ? "Chưa phân loại" : setup.categories.find((category) => category.id === id)?.name || "Danh mục đã ngừng sử dụng";
+  const categoryName = (id) => id === null ? t("Chưa phân loại") : setup.categories.find((category) => category.id === id)?.name || t("Danh mục đã ngừng sử dụng");
 
   return <>
     {heading}
@@ -143,16 +144,16 @@ export default function RecurringBills() {
       <section className="card metric"><h2>Dự kiến mỗi tháng</h2><strong>{activeBills.length > 0 && pricedBills.length === 0 ? "Chưa có số tiền" : formatVnd(pricedBills.reduce((sum, bill) => sum + bill.expected_amount, 0))}</strong><p>{unknownAmountCount ? `Chưa gồm ${unknownAmountCount} hóa đơn chưa nhập số tiền` : "Chỉ tính các hóa đơn đang hoạt động"}</p></section>
     </div>
     <p className="muted recurring-job-note">Chưa có xác nhận gửi lời nhắc. Danh sách này giúp bạn lập kế hoạch; khoản dự kiến chưa được tính vào chi tiêu.</p>
-    {success && <p className="success" role="status">{success}</p>}
+    {success && <p className="success" role="status">{t(success)}</p>}
     {!editor && <ErrorNotice error={error} />}
     <div className={`recurring-layout${editor ? " has-editor" : ""}`}>
       {editor && <section className="card recurring-editor" aria-labelledby="recurring-form-title">
-        <h2 id="recurring-form-title">{editor.id ? "Sửa hóa đơn" : "Thêm hóa đơn"}</h2>
+        <h2 id="recurring-form-title">{editor.id ? t("Sửa hóa đơn") : t("Thêm hóa đơn")}</h2>
         <form onSubmit={save}>
           <fieldset disabled={busy || !canEdit || Boolean(uncertainCreate)} className="recurring-fields">
             <label className="field" htmlFor="bill-name">Tên hóa đơn<input id="bill-name" value={editor.fields.name} onChange={(e) => updateField("name", e.target.value)} maxLength={100} required placeholder="Ví dụ: Tiền điện" /></label>
             <label className="field" htmlFor="bill-category">Danh mục (không bắt buộc)<select id="bill-category" value={editor.fields.categoryId} onChange={(e) => updateField("categoryId", e.target.value)}><option value="">Chưa phân loại</option>{setup.categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
-            <label className="field" htmlFor="bill-amount">Số tiền dự kiến (đồng, không bắt buộc)<input id="bill-amount" type="text" inputMode="numeric" value={editor.fields.amount} onChange={(e) => updateField("amount", e.target.value)} placeholder="Để trống nếu chưa biết" aria-describedby="bill-amount-preview" /><small id="bill-amount-preview">{!editor.fields.amount.trim() ? "Chưa có số tiền dự kiến." : parseVnd(editor.fields.amount) === null ? "Nhập số nguyên đồng từ 0 trở lên hoặc để trống." : formatVnd(parseVnd(editor.fields.amount))}</small></label>
+            <label className="field" htmlFor="bill-amount">Số tiền dự kiến (đồng, không bắt buộc)<input id="bill-amount" type="text" inputMode="numeric" value={editor.fields.amount} onChange={(e) => updateField("amount", e.target.value)} placeholder="Để trống nếu chưa biết" aria-describedby="bill-amount-preview" /><small id="bill-amount-preview">{!editor.fields.amount.trim() ? t("Chưa có số tiền dự kiến.") : parseVnd(editor.fields.amount) === null ? t("Nhập số nguyên đồng từ 0 trở lên hoặc để trống.") : formatVnd(parseVnd(editor.fields.amount))}</small></label>
             <div className="form-grid">
               <label className="field" htmlFor="bill-due-day">Ngày đến hạn<input id="bill-due-day" type="number" inputMode="numeric" min="1" max="31" step="1" value={editor.fields.dueDay} onChange={(e) => updateField("dueDay", e.target.value)} required /><small>Ngày trong tháng, từ 1 đến 31.</small></label>
               <label className="field" htmlFor="bill-remind">Nhắc trước (ngày)<input id="bill-remind" type="number" inputMode="numeric" min="0" max="30" step="1" value={editor.fields.remindDays} onChange={(e) => updateField("remindDays", e.target.value)} required /><small>0 là nhắc đúng ngày đến hạn.</small></label>
@@ -162,15 +163,15 @@ export default function RecurringBills() {
           </fieldset>
           {!setup.categories.length && <p className="notice">Hộ chưa có danh mục. Bạn vẫn có thể lưu hóa đơn ở trạng thái Chưa phân loại.</p>}
           <ErrorNotice error={error} />
-          {uncertainCreate && <div className="notice" role="status"><p>Chưa xác nhận được lần tạo hóa đơn vừa rồi. Nội dung đang nhập được giữ; cần kiểm tra danh sách trước khi gửi lại để tránh tạo trùng.</p><button type="button" className="button-secondary" disabled={busy} onClick={reconcileCreate}>{busy ? "Đang kiểm tra…" : "Kiểm tra danh sách đã lưu"}</button>{uncertainCreate.checked && <><p>{uncertainCreate.matches.length ? `Đã tìm thấy ${uncertainCreate.matches.length} hóa đơn mới khớp nội dung trong danh sách.` : "Chưa thấy hóa đơn mới khớp nội dung. Nếu bạn chọn gửi lại, máy chủ vẫn có thể hoàn tất yêu cầu trước đó."}</p>{uncertainCreate.matches.length ? <button type="button" disabled={busy} onClick={() => { setEditor(null); setUncertainCreate(null); setError(null); setSuccess("Đã giữ hóa đơn tìm thấy trong danh sách; không gửi thêm yêu cầu tạo."); }}>Dùng hóa đơn đã tìm thấy</button> : <button type="button" disabled={busy || !canEdit} onClick={() => { setUncertainCreate(null); setError(null); }}>Cho phép gửi lại sau khi kiểm tra</button>}</>}</div>}
-          <div className="actions"><button type="submit" disabled={busy || !canEdit || Boolean(uncertainCreate)}>{busy ? "Đang xử lý…" : "Lưu hóa đơn"}</button><button type="button" className="button-secondary" disabled={busy} onClick={() => { setEditor(null); setUncertainCreate(null); setError(null); }}>Hủy</button></div>
+            {uncertainCreate && <div className="notice" role="status"><p>{t("Chưa xác nhận được lần tạo hóa đơn vừa rồi. Nội dung đang nhập được giữ; cần kiểm tra danh sách trước khi gửi lại để tránh tạo trùng.")}</p><button type="button" className="button-secondary" disabled={busy} onClick={reconcileCreate}>{busy ? t("Đang kiểm tra…") : t("Kiểm tra danh sách đã lưu")}</button>{uncertainCreate.checked && <><p>{uncertainCreate.matches.length ? `${t("Đã tìm thấy")} ${uncertainCreate.matches.length} ${t("hóa đơn mới khớp nội dung trong danh sách.")}` : t("Chưa thấy hóa đơn mới khớp nội dung. Nếu bạn chọn gửi lại, máy chủ vẫn có thể hoàn tất yêu cầu trước đó.")}</p>{uncertainCreate.matches.length ? <button type="button" disabled={busy} onClick={() => { setEditor(null); setUncertainCreate(null); setError(null); setSuccess(t("Đã giữ hóa đơn tìm thấy trong danh sách; không gửi thêm yêu cầu tạo.")); }}>{t("Dùng hóa đơn đã tìm thấy")}</button> : <button type="button" disabled={busy || !canEdit} onClick={() => { setUncertainCreate(null); setError(null); }}>{t("Cho phép gửi lại sau khi kiểm tra")}</button>}</>}</div>}
+          <div className="actions"><button type="submit" disabled={busy || !canEdit || Boolean(uncertainCreate)}>{busy ? t("Đang xử lý…") : t("Lưu hóa đơn")}</button><button type="button" className="button-secondary" disabled={busy} onClick={() => { setEditor(null); setUncertainCreate(null); setError(null); }}>{t("Hủy")}</button></div>
         </form>
       </section>}
       <section className="card recurring-list-panel" aria-labelledby="recurring-list-title">
         <div className="recurring-list-heading"><h2 id="recurring-list-title">Danh sách hóa đơn</h2><label className="field" htmlFor="bill-filter"><span className="muted">Hiển thị</span><select id="bill-filter" value={filter} onChange={(e) => setFilter(e.target.value)}><option value="all">Tất cả</option><option value="active">Đang hoạt động</option><option value="paused">Đang tạm dừng</option></select></label></div>
         {shown.length ? <ul className="recurring-list">{shown.map((bill) => <li key={bill.id} className={`recurring-item${bill.active ? "" : " is-paused"}`}>
           <div className="recurring-day" aria-label={`Đến hạn ngày ${bill.due_day} hằng tháng`}><span>Ngày</span><strong>{bill.due_day}</strong></div>
-          <div className="recurring-item-body"><div className="recurring-item-heading"><h3>{bill.name}</h3><span className={`status-badge ${bill.active ? "status-confirmed" : ""}`}>{bill.active ? "Đang hoạt động" : "Tạm dừng"}</span></div><p className="muted">{categoryName(bill.category_id)} · {bill.remind_days_before === 0 ? "Nhắc đúng ngày" : `Nhắc trước ${bill.remind_days_before} ngày`}</p><strong className="recurring-amount money">{bill.expected_amount === null ? "Chưa có số tiền dự kiến" : <>{formatVnd(bill.expected_amount)}<small> / tháng</small></>}</strong>{canEdit && <div className="actions recurring-item-actions"><button type="button" className="button-secondary" disabled={busy || Boolean(editor)} onClick={() => openEditor(bill)} aria-label={`Sửa ${bill.name}`}>Sửa</button><button type="button" className="button-secondary" disabled={busy || Boolean(editor)} onClick={() => toggle(bill)} aria-label={`${bill.active ? "Tạm dừng" : "Bật lại"} ${bill.name}`}>{bill.active ? "Tạm dừng" : "Bật lại"}</button></div>}</div>
+          <div className="recurring-item-body"><div className="recurring-item-heading"><h3>{bill.name}</h3><span className={`status-badge ${bill.active ? "status-confirmed" : ""}`}>{bill.active ? t("Đang hoạt động") : t("Tạm dừng")}</span></div><p className="muted">{categoryName(bill.category_id)} · {bill.remind_days_before === 0 ? t("Nhắc đúng ngày") : `${t("Nhắc trước")} ${bill.remind_days_before} ${t("ngày")}`}</p><strong className="recurring-amount money">{bill.expected_amount === null ? t("Chưa có số tiền dự kiến") : <>{formatVnd(bill.expected_amount)}<small> / {t("tháng")}</small></>}</strong>{canEdit && <div className="actions recurring-item-actions"><button type="button" className="button-secondary" disabled={busy || Boolean(editor)} onClick={() => openEditor(bill)} aria-label={`${t("Sửa")} ${bill.name}`}>{t("Sửa")}</button><button type="button" className="button-secondary" disabled={busy || Boolean(editor)} onClick={() => toggle(bill)} aria-label={`${t(bill.active ? "Tạm dừng" : "Bật lại")} ${bill.name}`}>{bill.active ? t("Tạm dừng") : t("Bật lại")}</button></div>}</div>
         </li>)}</ul> : <div className="empty-state"><h3>{setup.items.length ? "Không có hóa đơn trong bộ lọc này" : "Chưa có hóa đơn định kỳ"}</h3><p>{setup.items.length ? "Chọn bộ lọc khác để xem các hóa đơn còn lại." : "Thêm tiền nhà, điện nước hoặc các khoản thanh toán hằng tháng của gia đình."}</p>{canEdit && !editor && !setup.items.length && <button type="button" onClick={() => openEditor()}>Thêm hóa đơn đầu tiên</button>}</div>}
       </section>
     </div>

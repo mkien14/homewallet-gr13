@@ -11,7 +11,10 @@ export function formatVnd(value) {
 export function formatDate(iso) {
   if (!iso) return "";
   const match = /^(\d{4})-(\d{2})-(\d{2})(?:$|T)/.exec(String(iso));
-  return match ? `${match[3]}/${match[2]}/${match[1]}` : "";
+  if (!match) return "";
+  const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]), 12));
+  const locale = globalThis.document?.documentElement?.lang === "en" ? "en-US" : "vi-VN";
+  return new Intl.DateTimeFormat(locale, { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC" }).format(date);
 }
 
 export function parseVnd(text) {

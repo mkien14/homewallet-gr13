@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../api";
 import { useMe } from "../useMe";
+import { usePreferences } from "../preferences";
 
 function Setup({ onDone }) {
+  const { t } = usePreferences();
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   const [error, setError] = useState(null);
@@ -19,25 +21,26 @@ function Setup({ onDone }) {
 
   return (
     <>
-      <p>Bạn chưa thuộc hộ nào.</p>
+      <p>{t("Bạn chưa thuộc hộ nào.")}</p>
       <div className="card">
-        <h3>Tạo hộ mới</h3>
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Tên hộ, ví dụ: Nhà Kiên" />
-        <button onClick={() => run(() => api("/api/households", { method: "POST", body: { name } }))}>Tạo hộ</button>
+        <h3>{t("Tạo hộ mới")}</h3>
+        <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("Tên hộ, ví dụ: Nhà Kiên")} />
+        <button onClick={() => run(() => api("/api/households", { method: "POST", body: { name } }))}>{t("Tạo hộ")}</button>
       </div>
       <div className="card">
-        <h3>Tham gia bằng mã mời</h3>
-        <input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Mã mời 8 ký tự" />
+        <h3>{t("Tham gia bằng mã mời")}</h3>
+        <input value={code} onChange={(e) => setCode(e.target.value)} placeholder={t("Mã mời 8 ký tự")} />
         <button onClick={() => run(() => api("/api/households/join", { method: "POST", body: { invite_code: code } }))}>
-          Tham gia
+          {t("Tham gia")}
         </button>
       </div>
-      {error && <p className="error">{error}</p>}
+      {error && <p className="error">{t(error)}</p>}
     </>
   );
 }
 
 function HouseholdView({ household, onChange }) {
+  const { t } = usePreferences();
   const [members, setMembers] = useState([]);
   const [error, setError] = useState(null);
   const isOwner = household.role === "owner";
@@ -64,42 +67,18 @@ function HouseholdView({ household, onChange }) {
     }
   }
 
-  return (
-    <div className="card">
-      <h3>{household.name}</h3>
-      <p>Vai trò của bạn: <b>{isOwner ? "Chủ hộ" : "Thành viên"}</b></p>
-      {isOwner && (
-        <p>
-          Mã mời: <code>{household.invite_code}</code>{" "}
-          <button onClick={() => act(() => api(`/api/households/${household.id}/invite-code`, { method: "POST" }))}>
-            Đổi mã
-          </button>
-        </p>
-      )}
-      <ul>
-        {members.map((m) => (
-          <li key={m.id}>
-            {m.display_name} ({m.email}) - {m.role === "owner" ? "Chủ hộ" : "Thành viên"}{" "}
-            {isOwner && m.role !== "owner" && (
-              <button onClick={() => act(() => api(`/api/households/${household.id}/members/${m.id}`, { method: "DELETE" }))}>
-                Xóa
-              </button>
-            )}
-          </li>
-        ))}
-      </ul>
-      {error && <p className="error">{error}</p>}
-    </div>
-  );
+  return <div className="workspace-columns"><section className="card"><div className="dashboard-card-head"><h2>♙ &nbsp;{t("Thành viên")}</h2><span className="status-badge">{members.length} {t("người")}</span></div><div className="table-scroll"><table><thead><tr><th>{t("Thành viên")}</th><th>{t("Vai trò")}</th><th></th></tr></thead><tbody>{members.map((m) => <tr key={m.id}><td><div className="household-member"><span className="member-avatar">{m.display_name?.slice(0,1).toUpperCase()}</span><div><b>{m.display_name}</b><small>{m.email}</small></div></div></td><td><span className="status-badge">{m.role === "owner" ? t("Chủ hộ") : t("Thành viên")}</span></td><td>{isOwner && m.role !== "owner" && <button className="button-danger" onClick={() => act(() => api(`/api/households/${household.id}/members/${m.id}`, { method: "DELETE" }))}>{t("Xóa")}</button>}</td></tr>)}</tbody></table></div><div className="dashboard-note">{t("Gửi mã mời cho người thân để họ tham gia hộ gia đình.")}</div>{error && <p className="error">{error}</p>}</section><aside className="workspace-stack"><section className="card"><h2>⌂ &nbsp;{t("Thông tin hộ")}</h2><p>{household.name}</p><p>{t("Vai trò")}: <b>{isOwner ? t("Chủ hộ") : t("Thành viên")}</b></p>{isOwner && <><small>{t("Mã mời")}</small><p className="invite-code">{household.invite_code}</p><button className="button-secondary" onClick={() => act(() => api(`/api/households/${household.id}/invite-code`, { method: "POST" }))}>{t("Đổi mã mời")}</button></>}</section><section className="card"><h2>{t("Quyền trong hộ")}</h2><p><span className="household-check">✓</span> &nbsp;{t("Theo dõi chi tiêu chung")}</p><p><span className="household-check">✓</span> &nbsp;{t("Kiểm tra hóa đơn")}</p><p><span className="household-check">✓</span> &nbsp;{t("Xem ngân sách gia đình")}</p></section></aside></div>;
+
 }
 
 export default function Home() {
+  const { t } = usePreferences();
   const { me, error, reload } = useMe();
-  if (error) return <p className="error">{error}</p>;
-  if (!me) return <p>Đang tải...</p>;
+  if (error) return <p className="error">{t(error)}</p>;
+  if (!me) return <p>{t("Đang tải…")}</p>;
   return (
     <>
-      <p>Xin chào, <b>{me.user.email}</b></p>
+      <div className="page-heading"><div><p className="eyebrow">{t("Xin chào")}, {me.user.email}</p><h1>{me.household?.name || t("Hộ gia đình")}</h1></div></div>
       {me.household ? (
         <HouseholdView household={me.household} onChange={reload} />
       ) : (

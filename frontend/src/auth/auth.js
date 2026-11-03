@@ -2,10 +2,15 @@ import { config } from "../config";
 import { challengeFor, randomString } from "./pkce";
 
 const TOKEN_KEY = "hw.token";
+const AUTH_MODE_KEY = "hw.auth.mode";
 const VERIFIER_KEY = "hw.pkce.verifier";
 const STATE_KEY = "hw.pkce.state";
 
 export async function login() {
+  if (sessionStorage.getItem(AUTH_MODE_KEY) === "srp") {
+    const { reactSignOut } = await import("./cognito");
+    await reactSignOut();
+  }
   const verifier = randomString(48); 
   const state = randomString(16);
   sessionStorage.setItem(VERIFIER_KEY, verifier);
@@ -66,9 +71,30 @@ export function getToken() {
   return t.access;
 }
 
-export const isLoggedIn = () => getToken() !== null;
+export async function getAccessToken() {
+  if (sessionStorage.getItem(AUTH_MODE_KEY) === "srp") {
+    try {
+      const { getReactAccessToken } = await import("./cognito");
+      return await getReactAccessToken();
+    } catch {
+      sessionStorage.removeItem(TOKEN_KEY);
+      sessionStorage.removeItem(AUTH_MODE_KEY);
+      window.location.assign("/auth/react");
+      return null;
+    }
+  }
+  return getToken();
+}
 
-export function logout() {
+export const isLoggedIn = () => getToken() !== null || sessionStorage.getItem(AUTH_MODE_KEY) === "srp";
+
+export async function logout() {
+  if (sessionStorage.getItem(AUTH_MODE_KEY) === "srp") {
+    const { reactSignOut } = await import("./cognito");
+    await reactSignOut();
+    window.location.assign("/");
+    return;
+  }
   sessionStorage.removeItem(TOKEN_KEY);
   const p = new URLSearchParams({ client_id: config.clientId, logout_uri: config.logoutUri });
   window.location.assign(`${config.cognitoDomain}/logout?${p}`);

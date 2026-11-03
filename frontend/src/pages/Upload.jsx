@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { STATUS_LABEL, uploadReceipt, waitForStatus } from "../image";
+import { uploadReceipt } from "../image";
 import { useMe } from "../useMe";
 
 const MAX_FILES = 10;
@@ -37,13 +37,7 @@ export default function Upload() {
       const key = base[i].key;
       try {
         const id = await uploadReceipt(files[i], (stage) => patch(key, { stage }), { signal });
-        patch(key, { stage: "Đã tải lên, đang kiểm tra trạng thái", id });
-        const status = await waitForStatus(id, (s) => patch(key, { stage: STATUS_LABEL[s] || s }), 60, { signal });
-        patch(key, {
-          stage: STATUS_LABEL[status] || status,
-          error: status === "TIMEOUT" ? "Hệ thống vẫn đang xử lý. Bạn có thể theo dõi ở danh sách hóa đơn." : null,
-          done: true,
-        });
+        patch(key, { stage: "Đã tải lên. Xem hóa đơn để theo dõi xử lý", id, done: true });
       } catch (err) {
         if (signal.aborted) return;
         patch(key, { stage: "Lỗi", error: err.message, done: true });
@@ -51,23 +45,11 @@ export default function Upload() {
     }
   }
 
-  return (
-    <div className="card">
-      <h3>Tải ảnh hóa đơn</h3>
-      <p>Tối đa {MAX_FILES} tệp (JPEG, PNG hoặc PDF dưới 5 MB). Ảnh được nén ngay trên máy bạn trước khi gửi.</p>
-      <p><Link to="/receipts">Xem danh sách và xác nhận hóa đơn</Link></p>
-      <label className="field">Chọn tệp hóa đơn
-        <input type="file" multiple accept="image/jpeg,image/png,application/pdf" onChange={onPick} disabled={busy} />
-      </label>
-      <ul>
-        {items.map((it) => (
-          <li key={it.key}>
-            {it.name}: <b>{it.stage}</b>
-            {it.error && <span className="error"> ({it.error})</span>}
-            {it.id && <> · <Link to={`/receipts/${it.id}`}>Xem hóa đơn</Link></>}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+  return <>
+    <div className="page-heading"><div><p className="eyebrow">Giao dịch / Hóa đơn</p><h1>Tải ảnh hóa đơn</h1></div><Link className="button button-secondary" to="/receipts">Xem và xác nhận hóa đơn</Link></div>
+    <div className="workspace-columns"><section className="card"><div className="dashboard-card-head"><h2>⇧ &nbsp;Chọn tệp</h2><span className="status-badge">JPEG · PNG · PDF</span></div>
+      <label className="upload-drop"><span className="upload-icon">⇧</span><strong>Chọn ảnh hóa đơn từ máy</strong><span>Chụp rõ nội dung và tổng tiền trên hóa đơn</span><span className="button">Chọn tệp hóa đơn</span><input type="file" multiple accept="image/jpeg,image/png,application/pdf" onChange={onPick} disabled={busy} /><small>Tối đa {MAX_FILES} tệp · Dưới 5 MB mỗi tệp · Ảnh được nén trên máy</small></label>
+      <div className="upload-queue">{items.map((it) => <div className="upload-item" key={it.key}><span className="upload-file-icon">▤</span><div><strong>{it.name}</strong><small>{it.stage}{it.error && <span className="error"> · {it.error}</span>}</small></div>{it.id && <Link to={`/receipts/${it.id}`}>Xem →</Link>}</div>)}</div>
+    </section><aside className="workspace-stack"><section className="card"><h2>☷ &nbsp;Quy trình</h2><ol className="process-list"><li><b>Chọn ảnh hóa đơn</b><small>Chọn tối đa 10 tệp mỗi lượt</small></li><li><b>Nén trên máy</b><small>Giảm dung lượng trước khi gửi</small></li><li><b>Tải lên và đọc</b><small>Hệ thống xử lý nội dung hóa đơn</small></li><li><b>Kiểm tra và xác nhận</b><small>Kiểm tra bản nháp trước khi ghi nhận</small></li></ol></section><section className="card"><h2>✦ &nbsp;Mẹo chụp rõ nét</h2><p>✓ &nbsp;Đặt hóa đơn trên nền phẳng, đủ sáng</p><p>✓ &nbsp;Chụp thẳng, thấy rõ dòng tổng cộng</p><p>✓ &nbsp;Mỗi ảnh chỉ một hóa đơn</p></section></aside></div>
+  </>;
 }

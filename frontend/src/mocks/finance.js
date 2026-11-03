@@ -1,4 +1,5 @@
 import { todayIso } from "../format.js";
+import { dispatchRecurringMock } from "./recurring.js";
 
 let nextFailure = "none";
 
@@ -63,6 +64,12 @@ function financeState(state) {
   for (const [period, budget] of Object.entries(data.budgets)) {
     data.budgets[period] = budgetPayload(state, period, budget);
   }
+  if (Array.isArray(data.bills)) {
+    state.recurringByHousehold ??= {};
+    state.recurringByHousehold[key] ??= data.bills;
+    delete data.bills;
+  }
+  delete data.billIdempotency;
   return data;
 }
 
@@ -142,6 +149,12 @@ function suggestion(state, period, body) {
 
 export function dispatchFinance(state, route, verb, body) {
   const budget = /^\/api\/budgets\/([^/]+)(\/suggest)?$/.exec(route);
+  const recurring = /^\/api\/recurring-bills(?:\/\d+)?$/.test(route);
+  if (recurring) {
+    if (state.household) financeState(state);
+    if (verb !== "GET") { owner(state); mutationFailure(); }
+    return dispatchRecurringMock(state, route, verb, body);
+  }
   if (!budget) return { handled: false };
   const data = financeState(state);
   validPeriod(budget[1]);
