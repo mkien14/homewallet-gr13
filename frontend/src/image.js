@@ -67,7 +67,15 @@ export async function uploadReceipt(file, onStage, { signal } = {}) {
   const form = new FormData();
   Object.entries(upload.fields).forEach(([k, v]) => form.append(k, v));
   form.append("file", blob); 
-  const res = await fetch(upload.url, { method: "POST", body: form, signal });
+  const timeout = AbortSignal.timeout(60000);
+  let res;
+  try {
+    res = await fetch(upload.url, { method: "POST", body: form, signal: signal ? AbortSignal.any([signal, timeout]) : timeout });
+  } catch (error) {
+    if (signal?.aborted) throw error;
+    if (timeout.aborted) throw new Error("Tải ảnh lên quá lâu. Hãy kiểm tra kết nối rồi xem danh sách hóa đơn trước khi thử lại.", { cause: error });
+    throw new Error("Không kết nối được kho lưu trữ. Hãy kiểm tra kết nối và cấu hình S3.", { cause: error });
+  }
   if (!res.ok) throw new Error(`Kho lưu trữ từ chối tệp (${res.status})`);
   return receipt.id;
 }

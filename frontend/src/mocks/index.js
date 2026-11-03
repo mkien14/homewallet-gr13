@@ -57,6 +57,17 @@ function seed() {
   return {
     version: 1,
     user: { id: 1, email: "thuc.demo@example.com", display_name: "Thức" },
+    community_admin: false,
+    community_posts: [
+      { id: 1, type: "tip", title: "Chia ngân sách theo tuần để dễ theo dõi", body: "Chia khoản chi linh hoạt thành bốn tuần giúp gia đình nhận ra sớm khi một danh mục đang vượt kế hoạch.", status: "APPROVED", author: "Thức", updated_at: now, sample: true },
+      { id: 2, type: "budget_template", title: "Mẫu ngân sách gia đình mới bắt đầu", body: "Bắt đầu với ăn uống, đi lại, hóa đơn cố định và tiết kiệm. Điều chỉnh tỷ lệ theo thu nhập thực tế của gia đình.", status: "APPROVED", author: "Chi", updated_at: now, sample: true },
+      { id: 3, type: "tip", title: "Ghi chi tiêu ngay trong ngày", body: "Ghi lại các khoản nhỏ vào cuối ngày để không bỏ sót chi phí tiền mặt.", status: "PENDING", author: "Thức", updated_at: now, sample: true },
+    ],
+    notifications: [
+      { id: 1, type: "budget_alert", title: "Cảnh báo ngân sách", body: "Một danh mục chi tiêu đã chạm ngưỡng thiết lập. Mở HomeWallet để xem chi tiết.", deep_link: "/budgets", created_at: now, read: false, read_at: null },
+      { id: 2, type: "recurring_bill_reminder", title: "Nhắc hóa đơn", body: "Có hóa đơn định kỳ sắp đến hạn. Mở HomeWallet để xem lịch thanh toán.", deep_link: "/recurring-bills", created_at: now, read: true, read_at: now },
+    ],
+    push_subscriptions: [],
     household: { id: 1, name: "Gia đình HomeWallet", role: "owner", invite_code: "DEMO2026" },
     members: [
       { id: 1, display_name: "Thức", email: "thuc.demo@example.com", role: "owner", joined_at: now },
@@ -91,6 +102,10 @@ function readState() {
     // The demo also works when browser storage is unavailable.
   }
   memoryState ??= seed();
+  memoryState.community_admin ??= false;
+  memoryState.community_posts ??= seed().community_posts;
+  memoryState.notifications ??= seed().notifications;
+  memoryState.push_subscriptions ??= [];
   return memoryState;
 }
 
@@ -327,6 +342,56 @@ function dispatch(path, { method = "GET", body, headers } = {}) {
   const detail = /^\/api\/receipts\/(\d+)$/.exec(route);
   const confirm = /^\/api\/receipts\/(\d+)\/confirm$/.exec(route);
   if (route === "/api/me" && verb === "GET") return { user: state.user, household: state.household };
+  if (route === "/api/notifications" && verb === "GET") return { items: state.notifications };
+  const notification = /^\/api\/notifications\/(\d+)$/.exec(route);
+  if (notification && verb === "PATCH") {
+    const item = state.notifications.find((entry) => entry.id === Number(notification[1]));
+    if (!item) fail(404, "NOT_FOUND", "Không tìm thấy thông báo.");
+    item.read = true; item.read_at ??= new Date().toISOString();
+    return { id: item.id, read: true, read_at: item.read_at };
+  }
+  if (route === "/api/push/subscriptions" && verb === "POST") {
+    const saved = state.push_subscriptions.find((entry) => entry.browser_id === body?.browser_id);
+    if (saved) return { subscription: { id: saved.id } };
+    const item = { id: nextId(state.push_subscriptions), browser_id: body?.browser_id || "mock-browser" };
+    state.push_subscriptions.push(item);
+    return { subscription: { id: item.id } };
+  }
+  const pushSubscription = /^\/api\/push\/subscriptions\/(\d+)$/.exec(route);
+  if (pushSubscription && verb === "DELETE") {
+    state.push_subscriptions = state.push_subscriptions.filter((entry) => entry.id !== Number(pushSubscription[1]));
+    return null;
+  }
+  if (route === "/api/mock/community/admin" && verb === "POST") {
+    state.community_admin = Boolean(body?.enabled);
+    return { is_admin: state.community_admin };
+  }
+  if (route === "/api/community/posts" && verb === "GET") {
+    return { items: state.community_posts.filter((post) => post.status === "APPROVED").sort((a, b) => b.id - a.id) };
+  }
+  if (route === "/api/community/posts" && verb === "POST") {
+    if (!body?.title?.trim() || !body?.body?.trim() || !["tip", "budget_template"].includes(body.type)) fail(422, "VALIDATION", "Hãy nhập tiêu đề, nội dung và loại bài hợp lệ.");
+    const post = { id: nextId(state.community_posts), type: body.type, title: body.title.trim(), body: body.body.trim(), status: "PENDING", author: state.user.display_name, updated_at: new Date().toISOString() };
+    state.community_posts.push(post);
+    return { post };
+  }
+  if (route === "/api/admin/community/posts" && verb === "GET") {
+    if (!state.community_admin) fail(403, "FORBIDDEN", "Bạn không có quyền quản trị cộng đồng.");
+    const status = url.searchParams.get("status");
+    return { items: state.community_posts.filter((post) => !status || post.status === status).sort((a, b) => b.id - a.id) };
+  }
+  const communityPost = /^\/api\/admin\/community\/posts\/(\d+)$/.exec(route);
+  if (communityPost && verb === "PATCH") {
+    if (!state.community_admin) fail(403, "FORBIDDEN", "Bạn không có quyền quản trị cộng đồng.");
+    const post = state.community_posts.find((entry) => entry.id === Number(communityPost[1]));
+    if (!post) fail(404, "NOT_FOUND", "Không tìm thấy bài viết.");
+    if (body?.title !== undefined) post.title = body.title.trim();
+    if (body?.body !== undefined) post.body = body.body.trim();
+    if (body?.status !== undefined && !["PENDING", "APPROVED", "HIDDEN"].includes(body.status)) fail(422, "VALIDATION", "Trạng thái bài viết không hợp lệ.");
+    if (body?.status !== undefined) post.status = body.status;
+    post.updated_at = new Date().toISOString();
+    return { post };
+  }
   if (route === "/api/categories" && verb === "GET") return { categories: state.categories };
   if (route === "/api/households/1/members" && verb === "GET") return { members: state.members };
   if (route === "/api/households/1/invite-code" && verb === "POST") {
@@ -362,6 +427,12 @@ function dispatch(path, { method = "GET", body, headers } = {}) {
     return { receipt: { id: receipt.id, status: receipt.status }, upload: { url: `mock://receipts/${receipt.id}`, fields: {} } };
   }
   if (detail && verb === "GET") return receiptDetail(receiptById(state, detail[1]));
+  if (detail && verb === "DELETE") {
+    const receipt = receiptById(state, detail[1]);
+    state.transactions = state.transactions.filter((item) => item.receipt_id !== receipt.id);
+    state.receipts = state.receipts.filter((item) => item.id !== receipt.id);
+    return { deleted: true };
+  }
   if (confirm && verb === "POST") {
     validateTransaction(state, body, true);
     const receipt = receiptById(state, confirm[1]);

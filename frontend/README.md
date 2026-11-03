@@ -1,16 +1,11 @@
-# React + Vite
+## Local development
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Run commands from `frontend` after installing dependencies with `npm install`.
 
-Currently, two official plugins are available:
+- `npm run dev` starts the Vite development server using `VITE_API_TARGET` from `.env.local`.
+- `npm run dev:mock` starts the UI with browser-local sample data.
+- `npm run build` creates the production frontend bundle.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+For the React sign-in preview, configure the Cognito domain, SPA client ID, user pool ID, and `VITE_ENABLE_REACT_AUTH_UI=true` in `.env.local`. The branded sign-in screen uses Cognito SRP through AWS Amplify Auth; passwords are sent directly to Cognito, not to the HomeWallet API. The OAuth PKCE Hosted UI remains available as an alternative.
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+The language selector supports Vietnamese and English. The selected language is saved in the browser before sign-in and synchronized to `/api/me` after sign-in. The light and dark themes are remembered in the browser. See `.env.example` for the required frontend settings; it contains placeholders only.

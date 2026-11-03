@@ -1,0 +1,14 @@
+{
+  "name": "HomeWallet",
+  "short_name": "HomeWallet",
+  "description": "Quản lý chi tiêu gia đình",
+  "lang": "vi",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f3f6fa",
+  "theme_color": "#1d5fe0",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

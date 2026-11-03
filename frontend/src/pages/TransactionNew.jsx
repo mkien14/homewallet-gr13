@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { formatVnd, parseVnd } from "../format";
+import { t } from "../preferences";
 import { buildTransactionBody, transactionDateLimit } from "../transactionForm";
 
 function localToday() {
@@ -69,7 +70,7 @@ export default function TransactionNew() {
       if (!Number.isSafeInteger(result?.transaction?.id) || result.transaction.id <= 0 || result.transaction.status !== "CONFIRMED") {
         throw new Error("Máy chủ chưa trả về kết quả lưu giao dịch hợp lệ. Hãy gửi lại cùng nội dung để kiểm tra.");
       }
-      navigate("/dashboard", { replace: true, state: { success: "Đã thêm giao dịch thủ công." } });
+      navigate("/dashboard", { replace: true, state: { success: t("Đã thêm giao dịch thủ công.") } });
     } catch (err) {
       const uncertain = !err.status || err.status >= 500 || err.status === 409;
       if (uncertain) setRetryBody(body);
@@ -82,13 +83,13 @@ export default function TransactionNew() {
 
   if (loadError) return (
     <section className="card">
-      <h1>Nhập giao dịch</h1>
-      <p className="error" role="alert">{loadError}</p>
+      <h1>{t("Nhập giao dịch")}</h1>
+      <p className="error" role="alert">{t(loadError)}</p>
       <button type="button" onClick={() => { setLoadError(""); setReloadVersion((v) => v + 1); }}>Thử lại</button>
     </section>
   );
-  if (!setup) return <p role="status">Đang tải danh mục...</p>;
-  if (!setup.household) return <p>Bạn cần <Link to="/">tạo hoặc tham gia một hộ</Link> trước khi nhập giao dịch.</p>;
+  if (!setup) return <p role="status">{t("Đang tải danh mục...")}</p>;
+  if (!setup.household) return <p>{t("Bạn cần")} <Link to="/">{t("tạo hoặc tham gia một hộ")}</Link> {t("trước khi nhập giao dịch.")}</p>;
 
   const formattedAmount = parseVnd(amount);
   const locked = busy || Boolean(retryBody);
@@ -99,16 +100,16 @@ export default function TransactionNew() {
         <div><p className="eyebrow">Giao dịch</p><h1>Nhập chi tiêu thủ công</h1></div>
         <Link className="button button-secondary" to="/dashboard">Xem tổng quan</Link>
       </div>
-      <form className="card transaction-form" onSubmit={submit}>
+      <div className="workspace-columns"><form className="card transaction-form" onSubmit={submit}>
         <p>Ghi lại khoản chi không có hóa đơn hoặc hóa đơn chưa đọc được.</p>
-        {retryBody && <p className="notice" role="status">Chưa xác nhận được kết quả gửi. Dữ liệu được giữ nguyên; bấm “Gửi lại giao dịch” để kiểm tra và gửi lại cùng mã, tránh tạo trùng.</p>}
+        {retryBody && <p className="notice" role="status">{t("Chưa xác nhận được kết quả gửi. Dữ liệu được giữ nguyên; bấm “Gửi lại giao dịch” để kiểm tra và gửi lại cùng mã, tránh tạo trùng.")}</p>}
         <div className="form-grid">
           <label className="field" htmlFor="transaction-date">Ngày chi tiêu
             <input id="transaction-date" type="date" min="0001-01-01" max={transactionDateLimit()} value={occurredOn} onChange={(e) => setOccurredOn(e.target.value)} required disabled={locked} />
           </label>
           <label className="field" htmlFor="transaction-amount">Số tiền (đồng)
             <input id="transaction-amount" type="text" inputMode="numeric" placeholder="Ví dụ: 150.000" value={amount} onChange={(e) => setAmount(e.target.value)} required disabled={locked} aria-describedby="amount-preview" />
-            <small id="amount-preview">{formattedAmount !== null ? formatVnd(formattedAmount) : "Nhập số nguyên đồng, không có phần thập phân."}</small>
+            <small id="amount-preview">{formattedAmount !== null ? formatVnd(formattedAmount) : t("Nhập số nguyên đồng, không có phần thập phân.")}</small>
           </label>
           <label className="field" htmlFor="transaction-category">Danh mục
             <select id="transaction-category" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} disabled={locked}>
@@ -121,13 +122,13 @@ export default function TransactionNew() {
           <textarea id="transaction-note" rows={3} maxLength={500} placeholder="Ví dụ: Mua thực phẩm cho bữa tối" value={note} onChange={(e) => setNote(e.target.value)} disabled={locked} />
         </label>
         {!setup.categories.length && <p className="notice">Hộ chưa có danh mục. Bạn vẫn có thể lưu giao dịch ở trạng thái Chưa phân loại.</p>}
-        {error && <p className="error" role="alert">{error}</p>}
+        {error && <p className="error" role="alert">{t(error)}</p>}
         <div className="actions">
-          <button type="submit" disabled={busy}>{busy ? "Đang lưu..." : retryBody ? "Gửi lại giao dịch" : "Lưu giao dịch"}</button>
+          <button type="submit" disabled={busy}>{busy ? t("Đang lưu...") : retryBody ? t("Gửi lại giao dịch") : t("Lưu giao dịch")}</button>
           {!retryBody && <Link to="/dashboard" className="text-link">Hủy</Link>}
         </div>
         <p className="muted">Bấm gửi lại sau lỗi mạng vẫn sử dụng cùng một mã giao dịch.</p>
-      </form>
+      </form><aside className="workspace-stack"><section className="card"><h2>Thông tin giao dịch</h2><div className="dashboard-note">Giao dịch được tính vào thống kê sau khi lưu thành công.</div><p>Chọn ngày, số tiền và danh mục để gia đình dễ theo dõi.</p></section><section className="card"><h2>Có hóa đơn?</h2><p>Tải ảnh để đọc thông tin và kiểm tra trước khi xác nhận.</p><Link className="button button-secondary" to="/upload">Tải ảnh hóa đơn</Link></section></aside></div>
     </>
   );
 }
