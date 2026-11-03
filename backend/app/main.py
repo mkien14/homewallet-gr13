@@ -7,6 +7,7 @@ from flask.json.provider import DefaultJSONProvider
 
 from . import (
     budgets,
+    community,
     dashboard,
     households,
     notifications,
@@ -48,6 +49,7 @@ def create_app(test_config=None) -> Flask:
     app.teardown_appcontext(close_db)
     register_error_handlers(app)
     app.register_blueprint(households.bp)
+    app.register_blueprint(community.bp)
     app.register_blueprint(notifications.bp)
     app.register_blueprint(budgets.bp)
     app.register_blueprint(receipts.bp)
