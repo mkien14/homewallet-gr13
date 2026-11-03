@@ -1,5 +1,7 @@
 from copy import deepcopy
 
+import pytest
+
 from app import budgets, users
 from app.budget_suggestions import BudgetSuggestionError
 
@@ -304,3 +306,58 @@ def test_suggestion_rejects_invalid_period_and_savings_above_income(
     assert invalid_savings.status_code == 422
     assert invalid_savings.get_json()["error"]["code"] == "VALIDATION"
     assert db.writes == []
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"income_estimate": -1, "savings_goal": 0},
+        {"income_estimate": 100, "savings_goal": -1},
+        {"income_estimate": 100, "savings_goal": 101},
+    ],
+)
+def test_suggestion_rejects_negative_or_unavailable_income(
+    client, make_token, monkeypatch, payload
+):
+    db = FakeBudgetDB()
+    _install_budget_fakes(monkeypatch, db)
+
+    response = client.post(
+        "/api/budgets/2026-10/suggest",
+        json=payload,
+        headers=_auth(make_token, "owner"),
+    )
+
+    assert response.status_code == 422
+    assert response.get_json()["error"]["code"] == "VALIDATION"
+    assert db.writes == []
+
+
+def test_rule_fallback_with_missing_history_returns_empty_draft(
+    client, make_token, monkeypatch
+):
+    db = FakeBudgetDB()
+    _install_budget_fakes(monkeypatch, db)
+    monkeypatch.setattr(
+        budgets,
+        "suggest_with_gemini",
+        lambda **_kwargs: (_ for _ in ()).throw(
+            BudgetSuggestionError("Gemini is unavailable")
+        ),
+    )
+
+    response = client.post(
+        "/api/budgets/2026-10/suggest",
+        json={"income_estimate": 1_000_000, "savings_goal": 200_000},
+        headers=_auth(make_token, "owner"),
+    )
+
+    assert response.status_code == 200
+    assert response.get_json()["suggestion"] == {
+        "period": "2026-10",
+        "income_estimate": 1_000_000,
+        "savings_goal": 200_000,
+        "source": "RULE",
+        "status": "DRAFT",
+        "allocations": [],
+    }
