@@ -59,6 +59,12 @@ class FakeCursor:
         elif sql.startswith("SELECT id FROM receipts WHERE household_id"):
             digest = params[1]
             self.row = {"id": 99} if digest in self.state.duplicate_hashes else None
+        elif sql.startswith("SELECT id FROM receipts WHERE id = %s FOR UPDATE"):
+            self.row = (
+                {"id": self.state.receipt["id"]}
+                if self.state.receipt["id"] == params[0]
+                else None
+            )
         elif sql.startswith("SELECT id, name FROM categories"):
             self.rows = self.state.categories
         elif sql.startswith("SELECT id, status FROM transactions"):
@@ -71,6 +77,12 @@ class FakeCursor:
                 (row for row in self.state.transactions if row["receipt_id"] == params[0]),
                 None,
             )
+        elif sql.startswith("SELECT status FROM transactions WHERE id = %s"):
+            transaction = next(
+                (row for row in self.state.transactions if row["id"] == params[0]),
+                None,
+            )
+            self.row = {"status": transaction["status"]} if transaction else None
         elif sql.startswith("SELECT status FROM receipts"):
             self.row = {"status": self.state.receipt["status"]}
         elif sql.startswith("SELECT 1 FROM household_members"):
@@ -93,6 +105,7 @@ class FakeCursor:
                 "merchant": params[4],
                 "total_amount": params[5],
                 "category_id": params[6],
+                "note": params[7],
                 "status": "DRAFT",
             })
         elif sql.startswith("UPDATE receipts SET status = %s"):
@@ -291,6 +304,7 @@ def test_valid_gemini_response_creates_draft_and_deletes_message(
         "merchant": "Tiệm ăn",
         "total_amount": 200000,
         "category_id": 2,
+        "note": None,
         "status": "DRAFT",
     }]
     assert state.items == [(1, "Món ăn", 2.0, 100000, 200000, 2)]
