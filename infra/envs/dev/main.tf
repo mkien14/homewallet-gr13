@@ -177,12 +177,14 @@ module "data" {
 module "migrate" {
   source = "../../modules/migrate"
 
-  name               = "homewallet-dev"
-  cluster_name       = module.compute.cluster_name
-  image              = local.image
-  execution_role_arn = module.compute.execution_role_arn
-  db_host            = module.data.address
-  db_secret_arn      = module.data.secret_arn
+  name          = "homewallet-dev"
+  cluster_name  = module.compute.cluster_name
+  image         = local.image
+  db_host       = module.data.address
+  db_secret_arn = module.data.secret_arn
+
+  enable_runtime_bootstrap = true
+  runtime_db_secret_arn    = aws_secretsmanager_secret.db_runtime.arn
 }
 
 module "cognito" {
