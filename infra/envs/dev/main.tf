@@ -182,6 +182,9 @@ module "migrate" {
   image         = local.image
   db_host       = module.data.address
   db_secret_arn = module.data.secret_arn
+
+  enable_runtime_bootstrap = true
+  runtime_db_secret_arn    = aws_secretsmanager_secret.db_runtime.arn
 }
 
 module "cognito" {
