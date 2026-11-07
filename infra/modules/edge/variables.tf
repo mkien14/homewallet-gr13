@@ -22,3 +22,8 @@ variable "origin_verify_header" {
   type      = string
   sensitive = true
 }
+variable "web_acl_arn" {
+  description = "CloudFront WAFv2 Web ACL ARN"
+  type        = string
+  default     = null
+}
