@@ -22,3 +22,8 @@ variable "enable_dev_client" {
   type    = bool
   default = false
 }
+
+variable "auth_email_sender" {
+  description = "Existing SES-verified auth email sender in the user pool region"
+  type        = string
+}
