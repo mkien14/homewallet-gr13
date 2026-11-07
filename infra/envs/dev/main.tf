@@ -212,6 +212,7 @@ module "cognito" {
     "${module.edge.url}/"
   ]
 
+  auth_email_sender   = var.weekly_report_sender
   enable_dev_client   = true
   deletion_protection = "INACTIVE"
 

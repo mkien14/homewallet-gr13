@@ -48,8 +48,26 @@ resource "aws_cognito_user_pool" "this" {
     email_message        = "Mã xác minh HomeWallet của bạn là {####}"
   }
 
+  schema {
+    name                = "preferred_locale"
+    attribute_data_type = "String"
+    mutable             = true
+    required            = false
+
+    string_attribute_constraints {
+      min_length = "2"
+      max_length = "2"
+    }
+  }
+
   email_configuration {
-    email_sending_account = "COGNITO_DEFAULT"
+    email_sending_account = "DEVELOPER"
+    from_email_address    = var.auth_email_sender
+    source_arn            = local.auth_email_identity_arn
+  }
+
+  lambda_config {
+    custom_message = aws_lambda_function.custom_message.arn
   }
 }
 
