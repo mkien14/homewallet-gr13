@@ -19,3 +19,7 @@ output "jobs_task_definition_arn" {
 output "scheduled_job_names" {
   value = { for key, schedule in aws_scheduler_schedule.jobs : key => schedule.name }
 }
+
+output "alb_arn_suffix" {
+  value = aws_lb.this.arn_suffix
+}
