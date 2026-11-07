@@ -26,8 +26,12 @@ resource "aws_ecs_task_definition" "migrate" {
   network_mode             = "awsvpc"
   cpu                      = 256
   memory                   = 512
-  execution_role_arn       = aws_iam_role.execution.arn
-  task_role_arn            = aws_iam_role.task.arn
+  execution_role_arn = (
+    var.enable_separate_execution_role
+    ? aws_iam_role.execution[0].arn
+    : var.legacy_execution_role_arn
+  )
+  task_role_arn = aws_iam_role.task.arn
 
   runtime_platform {
     operating_system_family = "LINUX"

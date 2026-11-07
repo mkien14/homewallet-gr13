@@ -25,7 +25,8 @@ resource "aws_cloudfront_function" "spa" {
   name    = "${var.name}-spa-rewrite"
   runtime = "cloudfront-js-2.0"
   publish = true
-  code    = file("${path.module}/spa-rewrite.js")
+  # Preserve the deployed CRLF format without changing the function logic.
+  code = replace(replace(file("${path.module}/spa-rewrite.js"), "\r\n", "\n"), "\n", "\r\n")
 }
 
 resource "aws_cloudfront_distribution" "this" {
@@ -40,9 +41,6 @@ resource "aws_cloudfront_distribution" "this" {
     domain_name              = var.frontend_bucket_domain
     origin_access_control_id = aws_cloudfront_origin_access_control.frontend.id
 
-    s3_origin_config {
-      origin_access_identity = ""
-    }
   }
 
   origin {
@@ -122,27 +120,23 @@ resource "aws_cloudfront_distribution" "this" {
   }
 }
 
-data "aws_iam_policy_document" "frontend" {
-  statement {
-    sid     = "AllowCloudFrontRead"
-    actions = ["s3:GetObject"]
-
-    resources = ["${var.frontend_bucket_arn}/*"]
-
-    principals {
-      type        = "Service"
-      identifiers = ["cloudfront.amazonaws.com"]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "AWS:SourceArn"
-      values   = [aws_cloudfront_distribution.this.arn]
-    }
-  }
-}
-
 resource "aws_s3_bucket_policy" "frontend" {
   bucket = var.frontend_bucket_id
-  policy = data.aws_iam_policy_document.frontend.json
+
+  # Build the same policy directly so a WAF update does not defer a data read.
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid       = "AllowCloudFrontRead"
+      Effect    = "Allow"
+      Action    = "s3:GetObject"
+      Resource  = "${var.frontend_bucket_arn}/*"
+      Principal = { Service = "cloudfront.amazonaws.com" }
+      Condition = {
+        StringEquals = {
+          "AWS:SourceArn" = aws_cloudfront_distribution.this.arn
+        }
+      }
+    }]
+  })
 }

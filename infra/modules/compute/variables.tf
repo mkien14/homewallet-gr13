@@ -83,3 +83,7 @@ variable "origin_verify_header" {
   type      = string
   sensitive = true
 }
+variable "job_schedules_enabled" {
+  type    = bool
+  default = true
+}

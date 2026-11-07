@@ -156,7 +156,7 @@ resource "aws_scheduler_schedule" "jobs" {
   group_name                   = aws_scheduler_schedule_group.jobs.name
   schedule_expression          = each.value.schedule_expression
   schedule_expression_timezone = "Asia/Ho_Chi_Minh"
-  state                        = "ENABLED"
+  state                        = var.job_schedules_enabled ? "ENABLED" : "DISABLED"
 
   flexible_time_window {
     mode = "OFF"
