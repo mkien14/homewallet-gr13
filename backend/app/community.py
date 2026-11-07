@@ -47,7 +47,7 @@ def _serialize(row):
 def _list_posts(db, *, status=None):
     query = (
         "SELECT p.id, p.type, p.title, p.body, p.status, "
-        "COALESCE(NULLIF(u.display_name, ''), u.email) AS author, p.updated_at "
+        "NULLIF(TRIM(u.display_name), '') AS author, p.updated_at "
         "FROM community_posts p JOIN users u ON u.id = p.author_id"
     )
     params = ()
@@ -103,7 +103,7 @@ def create_post():
     with db.cursor() as cur:
         cur.execute(
             "SELECT p.id, p.type, p.title, p.body, p.status, "
-            "COALESCE(NULLIF(u.display_name, ''), u.email) AS author, p.updated_at "
+            "NULLIF(TRIM(u.display_name), '') AS author, p.updated_at "
             "FROM community_posts p JOIN users u ON u.id = p.author_id WHERE p.id = %s",
             (post_id,),
         )
@@ -165,7 +165,7 @@ def update_admin_post(post_id):
     with db.cursor() as cur:
         cur.execute(
             "SELECT p.id, p.type, p.title, p.body, p.status, "
-            "COALESCE(NULLIF(u.display_name, ''), u.email) AS author, p.updated_at "
+            "NULLIF(TRIM(u.display_name), '') AS author, p.updated_at "
             "FROM community_posts p JOIN users u ON u.id = p.author_id WHERE p.id = %s",
             (post_id,),
         )

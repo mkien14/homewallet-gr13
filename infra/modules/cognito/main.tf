@@ -53,6 +53,14 @@ resource "aws_cognito_user_pool" "this" {
   }
 }
 
+# D2: Chi reviews this resource; Kien applies and enrolls the selected dev user.
+# This group grants application moderation through verified cognito:groups only.
+resource "aws_cognito_user_group" "community_admins" {
+  name         = "${var.name}-admins"
+  user_pool_id = aws_cognito_user_pool.this.id
+  description  = "HomeWallet community moderators"
+}
+
 resource "aws_cognito_user_pool_domain" "this" {
   domain       = local.domain_prefix
   user_pool_id = aws_cognito_user_pool.this.id

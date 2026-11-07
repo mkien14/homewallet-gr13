@@ -1,3 +1,6 @@
+Community/admin (#29, D2): xem [contract community](community-api.md) và
+[ma trận nghiệm thu](test-cases-community.md). Contract đang chờ Kiên/Thức xác nhận.
+
 Trạng thái hóa đơn: UPLOADING, UPLOADED, PROCESSING, DRAFT_READY, NEEDS_REVIEW, CONFIRMED, FAILED
 Mã cảnh báo (warnings): DUPLICATE_FILE, POSSIBLE_DUPLICATE, TOTAL_MISMATCH, DATE_MISSING, NOT_A_RECEIPT
 
