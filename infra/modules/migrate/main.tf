@@ -26,7 +26,7 @@ resource "aws_ecs_task_definition" "migrate" {
   network_mode             = "awsvpc"
   cpu                      = 256
   memory                   = 512
-  execution_role_arn       = var.execution_role_arn
+  execution_role_arn       = aws_iam_role.execution.arn
   task_role_arn            = aws_iam_role.task.arn
 
   runtime_platform {
@@ -57,4 +57,9 @@ resource "aws_ecs_task_definition" "migrate" {
       }
     }
   }])
+
+  depends_on = [
+    aws_iam_role_policy_attachment.execution,
+    aws_iam_role_policy.execution_read_db_secret,
+  ]
 }
