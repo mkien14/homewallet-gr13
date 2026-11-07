@@ -15,3 +15,14 @@ variable "runtime_db_secret_arn" {
   default     = null
   nullable    = true
 }
+
+variable "enable_separate_execution_role" {
+  type    = bool
+  default = false
+}
+
+variable "legacy_execution_role_arn" {
+  type     = string
+  default  = null
+  nullable = true
+}

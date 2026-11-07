@@ -88,6 +88,9 @@ module "compute" {
   image               = local.image
   receipts_bucket_arn = module.storage.bucket_arn
 
+  desired_count         = var.api_desired_count
+  job_schedules_enabled = var.job_schedules_enabled
+
   jobs_image = "${module.ecr.repository_url}:dev"
 
   ses_from_address = var.weekly_report_sender
@@ -179,12 +182,20 @@ module "migrate" {
 
   name          = "homewallet-dev"
   cluster_name  = module.compute.cluster_name
-  image         = local.image
+  image         = "${module.ecr.repository_url}:${var.migrate_image_tag}"
   db_host       = module.data.address
   db_secret_arn = module.data.secret_arn
 
-  enable_runtime_bootstrap = true
-  runtime_db_secret_arn    = aws_secretsmanager_secret.db_runtime.arn
+  enable_separate_execution_role = var.enable_db_runtime_setup
+  legacy_execution_role_arn      = module.compute.execution_role_arn
+
+  enable_runtime_bootstrap = var.enable_db_runtime_setup
+
+  runtime_db_secret_arn = (
+    var.enable_db_runtime_setup
+    ? aws_secretsmanager_secret.db_runtime[0].arn
+    : null
+  )
 }
 
 module "cognito" {

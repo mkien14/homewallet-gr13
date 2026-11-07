@@ -2,7 +2,7 @@ resource "aws_iam_role_policy" "execution_read_runtime_secret" {
   count = var.enable_runtime_bootstrap ? 1 : 0
 
   name = "read-runtime-secret-for-bootstrap"
-  role = aws_iam_role.execution.id
+  role = aws_iam_role.execution[0].id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -30,7 +30,7 @@ resource "aws_ecs_task_definition" "runtime_bootstrap" {
   cpu                      = 256
   memory                   = 512
 
-  execution_role_arn = aws_iam_role.execution.arn
+  execution_role_arn = aws_iam_role.execution[0].arn
   task_role_arn      = aws_iam_role.task.arn
 
   runtime_platform {
