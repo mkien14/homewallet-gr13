@@ -33,6 +33,7 @@ resource "aws_cloudfront_distribution" "this" {
   is_ipv6_enabled     = true
   default_root_object = "index.html"
   comment             = "${var.name} frontend and API"
+  web_acl_id          = var.web_acl_arn
 
   origin {
     origin_id                = "frontend-s3"

@@ -33,6 +33,18 @@ provider "aws" {
   }
 }
 
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
+
+  default_tags {
+    tags = {
+      project = "homewallet"
+      env     = "dev"
+    }
+  }
+}
+
 resource "random_password" "origin_verify" {
   length  = 40
   special = false
@@ -245,4 +257,5 @@ module "edge" {
 
   alb_domain_name      = module.compute.alb_dns_name
   origin_verify_header = random_password.origin_verify.result
+  web_acl_arn          = aws_wafv2_web_acl.frontend.arn
 }
