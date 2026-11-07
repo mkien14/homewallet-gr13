@@ -1,6 +1,7 @@
 output "user_pool_id" { value = aws_cognito_user_pool.this.id }
 output "user_pool_arn" { value = aws_cognito_user_pool.this.arn }
 output "spa_client_id" { value = aws_cognito_user_pool_client.spa.id }
+output "community_admin_group_name" { value = aws_cognito_user_group.community_admins.name }
 
 output "dev_client_id" {
   value = var.enable_dev_client ? aws_cognito_user_pool_client.dev[0].id : null

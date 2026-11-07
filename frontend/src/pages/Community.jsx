@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../api";
-import { getToken } from "../auth/auth";
+import { getAccessToken } from "../auth/auth";
 import { USE_MOCK } from "../mode";
 import { usePreferences } from "../preferences";
 
-function isCognitoAdmin() {
+function isCognitoAdmin(token) {
   try {
-    const token = getToken();
     if (!token) return false;
     const encoded = token.split(".")[1].replace(/-/gu, "+").replace(/_/gu, "/");
     const payload = JSON.parse(atob(`${encoded}${"=".repeat((4 - encoded.length % 4) % 4)}`));
@@ -37,7 +36,7 @@ function PostCard({ post, admin, onAction, busy, t, translateSample }) {
 
 export default function Community() {
   const { t } = usePreferences();
-  const [isAdmin, setIsAdmin] = useState(() => USE_MOCK ? localStorage.getItem("hw.mock.communityAdmin") === "1" : isCognitoAdmin());
+  const [isAdmin, setIsAdmin] = useState(() => USE_MOCK && localStorage.getItem("hw.mock.communityAdmin") === "1");
   const [approved, setApproved] = useState([]);
   const [pending, setPending] = useState([]);
   const [title, setTitle] = useState("");
@@ -48,19 +47,26 @@ export default function Community() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
+  const mockAdmin = USE_MOCK && isAdmin;
   const load = useCallback(async () => {
-    setLoading(true); setError("");
+    setLoading(true); setError(""); setPending([]);
     try {
+      // Refresh the session before deriving visibility; the API remains authoritative.
+      const admin = USE_MOCK ? mockAdmin : isCognitoAdmin(await getAccessToken());
+      setIsAdmin(admin);
       const result = await api("/api/community/posts?status=APPROVED");
       setApproved(Array.isArray(result.items) ? result.items : []);
-      if (isAdmin) {
+      if (admin) {
         const queue = await api("/api/admin/community/posts?status=PENDING");
         const hidden = await api("/api/admin/community/posts?status=HIDDEN");
         setPending([...(queue.items || []), ...(hidden.items || [])]);
       } else setPending([]);
-    } catch (err) { setError(friendlyError(err)); }
+    } catch (err) {
+      if (!USE_MOCK && (err?.status === 401 || err?.status === 403)) setIsAdmin(false);
+      setError(friendlyError(err));
+    }
     finally { setLoading(false); }
-  }, [isAdmin]);
+  }, [mockAdmin]);
   useEffect(() => { queueMicrotask(() => { void load(); }); }, [load]);
 
   async function submit(event) {
