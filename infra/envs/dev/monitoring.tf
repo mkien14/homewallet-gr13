@@ -47,9 +47,10 @@ locals {
     },
     {
       for alarm in flatten([
+        # Keep monitoring-only plans independent of ECS task definitions.
         for service, service_name in {
-          api    = module.compute.service_name
-          worker = module.compute.worker_service_name
+          api    = "api"
+          worker = "worker"
           } : [
           for label, metric in { cpu = "CPUUtilization", memory = "MemoryUtilization" } : {
             key                      = "${service}_${label}"
