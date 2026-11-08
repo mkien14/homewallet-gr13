@@ -1,6 +1,6 @@
 {
   "include": ["backend", "ocr-lab"],
   "extraPaths": ["backend"],
-  "venvPath": "backend",
-  "venv": ".venv"
+  "venvPath": ".",
+  "venv": "venv"
 }
