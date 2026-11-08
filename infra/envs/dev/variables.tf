@@ -39,3 +39,14 @@ variable "enable_db_runtime_setup" {
   type        = bool
   default     = false
 }
+
+variable "use_db_runtime_credentials" {
+  description = "Use the hw_runtime secret for API, worker, and scheduled jobs after bootstrap succeeds"
+  type        = bool
+  default     = false
+
+  validation {
+    condition     = !var.use_db_runtime_credentials || var.enable_db_runtime_setup
+    error_message = "use_db_runtime_credentials requires enable_db_runtime_setup=true so the runtime secret and separate migration role exist."
+  }
+}
