@@ -50,7 +50,7 @@ def wait_time(err, attempt):
     return 10 * attempt
 
 
-def call_model(img_bytes):
+def call_model(img_bytes: bytes) -> tuple[types.GenerateContentResponse, float]:
     for attempt in range(1, MAX_TRIES + 1):
         t0 = time.time()
         try:
@@ -72,14 +72,16 @@ def call_model(img_bytes):
                 time.sleep(w)
                 continue
             raise
+    raise RuntimeError("Gemini request retry loop ended without a response")
 
 
 def run(path):
     p = pathlib.Path(path)
     resp, elapsed = call_model(p.read_bytes())
-    (OUT / f"{p.stem}.raw.txt").write_text(resp.text or "", encoding="utf-8")
+    response_text = resp.text or ""
+    (OUT / f"{p.stem}.raw.txt").write_text(response_text, encoding="utf-8")
     try:
-        d = json.loads(resp.text)
+        d = json.loads(response_text)
     except Exception:
         d = {}
     pred = {
