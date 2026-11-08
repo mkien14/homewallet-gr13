@@ -73,6 +73,17 @@ module "cache" {
 
 locals {
   image = "${module.ecr.repository_url}:${var.api_image_tag}"
+
+  runtime_db_secret_arn = (
+    var.enable_db_runtime_setup
+    ? aws_secretsmanager_secret.db_runtime[0].arn
+    : null
+  )
+  service_db_secret_arn = (
+    var.use_db_runtime_credentials
+    ? local.runtime_db_secret_arn
+    : module.data.secret_arn
+  )
 }
 
 module "compute" {
@@ -97,11 +108,13 @@ module "compute" {
 
   origin_verify_header = random_password.origin_verify.result
 
-  secret_arns = [
-    module.data.secret_arn,
-    aws_secretsmanager_secret.gemini.arn,
-    module.cache.auth_token_secret_arn
-  ]
+  # Keep admin DB-secret access during phase 1; remove it from the shared
+  # service execution role only after hw_runtime has been bootstrapped.
+  secret_arns = concat(
+    var.use_db_runtime_credentials ? [] : [module.data.secret_arn],
+    [aws_secretsmanager_secret.gemini.arn, module.cache.auth_token_secret_arn],
+    var.use_db_runtime_credentials ? [local.runtime_db_secret_arn] : []
+  )
 
   worker_image     = "${module.ecr.repository_url}:${var.worker_image_tag}"
   worker_queue_arn = module.queue.queue_arn
@@ -121,8 +134,8 @@ module "compute" {
   }
 
   worker_secrets = {
-    DB_USER        = "${module.data.secret_arn}:username::"
-    DB_PASSWORD    = "${module.data.secret_arn}:password::"
+    DB_USER        = "${local.service_db_secret_arn}:username::"
+    DB_PASSWORD    = "${local.service_db_secret_arn}:password::"
     GEMINI_API_KEY = aws_secretsmanager_secret.gemini.arn
   }
 
@@ -137,8 +150,8 @@ module "compute" {
   }
 
   jobs_secrets = {
-    DB_USER     = "${module.data.secret_arn}:username::"
-    DB_PASSWORD = "${module.data.secret_arn}:password::"
+    DB_USER     = "${local.service_db_secret_arn}:username::"
+    DB_PASSWORD = "${local.service_db_secret_arn}:password::"
   }
 
   api_environment = {
@@ -159,8 +172,8 @@ module "compute" {
   }
 
   api_secrets = {
-    DB_USER          = "${module.data.secret_arn}:username::"
-    DB_PASSWORD      = "${module.data.secret_arn}:password::"
+    DB_USER          = "${local.service_db_secret_arn}:username::"
+    DB_PASSWORD      = "${local.service_db_secret_arn}:password::"
     GEMINI_API_KEY   = aws_secretsmanager_secret.gemini.arn
     REDIS_AUTH_TOKEN = module.cache.auth_token_secret_arn
   }
@@ -191,11 +204,7 @@ module "migrate" {
 
   enable_runtime_bootstrap = var.enable_db_runtime_setup
 
-  runtime_db_secret_arn = (
-    var.enable_db_runtime_setup
-    ? aws_secretsmanager_secret.db_runtime[0].arn
-    : null
-  )
+  runtime_db_secret_arn = local.runtime_db_secret_arn
 }
 
 module "cognito" {
