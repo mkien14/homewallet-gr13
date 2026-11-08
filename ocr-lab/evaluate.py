@@ -8,6 +8,9 @@ import unicodedata
 from rapidfuzz import fuzz
 
 os.chdir(pathlib.Path(__file__).resolve().parent)
+# Windows PowerShell's legacy console encoding cannot print the Vietnamese report.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="backslashreplace")
 
 
 def strip_accents(s):
@@ -54,11 +57,11 @@ def evaluate(method, split, verbose=False):
         expected_date = r["date"].strip()
         # A blank/None label means no verified date ground truth; exclude it
         # from date accuracy instead of counting a null prediction as wrong.
-        has_date_label = expected_date.lower() not in ("", "none", "null")
-        ok_d = has_date_label and p.get("date") == expected_date
+        date_known = expected_date.lower() not in ("", "none", "null")
+        ok_d = date_known and p.get("date") == expected_date
         ok_m = merchant_ok(m, label_m)
         tot += ok_t
-        if has_date_label:
+        if date_known:
             date_labeled += 1
             dat += ok_d
         mer += ok_m
@@ -69,16 +72,17 @@ def evaluate(method, split, verbose=False):
         if verbose:
             print(f"  [{method}] {r['file']}")
             print(f"     tổng    : nhãn={exp_total!r}  dự đoán={p.get('total')!r}  {'ĐÚNG' if ok_t else 'sai'}")
-            if has_date_label:
-                print(f"     date    : label={expected_date!r}  prediction={p.get('date')!r}  {'OK' if ok_d else 'wrong'}")
+            if date_known:
+                date_status = "ĐÚNG" if ok_d else "sai"
             else:
-                print(f"     date    : no verified ground truth; excluded from date accuracy (prediction={p.get('date')!r})")
+                date_status = "N/A (không tính; nhãn ngày không xác định)"
+            print(f"     ngày    : nhãn={expected_date!r}  dự đoán={p.get('date')!r}  {date_status}")
             print(f"     cửa hàng: nhãn={label_m!r}  dự đoán={m!r}  {'ĐÚNG' if ok_m else 'sai'}")
     pct = lambda x, d: f"{100 * x / d:5.1f}%" if d else "  n/a"
     if secs:
         print(f"{method:10s} [{split}] n={n} (thiếu {missing})  tổng={pct(tot, n)}  ngày={pct(dat, date_labeled)} (n={date_labeled})  "
               f"cửa hàng={pct(mer, n)}  đúng dấu={pct(acc, n_acc)} (trên {n_acc} ảnh có dấu)  "
-              f"TB={sum(secs) / len(secs):.1f}s")
+              f"TB={sum(secs) / len(secs):.1f}s" )
     else:
         print(f"{method}: chưa có kết quả")
 

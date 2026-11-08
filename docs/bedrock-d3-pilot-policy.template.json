@@ -1,0 +1,40 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ReadSelectedInferenceProfile",
+      "Effect": "Allow",
+      "Action": "bedrock:GetInferenceProfile",
+      "Resource": "arn:aws:bedrock:ap-southeast-1:179923444714:inference-profile/apac.amazon.nova-lite-v1:0"
+    },
+    {
+      "Sid": "InvokeSelectedInferenceProfile",
+      "Effect": "Allow",
+      "Action": "bedrock:InvokeModel",
+      "Resource": "arn:aws:bedrock:ap-southeast-1:179923444714:inference-profile/apac.amazon.nova-lite-v1:0",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "ap-southeast-1"
+        }
+      }
+    },
+    {
+      "Sid": "InvokeOnlyThroughSelectedAPACProfile",
+      "Effect": "Allow",
+      "Action": "bedrock:InvokeModel",
+      "Resource": [
+        "arn:aws:bedrock:ap-northeast-1::foundation-model/amazon.nova-lite-v1:0",
+        "arn:aws:bedrock:ap-northeast-2::foundation-model/amazon.nova-lite-v1:0",
+        "arn:aws:bedrock:ap-northeast-3::foundation-model/amazon.nova-lite-v1:0",
+        "arn:aws:bedrock:ap-south-1::foundation-model/amazon.nova-lite-v1:0",
+        "arn:aws:bedrock:ap-southeast-1::foundation-model/amazon.nova-lite-v1:0",
+        "arn:aws:bedrock:ap-southeast-2::foundation-model/amazon.nova-lite-v1:0"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "bedrock:InferenceProfileArn": "arn:aws:bedrock:ap-southeast-1:179923444714:inference-profile/apac.amazon.nova-lite-v1:0"
+        }
+      }
+    }
+  ]
+}
