@@ -1,0 +1,775 @@
+{
+    "started_utc":  "2026-11-08T17:46:44+00:00",
+    "account":  "179923444714",
+    "region":  "ap-southeast-1",
+    "caller_arn":  "arn:aws:iam::179923444714:user/kien",
+    "endpoint":  "https://daoedidcrnf1f.cloudfront.net",
+    "fixture":  {
+                    "user_1":  "[deleted isolated test user 1]",
+                    "user_2":  "[deleted isolated test user 2]",
+                    "household_1_id":  14,
+                    "household_2_id":  15,
+                    "receipt_id":  29
+                },
+    "ac3":  [
+                {
+                    "case":  "no_token_me",
+                    "expected":  401,
+                    "actual":  401,
+                    "pass":  true,
+                    "request_id":  "39efc03f-02c3-4b1f-aad6-5910fb24fda7"
+                },
+                {
+                    "case":  "cross_household_members",
+                    "expected":  404,
+                    "actual":  404,
+                    "pass":  true,
+                    "request_id":  "0a1e1b42-8874-4249-9f40-d3a7b9fc7208"
+                },
+                {
+                    "case":  "cross_household_receipt",
+                    "expected":  404,
+                    "actual":  404,
+                    "pass":  true,
+                    "request_id":  "29169bb3-99d2-490f-b3f0-bce526728c4b"
+                },
+                {
+                    "case":  "same_household_members",
+                    "expected":  200,
+                    "actual":  200,
+                    "pass":  true,
+                    "request_id":  "b2eed535-ef08-41b4-bb42-5b6297ab385f"
+                }
+            ],
+    "cleanup":  [
+                    {
+                        "object":  "receipt",
+                        "id":  29,
+                        "status":  200,
+                        "request_id":  "6b85def8-d5cd-4083-8403-ff7153865e38"
+                    },
+                    {
+                        "object":  "household",
+                        "id":  14,
+                        "status":  200,
+                        "request_id":  "3bd541a7-59ee-4879-a19b-6cce866dd55b"
+                    },
+                    {
+                        "object":  "household",
+                        "id":  15,
+                        "status":  200,
+                        "request_id":  "91b00c17-1a36-48ef-a4a4-6dc930e2301a"
+                    },
+                    {
+                        "object":  "cognito_user",
+                        "index":  1,
+                        "deleted":  true
+                    },
+                    {
+                        "object":  "cognito_user",
+                        "index":  2,
+                        "deleted":  true
+                    }
+                ],
+    "ping":  {
+                 "status":  200,
+                 "request_id":  "dbc52365-93e3-4760-9565-de2aa22776cb"
+             },
+    "dashboard_preflight":  {
+                                "status":  200,
+                                "request_id":  "4c270d12-bd3f-47d9-aa8d-f87009e7723f"
+                            },
+    "load":  {
+                 "start_utc":  "2026-11-08T17:46:49+00:00",
+                 "end_utc":  "2026-11-08T17:48:51+00:00",
+                 "duration_seconds":  122.24,
+                 "max_clients":  5,
+                 "request_interval_seconds_per_client":  2,
+                 "requests":  279,
+                 "statuses":  {
+                                  "200":  279
+                              },
+                 "network_errors":  [
+
+                                    ],
+                 "latency_ms":  {
+                                    "sample_count":  279,
+                                    "p50":  133.62,
+                                    "p95":  339.11,
+                                    "min":  107.34,
+                                    "max":  1316.77,
+                                    "mean":  163.31
+                                },
+                 "queue_snapshots":  [
+                                         {
+                                             "time_utc":  "2026-11-08T17:46:49+00:00",
+                                             "receipts-queue":  {
+                                                                    "visible":  0,
+                                                                    "inflight":  0
+                                                                },
+                                             "receipts-dlq":  {
+                                                                  "visible":  1,
+                                                                  "inflight":  0
+                                                              }
+                                         },
+                                         {
+                                             "time_utc":  "2026-11-08T17:47:04+00:00",
+                                             "receipts-queue":  {
+                                                                    "visible":  0,
+                                                                    "inflight":  0
+                                                                },
+                                             "receipts-dlq":  {
+                                                                  "visible":  1,
+                                                                  "inflight":  0
+                                                              }
+                                         },
+                                         {
+                                             "time_utc":  "2026-11-08T17:47:19+00:00",
+                                             "receipts-queue":  {
+                                                                    "visible":  0,
+                                                                    "inflight":  0
+                                                                },
+                                             "receipts-dlq":  {
+                                                                  "visible":  1,
+                                                                  "inflight":  0
+                                                              }
+                                         },
+                                         {
+                                             "time_utc":  "2026-11-08T17:47:34+00:00",
+                                             "receipts-queue":  {
+                                                                    "visible":  0,
+                                                                    "inflight":  0
+                                                                },
+                                             "receipts-dlq":  {
+                                                                  "visible":  1,
+                                                                  "inflight":  0
+                                                              }
+                                         },
+                                         {
+                                             "time_utc":  "2026-11-08T17:47:50+00:00",
+                                             "receipts-queue":  {
+                                                                    "visible":  0,
+                                                                    "inflight":  0
+                                                                },
+                                             "receipts-dlq":  {
+                                                                  "visible":  1,
+                                                                  "inflight":  0
+                                                              }
+                                         },
+                                         {
+                                             "time_utc":  "2026-11-08T17:48:05+00:00",
+                                             "receipts-queue":  {
+                                                                    "visible":  0,
+                                                                    "inflight":  0
+                                                                },
+                                             "receipts-dlq":  {
+                                                                  "visible":  1,
+                                                                  "inflight":  0
+                                                              }
+                                         },
+                                         {
+                                             "time_utc":  "2026-11-08T17:48:20+00:00",
+                                             "receipts-queue":  {
+                                                                    "visible":  0,
+                                                                    "inflight":  0
+                                                                },
+                                             "receipts-dlq":  {
+                                                                  "visible":  1,
+                                                                  "inflight":  0
+                                                              }
+                                         },
+                                         {
+                                             "time_utc":  "2026-11-08T17:48:35+00:00",
+                                             "receipts-queue":  {
+                                                                    "visible":  0,
+                                                                    "inflight":  0
+                                                                },
+                                             "receipts-dlq":  {
+                                                                  "visible":  1,
+                                                                  "inflight":  0
+                                                              }
+                                         },
+                                         {
+                                             "time_utc":  "2026-11-08T17:48:51+00:00",
+                                             "receipts-queue":  {
+                                                                    "visible":  0,
+                                                                    "inflight":  0
+                                                                },
+                                             "receipts-dlq":  {
+                                                                  "visible":  1,
+                                                                  "inflight":  0
+                                                              }
+                                         }
+                                     ],
+                 "stopped_early":  false
+             },
+    "finished_utc":  "2026-11-08T17:48:53+00:00",
+    "cloudwatch":  {
+                       "collected_utc":  "2026-11-08T17:52:24+00:00",
+                       "requested_start_utc":  "2026-11-08T17:41:49+00:00",
+                       "requested_end_utc":  "2026-11-08T17:52:24+00:00",
+                       "period_seconds":  60,
+                       "metrics":  {
+                                       "api_cpu_average":  [
+                                                               {
+                                                                   "time_utc":  "2026-11-09T00:41:00+07:00",
+                                                                   "value":  0.0593
+                                                               },
+                                                               {
+                                                                   "time_utc":  "2026-11-09T00:42:00+07:00",
+                                                                   "value":  0.0608
+                                                               },
+                                                               {
+                                                                   "time_utc":  "2026-11-09T00:43:00+07:00",
+                                                                   "value":  0.0581
+                                                               },
+                                                               {
+                                                                   "time_utc":  "2026-11-09T00:44:00+07:00",
+                                                                   "value":  0.06
+                                                               },
+                                                               {
+                                                                   "time_utc":  "2026-11-09T00:45:00+07:00",
+                                                                   "value":  0.0564
+                                                               },
+                                                               {
+                                                                   "time_utc":  "2026-11-09T00:46:00+07:00",
+                                                                   "value":  0.0558
+                                                               },
+                                                               {
+                                                                   "time_utc":  "2026-11-09T00:47:00+07:00",
+                                                                   "value":  9.2943
+                                                               },
+                                                               {
+                                                                   "time_utc":  "2026-11-09T00:48:00+07:00",
+                                                                   "value":  7.5004
+                                                               },
+                                                               {
+                                                                   "time_utc":  "2026-11-09T00:49:00+07:00",
+                                                                   "value":  1.0172
+                                                               },
+                                                               {
+                                                                   "time_utc":  "2026-11-09T00:50:00+07:00",
+                                                                   "value":  0.0587
+                                                               }
+                                                           ],
+                                       "api_cpu_maximum":  [
+                                                               {
+                                                                   "time_utc":  "2026-11-09T00:41:00+07:00",
+                                                                   "value":  0.0787
+                                                               },
+                                                               {
+                                                                   "time_utc":  "2026-11-09T00:42:00+07:00",
+                                                                   "value":  0.0794
+                                                               },
+                                                               {
+                                                                   "time_utc":  "2026-11-09T00:43:00+07:00",
+                                                                   "value":  0.0758
+                                                               },
+                                                               {
+                                                                   "time_utc":  "2026-11-09T00:44:00+07:00",
+                                                                   "value":  0.0796
+                                                               },
+                                                               {
+                                                                   "time_utc":  "2026-11-09T00:45:00+07:00",
+                                                                   "value":  0.0752
+                                                               },
+                                                               {
+                                                                   "time_utc":  "2026-11-09T00:46:00+07:00",
+                                                                   "value":  0.0733
+                                                               },
+                                                               {
+                                                                   "time_utc":  "2026-11-09T00:47:00+07:00",
+                                                                   "value":  11.6036
+                                                               },
+                                                               {
+                                                                   "time_utc":  "2026-11-09T00:48:00+07:00",
+                                                                   "value":  7.5946
+                                                               },
+                                                               {
+                                                                   "time_utc":  "2026-11-09T00:49:00+07:00",
+                                                                   "value":  2.9026
+                                                               },
+                                                               {
+                                                                   "time_utc":  "2026-11-09T00:50:00+07:00",
+                                                                   "value":  0.0775
+                                                               }
+                                                           ],
+                                       "api_memory_average":  [
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:41:00+07:00",
+                                                                      "value":  18.1641
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:42:00+07:00",
+                                                                      "value":  18.1641
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:43:00+07:00",
+                                                                      "value":  18.1641
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:44:00+07:00",
+                                                                      "value":  18.1641
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:45:00+07:00",
+                                                                      "value":  18.1641
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:46:00+07:00",
+                                                                      "value":  18.1641
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:47:00+07:00",
+                                                                      "value":  18.2617
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:48:00+07:00",
+                                                                      "value":  18.2617
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:49:00+07:00",
+                                                                      "value":  18.3431
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:50:00+07:00",
+                                                                      "value":  18.3594
+                                                                  }
+                                                              ],
+                                       "api_memory_maximum":  [
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:41:00+07:00",
+                                                                      "value":  18.1641
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:42:00+07:00",
+                                                                      "value":  18.1641
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:43:00+07:00",
+                                                                      "value":  18.1641
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:44:00+07:00",
+                                                                      "value":  18.1641
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:45:00+07:00",
+                                                                      "value":  18.1641
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:46:00+07:00",
+                                                                      "value":  18.1641
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:47:00+07:00",
+                                                                      "value":  18.2617
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:48:00+07:00",
+                                                                      "value":  18.2617
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:49:00+07:00",
+                                                                      "value":  18.3594
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:50:00+07:00",
+                                                                      "value":  18.3594
+                                                                  }
+                                                              ],
+                                       "worker_cpu_average":  [
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:41:00+07:00",
+                                                                      "value":  0.0
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:42:00+07:00",
+                                                                      "value":  0.0
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:43:00+07:00",
+                                                                      "value":  0.0
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:44:00+07:00",
+                                                                      "value":  0.0
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:45:00+07:00",
+                                                                      "value":  0.0
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:46:00+07:00",
+                                                                      "value":  0.0
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:47:00+07:00",
+                                                                      "value":  0.0
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:48:00+07:00",
+                                                                      "value":  0.0
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:49:00+07:00",
+                                                                      "value":  0.0
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:50:00+07:00",
+                                                                      "value":  0.0
+                                                                  }
+                                                              ],
+                                       "worker_cpu_maximum":  [
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:41:00+07:00",
+                                                                      "value":  0.0
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:42:00+07:00",
+                                                                      "value":  0.0
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:43:00+07:00",
+                                                                      "value":  0.0
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:44:00+07:00",
+                                                                      "value":  0.0
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:45:00+07:00",
+                                                                      "value":  0.0
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:46:00+07:00",
+                                                                      "value":  0.0
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:47:00+07:00",
+                                                                      "value":  0.0
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:48:00+07:00",
+                                                                      "value":  0.0
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:49:00+07:00",
+                                                                      "value":  0.0
+                                                                  },
+                                                                  {
+                                                                      "time_utc":  "2026-11-09T00:50:00+07:00",
+                                                                      "value":  0.0
+                                                                  }
+                                                              ],
+                                       "worker_memory_average":  [
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:41:00+07:00",
+                                                                         "value":  7.7148
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:42:00+07:00",
+                                                                         "value":  7.7148
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:43:00+07:00",
+                                                                         "value":  7.7148
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:44:00+07:00",
+                                                                         "value":  7.7148
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:45:00+07:00",
+                                                                         "value":  7.7148
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:46:00+07:00",
+                                                                         "value":  7.7148
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:47:00+07:00",
+                                                                         "value":  7.7148
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:48:00+07:00",
+                                                                         "value":  7.7148
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:49:00+07:00",
+                                                                         "value":  7.7148
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:50:00+07:00",
+                                                                         "value":  7.7148
+                                                                     }
+                                                                 ],
+                                       "worker_memory_maximum":  [
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:41:00+07:00",
+                                                                         "value":  7.7148
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:42:00+07:00",
+                                                                         "value":  7.7148
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:43:00+07:00",
+                                                                         "value":  7.7148
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:44:00+07:00",
+                                                                         "value":  7.7148
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:45:00+07:00",
+                                                                         "value":  7.7148
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:46:00+07:00",
+                                                                         "value":  7.7148
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:47:00+07:00",
+                                                                         "value":  7.7148
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:48:00+07:00",
+                                                                         "value":  7.7148
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:49:00+07:00",
+                                                                         "value":  7.7148
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:50:00+07:00",
+                                                                         "value":  7.7148
+                                                                     }
+                                                                 ],
+                                       "alb_generated_5xx":  [
+
+                                                             ],
+                                       "target_generated_5xx":  [
+
+                                                                ],
+                                       "alb_request_count":  [
+                                                                 {
+                                                                     "time_utc":  "2026-11-09T00:41:00+07:00",
+                                                                     "value":  1.0
+                                                                 },
+                                                                 {
+                                                                     "time_utc":  "2026-11-09T00:42:00+07:00",
+                                                                     "value":  0.0
+                                                                 },
+                                                                 {
+                                                                     "time_utc":  "2026-11-09T00:43:00+07:00",
+                                                                     "value":  0.0
+                                                                 },
+                                                                 {
+                                                                     "time_utc":  "2026-11-09T00:44:00+07:00",
+                                                                     "value":  0.0
+                                                                 },
+                                                                 {
+                                                                     "time_utc":  "2026-11-09T00:45:00+07:00",
+                                                                     "value":  0.0
+                                                                 },
+                                                                 {
+                                                                     "time_utc":  "2026-11-09T00:46:00+07:00",
+                                                                     "value":  36.0
+                                                                 },
+                                                                 {
+                                                                     "time_utc":  "2026-11-09T00:47:00+07:00",
+                                                                     "value":  140.0
+                                                                 },
+                                                                 {
+                                                                     "time_utc":  "2026-11-09T00:48:00+07:00",
+                                                                     "value":  117.0
+                                                                 },
+                                                                 {
+                                                                     "time_utc":  "2026-11-09T00:49:00+07:00",
+                                                                     "value":  0.0
+                                                                 },
+                                                                 {
+                                                                     "time_utc":  "2026-11-09T00:50:00+07:00",
+                                                                     "value":  0.0
+                                                                 }
+                                                             ],
+                                       "receipts_queue_visible":  [
+                                                                      {
+                                                                          "time_utc":  "2026-11-09T00:41:00+07:00",
+                                                                          "value":  0.0
+                                                                      },
+                                                                      {
+                                                                          "time_utc":  "2026-11-09T00:42:00+07:00",
+                                                                          "value":  0.0
+                                                                      },
+                                                                      {
+                                                                          "time_utc":  "2026-11-09T00:43:00+07:00",
+                                                                          "value":  0.0
+                                                                      },
+                                                                      {
+                                                                          "time_utc":  "2026-11-09T00:44:00+07:00",
+                                                                          "value":  0.0
+                                                                      },
+                                                                      {
+                                                                          "time_utc":  "2026-11-09T00:45:00+07:00",
+                                                                          "value":  0.0
+                                                                      },
+                                                                      {
+                                                                          "time_utc":  "2026-11-09T00:46:00+07:00",
+                                                                          "value":  0.0
+                                                                      },
+                                                                      {
+                                                                          "time_utc":  "2026-11-09T00:47:00+07:00",
+                                                                          "value":  0.0
+                                                                      },
+                                                                      {
+                                                                          "time_utc":  "2026-11-09T00:48:00+07:00",
+                                                                          "value":  0.0
+                                                                      },
+                                                                      {
+                                                                          "time_utc":  "2026-11-09T00:49:00+07:00",
+                                                                          "value":  0.0
+                                                                      },
+                                                                      {
+                                                                          "time_utc":  "2026-11-09T00:50:00+07:00",
+                                                                          "value":  0.0
+                                                                      },
+                                                                      {
+                                                                          "time_utc":  "2026-11-09T00:51:00+07:00",
+                                                                          "value":  0.0
+                                                                      }
+                                                                  ],
+                                       "receipts_queue_inflight":  [
+                                                                       {
+                                                                           "time_utc":  "2026-11-09T00:41:00+07:00",
+                                                                           "value":  0.0
+                                                                       },
+                                                                       {
+                                                                           "time_utc":  "2026-11-09T00:42:00+07:00",
+                                                                           "value":  0.0
+                                                                       },
+                                                                       {
+                                                                           "time_utc":  "2026-11-09T00:43:00+07:00",
+                                                                           "value":  0.0
+                                                                       },
+                                                                       {
+                                                                           "time_utc":  "2026-11-09T00:44:00+07:00",
+                                                                           "value":  0.0
+                                                                       },
+                                                                       {
+                                                                           "time_utc":  "2026-11-09T00:45:00+07:00",
+                                                                           "value":  0.0
+                                                                       },
+                                                                       {
+                                                                           "time_utc":  "2026-11-09T00:46:00+07:00",
+                                                                           "value":  0.0
+                                                                       },
+                                                                       {
+                                                                           "time_utc":  "2026-11-09T00:47:00+07:00",
+                                                                           "value":  0.0
+                                                                       },
+                                                                       {
+                                                                           "time_utc":  "2026-11-09T00:48:00+07:00",
+                                                                           "value":  0.0
+                                                                       },
+                                                                       {
+                                                                           "time_utc":  "2026-11-09T00:49:00+07:00",
+                                                                           "value":  0.0
+                                                                       },
+                                                                       {
+                                                                           "time_utc":  "2026-11-09T00:50:00+07:00",
+                                                                           "value":  0.0
+                                                                       },
+                                                                       {
+                                                                           "time_utc":  "2026-11-09T00:51:00+07:00",
+                                                                           "value":  0.0
+                                                                       }
+                                                                   ],
+                                       "receipts_dlq_visible":  [
+                                                                    {
+                                                                        "time_utc":  "2026-11-09T00:41:00+07:00",
+                                                                        "value":  1.0
+                                                                    },
+                                                                    {
+                                                                        "time_utc":  "2026-11-09T00:42:00+07:00",
+                                                                        "value":  1.0
+                                                                    },
+                                                                    {
+                                                                        "time_utc":  "2026-11-09T00:43:00+07:00",
+                                                                        "value":  1.0
+                                                                    },
+                                                                    {
+                                                                        "time_utc":  "2026-11-09T00:44:00+07:00",
+                                                                        "value":  1.0
+                                                                    },
+                                                                    {
+                                                                        "time_utc":  "2026-11-09T00:45:00+07:00",
+                                                                        "value":  1.0
+                                                                    },
+                                                                    {
+                                                                        "time_utc":  "2026-11-09T00:46:00+07:00",
+                                                                        "value":  1.0
+                                                                    },
+                                                                    {
+                                                                        "time_utc":  "2026-11-09T00:47:00+07:00",
+                                                                        "value":  1.0
+                                                                    },
+                                                                    {
+                                                                        "time_utc":  "2026-11-09T00:48:00+07:00",
+                                                                        "value":  1.0
+                                                                    },
+                                                                    {
+                                                                        "time_utc":  "2026-11-09T00:49:00+07:00",
+                                                                        "value":  1.0
+                                                                    },
+                                                                    {
+                                                                        "time_utc":  "2026-11-09T00:50:00+07:00",
+                                                                        "value":  1.0
+                                                                    }
+                                                                ],
+                                       "receipts_dlq_inflight":  [
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:41:00+07:00",
+                                                                         "value":  0.0
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:42:00+07:00",
+                                                                         "value":  0.0
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:43:00+07:00",
+                                                                         "value":  0.0
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:44:00+07:00",
+                                                                         "value":  0.0
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:45:00+07:00",
+                                                                         "value":  0.0
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:46:00+07:00",
+                                                                         "value":  0.0
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:47:00+07:00",
+                                                                         "value":  0.0
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:48:00+07:00",
+                                                                         "value":  0.0
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:49:00+07:00",
+                                                                         "value":  0.0
+                                                                     },
+                                                                     {
+                                                                         "time_utc":  "2026-11-09T00:50:00+07:00",
+                                                                         "value":  0.0
+                                                                     }
+                                                                 ]
+                                   }
+                   }
+}
