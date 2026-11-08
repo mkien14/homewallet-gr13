@@ -1,0 +1,33 @@
+{
+  "image_sharing": {
+    "confirmed": true,
+    "confirmed_date": "2026-11-07",
+    "sample_ids": [
+      "021",
+      "022",
+      "023",
+      "024",
+      "025",
+      "026",
+      "027",
+      "028",
+      "029",
+      "030"
+    ],
+    "source": "Roboflow",
+    "services": [
+      "Google Gemini",
+      "Amazon Bedrock"
+    ],
+    "data_restriction_check": "Group confirmation says no disallowed personal or financial data."
+  },
+  "gemini_quota": {
+    "verified_in_ai_studio": true,
+    "project_alias": "HWAPI",
+    "api_key_project_matches": true,
+    "model": "gemini-3.6-flash",
+    "rpm": 5,
+    "remaining_requests_today": 20,
+    "checked_utc": "2026-11-08T04:47:02Z"
+  }
+}
