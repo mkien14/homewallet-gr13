@@ -12,8 +12,10 @@ the restricted MySQL account is created:
    `hw_runtime` username/password fields. Their shared execution role loses
    access to the admin database secret. The migration execution role keeps it.
 
-Both variables default to `false`. Terraform validation rejects using runtime
-credentials before runtime setup is enabled.
+After phase 2 was accepted on dev, both variables default to `true` so later
+Terraform plans preserve the deployed runtime secret and credentials. Override
+them explicitly for the staged rollout in a new environment. Terraform
+validation rejects using runtime credentials before runtime setup is enabled.
 
 ## Phase 1: prepare and bootstrap
 

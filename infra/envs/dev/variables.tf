@@ -37,13 +37,13 @@ variable "migrate_image_tag" {
 variable "enable_db_runtime_setup" {
   description = "Deploy the separately reviewed DB runtime setup"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "use_db_runtime_credentials" {
   description = "Use the hw_runtime secret for API, worker, and scheduled jobs after bootstrap succeeds"
   type        = bool
-  default     = false
+  default     = true
 
   validation {
     condition     = !var.use_db_runtime_credentials || var.enable_db_runtime_setup
