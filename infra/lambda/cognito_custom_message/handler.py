@@ -2,11 +2,11 @@
 
 SUBJECTS = {
     "CustomMessage_SignUp": ("Xác minh tài khoản", "Verify your account"),
-    "CustomMessage_ResendCode": ("Gửi lại mã xác minh", "New verification code"),
+    "CustomMessage_ResendCode": ("Mã xác minh mới", "New verification code"),
     "CustomMessage_ForgotPassword": ("Đặt lại mật khẩu", "Reset your password"),
     "CustomMessage_Authentication": ("Mã xác thực", "Authentication code"),
-    "CustomMessage_UpdateUserAttribute": ("Xác minh thông tin", "Verify your details"),
-    "CustomMessage_VerifyUserAttribute": ("Xác minh thông tin", "Verify your details"),
+    "CustomMessage_UpdateUserAttribute": ("Xác minh thông tin tài khoản", "Verify your account information"),
+    "CustomMessage_VerifyUserAttribute": ("Xác minh thông tin tài khoản", "Verify your account information"),
     "CustomMessage_AdminCreateUser": ("Lời mời HomeWallet", "HomeWallet invitation"),
 }
 

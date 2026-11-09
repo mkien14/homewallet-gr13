@@ -12,7 +12,8 @@ SES sending is enabled but production access is disabled, so use only verified
 test recipients. Direct Lambda invocations with **fake placeholders** for
 signup/forgot-password in both locales returned HTTP 200 with the expected
 subjects and preserved placeholders (4/4). They did not trigger Cognito or
-send email.
+send email. This smoke predates the glossary wording approved below; repeat
+the local handler check after merging the wording update.
 
 An isolated Cognito user created with `MessageAction=SUPPRESS` also signed in
 through the SPA client using SRP, updated `custom:preferred_locale=en`, and read
@@ -20,20 +21,26 @@ back `en`; the user was deleted immediately. This confirms the current app
 client's effective locale read/write permissions for that flow, without
 testing signup email delivery.
 
-The current frontend signup call sends only `email`, without
-`custom:preferred_locale`; changing the app locale PATCHes `/api/me` but does
-not update the Cognito attribute. Thuc owns that UI integration before the
-email matrix can be completed. Hoang's terminology review is also pending.
+The frontend integration is prepared on branch `feat/42-43-cognito-locale-sync`
+but has not been merged, deployed or accepted. It passes
+`custom:preferred_locale` at signup, reads the attribute after sign-in and
+updates Cognito and `/api/me` on language changes. A failed destination keeps
+a per-user pending locale and shows a retry prompt. For Hosted UI/PKCE, the
+branch adds the Cognito self-service scope to the SPA client and OAuth request;
+apply the reviewed Terraform change before deploying that frontend build.
+Existing PKCE sessions need a new sign-in to receive the new scope. The
+approved glossary below is used by the Lambda handler.
 
-## Contract to confirm with Kien, Thuc and Hoang
+## Agreed locale and email contract
 
 | Surface | Attribute / rule |
 | --- | --- |
 | Backend profile | preferred_locale; accepts vi/en |
 | Cognito user | custom:preferred_locale; mutable String |
 | Default / invalid value | vi |
-| First signup email | Thuc supplies custom:preferred_locale in signup UserAttributes before Cognito sends verification |
-| Later language change | UI coordinates backend profile and Cognito update; partial failure is shown and retried |
+| Locale source | Cognito `custom:preferred_locale` is canonical; backend profile mirrors it |
+| First signup email | React client supplies custom:preferred_locale in signup UserAttributes before Cognito sends verification |
+| Later language change | UI updates Cognito and backend profile; partial failure is shown and retried |
 | Email template source | Stored Cognito attribute, not assumed ClientMetadata on every API |
 | Sender / region | Existing verified homewallet26@gmail.com / ap-southeast-1 |
 | Sandbox | Sender and all test recipients must be verified; do not change sandbox status |
@@ -41,18 +48,18 @@ email matrix can be completed. Hoang's terminology review is also pending.
 
 Never use household, transaction or receipt data in auth email tests. Do not delete existing Cognito users to create signup fixtures. Hoang/Kien select the accounts and verified recipients. Code placeholders stay in template source; real codes and tokens never go into evidence.
 
-## Draft terminology — pending Hoang review
+## Approved email terminology (Kiên, 09/11/2026)
 
 | vi | en |
 | --- | --- |
 | Xác minh tài khoản | Verify your account |
-| Gửi lại mã xác minh | New verification code |
+| Mã xác minh mới | New verification code |
 | Đặt lại mật khẩu | Reset your password |
 | Mã xác thực | Authentication code |
-| Xác minh thông tin | Verify your details |
+| Xác minh thông tin tài khoản | Verify your account information |
 | Lời mời HomeWallet | HomeWallet invitation |
 
-These strings reflect the proposed #42 handler, not an approved final glossary.
+Use these exact subject pairs in #42/#43 evidence. Hoàng can flag a product terminology conflict during review.
 
 ## Dev test matrix
 
@@ -85,7 +92,7 @@ Invalid-locale fallback is verified locally by #42 handler tests; do not inject 
 2. Lambda/SES/log cost and apply approved separately from WAF allowance.
 3. Kien applies from reviewed main; verify pool DEVELOPER email mode, Lambda trigger/invoke permission and locale schema together.
 4. Check SPA client effective locale read/write permissions using the intended SRP SDK flow. If an explicit attribute list is needed, preserve existing permissions. OAuth tokens require appropriate Cognito scopes for self-service attribute APIs; do not assume PKCE scopes imply these permissions.
-5. Hoang reviews glossary; Thuc supplies signup locale and error/retry UI; Kien owns backend preferred_locale persistence.
+5. Use the approved glossary below; review and deploy the prepared frontend locale integration and SPA client scope. Kien owns backend preferred_locale persistence. Check both SRP and PKCE sessions after deployment.
 6. Run test matrix using approved verified recipients; redact evidence.
 7. Report PASS/FAIL/N/A with owners. This email matrix alone does not establish whole-app #43 acceptance (jobs/reports/push/API/UI remain separate).
 8. Auth cutover remains a separately reviewed change by Kien only after the complete #42–43 matrix passes.
