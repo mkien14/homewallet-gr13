@@ -19,7 +19,7 @@ and its sanitized JSON companion.
 | Read-only load | PASS within measured scope | Kien's PR #91 run: max 5 clients, dashboard GET only, 279/279 HTTP 200, p50 133.62 ms, p95 339.11 ms, no timeout/network error, and no early stop. No team p95 SLA was set. |
 | OCR / D3 | PARTIAL / BLOCKED | Both original pilot report/lock pairs were found locally. Neither provider produced a schema-valid prediction; no OCR accuracy comparison is available. No rerun or expansion is authorized. |
 | Hoang run logs and fixtures | Server-side log review recorded; receipt 28 disposition pending | Admin reviewed `/ecs/hw-api` and `/ecs/hw-worker`; no sensitive patterns were found in those logs or the two PR #91 artifacts. Receipt 28 belongs to household 12 and is `UPLOADING`; its origin and team-approved handling remain to be established. Hoang's local terminal/capture was outside the review. |
-| Overall D4 / #36 | PARTIAL / BLOCKED pending OCR-scope decision | AC3 baseline, Member authorization, and bounded read load have evidence. The team must decide whether valid OCR benchmark results are a #36 acceptance criterion. If OCR is split out, record that decision and link the follow-up issue before closing #36. Kien's final review remains required. |
+| Overall D4 / #36 | CLOSED by team decision (2026-11-09) | AC3 baseline, Member authorization, and bounded read load have evidence. The team has decided to close #36 with the D3 limitation documented. This is not an OCR success or model-comparison claim. No separate D3 follow-up issue link was provided for this report. Receipt 28 handling and local terminal review remain recorded limitations, not resolved actions. |
 
 ## Hoàng's AC3 run
 
@@ -144,8 +144,9 @@ Record them as **not retrievable**, not as guessed values. The Member request
 IDs above belong to Kiên-provided evidence, and PR #91 IDs/fixtures belong only
 to Kiên's run.
 
-Kiên reviews the merged report. Keep #36 `PARTIAL / BLOCKED` until the team
-records whether valid OCR benchmark results are an acceptance criterion. If
-the team separates OCR into another task, add that decision and the follow-up
-issue link in the PR before closing #36. Do not claim a model winner or infer
-results beyond the ten-image pilot.
+The group confirmed #36 closed on 2026-11-09. This records the team's closure
+decision; it does not change the D3 result from `PARTIAL / BLOCKED`, establish
+valid OCR accuracy, or identify a winning model. No separate D3 follow-up issue
+ID/link was supplied. If the team opened one, add its link here. Receipt 28's
+origin/disposition and the local terminal/capture review remain limitations in
+the evidence record; closure does not imply those actions were completed.
