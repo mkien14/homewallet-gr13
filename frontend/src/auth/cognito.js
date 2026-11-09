@@ -4,11 +4,13 @@ import {
   confirmSignIn,
   confirmSignUp,
   fetchAuthSession,
+  fetchUserAttributes,
   resendSignUpCode,
   resetPassword,
   signIn,
   signOut,
   signUp,
+  updateUserAttribute,
   setUpTOTP,
   verifyTOTPSetup,
 } from "aws-amplify/auth";
@@ -50,9 +52,21 @@ export async function reactSignIn(username, password) {
   return signIn({ username, password, options: { authFlowType: "USER_SRP_AUTH" } });
 }
 
-export async function reactSignUp(username, password) {
+export async function reactSignUp(username, password, locale = "vi") {
   configureCognito();
-  return signUp({ username, password, options: { userAttributes: { email: username } } });
+  return signUp({ username, password, options: { userAttributes: { email: username, "custom:preferred_locale": locale === "en" ? "en" : "vi" } } });
+}
+
+export async function readReactPreferredLocale() {
+  configureCognito();
+  const attributes = await fetchUserAttributes();
+  return attributes["custom:preferred_locale"];
+}
+
+export async function writeReactPreferredLocale(locale) {
+  configureCognito();
+  const result = await updateUserAttribute({ userAttribute: { attributeKey: "custom:preferred_locale", value: locale } });
+  if (result.nextStep?.updateAttributeStep !== "DONE") throw new Error("Cognito locale update requires confirmation");
 }
 
 export async function reactConfirmSignUp(username, confirmationCode) {

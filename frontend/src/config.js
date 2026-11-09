@@ -6,5 +6,5 @@ export const config = {
   vapidPublicKey: import.meta.env.VITE_VAPID_PUBLIC_KEY,
   redirectUri: `${window.location.origin}/auth/callback`,
   logoutUri: `${window.location.origin}/`,
-  scopes: "openid email profile",
+  scopes: "openid email profile aws.cognito.signin.user.admin",
 };

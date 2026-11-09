@@ -47,7 +47,7 @@ Coordinate test accounts with Kien/Thuc/Hoang. Do not delete an existing user to
 | Hosted UI/PKCE | Existing login and callback still work |
 | Log review | No event, password, code or token output |
 
-Thuc must send `custom:preferred_locale` at signup, then coordinate updates to Cognito and the backend profile. Stable API errors, jobs/reports/push localization, cross-browser sync and reviewed glossary remain joint #43 acceptance work. Test both locales using verified recipients before declaring completion.
+The frontend signup and profile synchronization implementation is prepared on `feat/42-43-cognito-locale-sync` and awaits review, deployment and live acceptance. Apply the SPA client's additional self-service OAuth scope before deploying the frontend build, then sign in again for PKCE tests. The email glossary is approved in `docs/acceptance/43-cognito-email.md`. Stable API errors, jobs/reports/push localization and the remaining #43 acceptance work stay with the group. Test both locales using verified recipients before declaring completion.
 
 ## Rollback
 

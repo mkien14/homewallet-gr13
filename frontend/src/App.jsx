@@ -1,9 +1,11 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { BrowserRouter, Link, NavLink, Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { isLoggedIn, login, logout } from "./auth/auth";
+import { isReactAuthSession, reactSignOut } from "./auth/cognito";
 import { USE_MOCK } from "./mode";
-import { PreferenceProvider, preferenceStorageKeys, usePreferences } from "./preferences";
+import { PreferenceProvider, usePreferences } from "./preferences";
 import { api } from "./api";
+import { readCognitoPreferredLocale, writeCognitoPreferredLocale } from "./auth/locale";
 import { config } from "./config";
 import Callback from "./pages/Callback";
 import Home from "./pages/Home";
@@ -19,6 +21,12 @@ const MockFinanceTools = lazy(() => import("./components/MockFinanceTools"));
 const ReactAuth = lazy(() => import("./pages/ReactAuth"));
 const Notifications = lazy(() => import("./pages/Notifications"));
 const Community = lazy(() => import("./pages/Community"));
+const LOCALE_PENDING_KEY = "hw.locale.pending";
+
+function pendingLocaleFor(userId) {
+  const pending = localStorage.getItem(`${LOCALE_PENDING_KEY}.${userId}`);
+  return pending === "vi" || pending === "en" ? pending : null;
+}
 
 function Protected({ children }) {
   const { t } = usePreferences();
@@ -62,10 +70,23 @@ function AppContent() {
   const navigate = useNavigate();
   const { locale, setLocale, theme, setTheme, t } = usePreferences();
   const authenticated = USE_MOCK || isLoggedIn();
-  const localeSyncReady = useRef(false);
-  const localeRef = useRef(locale);
+  const localeUserId = useRef(null);
+  const [localeSyncStatus, setLocaleSyncStatus] = useState("ready");
 
-  useEffect(() => { localeRef.current = locale; }, [locale]);
+  const persistLocale = useCallback(async (next, userId) => {
+    localStorage.setItem(`${LOCALE_PENDING_KEY}.${userId}`, next);
+    setLocaleSyncStatus("saving");
+    const [profile, cognito] = await Promise.allSettled([
+      api("/api/me", { method: "PATCH", body: { preferred_locale: next } }),
+      writeCognitoPreferredLocale(next),
+    ]);
+    if (profile.status === "fulfilled" && cognito.status === "fulfilled") {
+      if (pendingLocaleFor(userId) === next) localStorage.removeItem(`${LOCALE_PENDING_KEY}.${userId}`);
+      setLocaleSyncStatus("ready");
+    } else {
+      setLocaleSyncStatus(profile.status !== cognito.status ? "partial" : "failed");
+    }
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -83,28 +104,40 @@ function AppContent() {
   }, [navigate, locale]);
 
   useEffect(() => {
-    if (!authenticated || USE_MOCK) { localeSyncReady.current = false; return undefined; }
+    if (!authenticated || USE_MOCK) { localeUserId.current = null; return undefined; }
     let active = true;
-    localeSyncReady.current = false;
-    api("/api/me").then(({ user }) => {
+    queueMicrotask(() => { if (active) setLocaleSyncStatus("loading"); });
+    api("/api/me").then(async ({ user }) => {
       if (!active) return;
-      const serverLocale = user?.preferred_locale === "en" ? "en" : "vi";
-      if (localStorage.getItem(preferenceStorageKeys.localeTouched) === "1") {
-        localeSyncReady.current = true;
-        if (localeRef.current !== serverLocale) return api("/api/me", { method: "PATCH", body: { preferred_locale: localeRef.current } });
-        return undefined;
+      const userId = String(user.id);
+      localeUserId.current = userId;
+      const pending = pendingLocaleFor(userId);
+      const profileLocale = user.preferred_locale === "en" ? "en" : "vi";
+      if (pending) {
+        setLocale(pending, { selected: false });
+        await persistLocale(pending, userId);
+        return;
       }
-      setLocale(serverLocale, { selected: false });
-      localeSyncReady.current = true;
-      return undefined;
-    }).catch(() => { localeSyncReady.current = true; });
+      try {
+        const cognitoLocale = await readCognitoPreferredLocale();
+        if (!active) return;
+        const next = cognitoLocale === "en" || cognitoLocale === "vi" ? cognitoLocale : profileLocale;
+        setLocale(next, { selected: false });
+        if (profileLocale !== next || cognitoLocale !== next) await persistLocale(next, userId);
+        else setLocaleSyncStatus("ready");
+      } catch {
+        if (!active) return;
+        setLocale(profileLocale, { selected: false });
+        setLocaleSyncStatus("cognito-unavailable");
+      }
+    }).catch(() => { if (active) setLocaleSyncStatus("profile-unavailable"); });
     return () => { active = false; };
-  }, [authenticated, setLocale]);
+  }, [authenticated, persistLocale, setLocale]);
 
-  useEffect(() => {
-    if (!authenticated || USE_MOCK || !localeSyncReady.current) return;
-    api("/api/me", { method: "PATCH", body: { preferred_locale: locale } }).catch(() => {});
-  }, [locale, authenticated]);
+  const changeLocale = (next) => {
+    setLocale(next);
+    if (authenticated && !USE_MOCK && localeUserId.current) void persistLocale(next, localeUserId.current);
+  };
 
   return (
     <div className="app-window">
@@ -113,7 +146,7 @@ function AppContent() {
         <Link className="brand" to="/">HomeWallet</Link>
         <span className="workspace-tab">⌂ &nbsp;{t("Cả hộ")}</span>
         <div className="header-preferences">
-          <label><span>{t("Ngôn ngữ")}</span><select aria-label={t("Ngôn ngữ")} value={locale} onChange={(event) => setLocale(event.target.value)}><option value="vi">Tiếng Việt</option><option value="en">English</option></select></label>
+          <label><span>{t("Ngôn ngữ")}</span><select aria-label={t("Ngôn ngữ")} value={locale} disabled={authenticated && !USE_MOCK && ["loading", "saving", "cognito-unavailable", "profile-unavailable"].includes(localeSyncStatus)} onChange={(event) => changeLocale(event.target.value)}><option value="vi">Tiếng Việt</option><option value="en">English</option></select></label>
           <label><span>{t("Giao diện")}</span><select aria-label={t("Giao diện")} value={theme} onChange={(event) => setTheme(event.target.value)}><option value="light">{t("Sáng")}</option><option value="dark">{t("Tối")}</option></select></label>
         </div>
         {!USE_MOCK && (authenticated
@@ -122,6 +155,24 @@ function AppContent() {
             ? <Link className="button button-secondary header-logout" to="/auth/react">{t("Đăng nhập hoặc đăng ký")}</Link>
             : <button type="button" className="button-secondary header-logout" onClick={login}>{t("Đăng nhập hoặc đăng ký")}</button>)}
       </header>
+      {authenticated && !USE_MOCK && ["partial", "failed", "cognito-unavailable", "profile-unavailable"].includes(localeSyncStatus) && (
+        <div className="notice" role="alert">
+          {t({
+            partial: "Ngôn ngữ mới chỉ được lưu một phần. Hãy thử lại.",
+            failed: "Chưa đồng bộ được ngôn ngữ tài khoản. Hãy thử lại.",
+            "cognito-unavailable": "Không đọc được ngôn ngữ tài khoản. Hãy đăng nhập lại.",
+            "profile-unavailable": "Không tải được hồ sơ tài khoản. Hãy thử lại.",
+          }[localeSyncStatus])}{" "}
+          <button type="button" onClick={() => {
+            if (localeSyncStatus === "profile-unavailable") window.location.reload();
+            else if (localeSyncStatus === "cognito-unavailable") {
+              if (isReactAuthSession()) void reactSignOut().then(() => navigate("/auth/react", { replace: true }));
+              else void login();
+            }
+            else if (localeUserId.current) void persistLocale(locale, localeUserId.current);
+          }}>{t(localeSyncStatus === "cognito-unavailable" ? "Đăng nhập lại" : "Thử lại")}</button>
+        </div>
+      )}
       {authenticated && (
           <nav className="workspace-nav" aria-label={t("Điều hướng chính")}>
             <div className="workspace-tools">

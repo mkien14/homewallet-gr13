@@ -30,7 +30,7 @@ const ERROR_TEXT = {
 };
 
 export default function ReactAuth() {
-  const { t } = usePreferences();
+  const { locale, t } = usePreferences();
   const navigate = useNavigate();
   const [flow, setFlow] = useState("signIn");
   const [email, setEmail] = useState("");
@@ -81,7 +81,7 @@ export default function ReactAuth() {
       if (password.length < 8) { setError("Mật khẩu cần ít nhất 8 ký tự."); return; }
       if (password !== passwordAgain) { setError("Hai mật khẩu chưa khớp."); return; }
       return run(async () => {
-        const result = await reactSignUp(username, password);
+        const result = await reactSignUp(username, password, locale);
         if (result.isSignUpComplete) { setFlow("signIn"); setMessage(t("Tài khoản đã được tạo. Hãy đăng nhập.")); }
         else { setFlow("confirmSignUp"); setMessage(t("Mã xác minh đã được gửi đến email của bạn.")); }
       });

@@ -28,7 +28,7 @@ The supported UI locales are `vi` and `en`; the default for existing and new use
 
 The response has the same shape as `GET /api/me` with the updated `user.preferred_locale`. A missing field, unsupported locale, or additional profile field returns `422` with the existing `VALIDATION` error code.
 
-At sign-up, the React client sends Cognito's `custom:preferred_locale` attribute. After sign-in, and whenever the user changes language, it updates that Cognito attribute through Cognito and calls `PATCH /api/me` to synchronize the application profile. If the application profile is created before the client syncs, its default is Vietnamese.
+At sign-up, the React client sends Cognito's `custom:preferred_locale` attribute. After sign-in it reads both the Cognito attribute and the application profile. If they differ, the Cognito value wins because it also determines the language of the first signup email; an absent/invalid Cognito value falls back to the profile. Whenever the user changes language, the client updates Cognito and calls `PATCH /api/me` independently. A failed update remains pending for that user and is retried on demand or at the next sign-in. If the application profile is created before the client syncs, its default is Vietnamese. Hosted UI/PKCE requires the `aws.cognito.signin.user.admin` OAuth scope for Cognito attribute reads and writes; previously issued tokens must be replaced by a new sign-in.
 
 ## Locale in scheduled messages
 
