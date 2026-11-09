@@ -1,6 +1,29 @@
 # #43 — Cognito email locale acceptance (Chi)
 
-Status: PREPARED / NOT RUN. Depends on reviewed and deployed #42. This document does not assert that #42 or #43 has passed on AWS.
+Status as of 09/11/2026: #42 infrastructure deployed and direct Lambda smoke
+passed; Cognito-triggered email matrix below remains NOT_RUN. This document
+does not assert that #42 live auth/email or #43 end-to-end acceptance passed.
+
+Read-only AWS review by Kien found the pool in SES `DEVELOPER` mode with the
+verified sender, the mutable `custom:preferred_locale` schema, an active Custom
+Message Lambda and invoke permission scoped to this pool. The SPA app client
+still has SRP, refresh, OAuth code and the localhost/CloudFront callbacks.
+SES sending is enabled but production access is disabled, so use only verified
+test recipients. Direct Lambda invocations with **fake placeholders** for
+signup/forgot-password in both locales returned HTTP 200 with the expected
+subjects and preserved placeholders (4/4). They did not trigger Cognito or
+send email.
+
+An isolated Cognito user created with `MessageAction=SUPPRESS` also signed in
+through the SPA client using SRP, updated `custom:preferred_locale=en`, and read
+back `en`; the user was deleted immediately. This confirms the current app
+client's effective locale read/write permissions for that flow, without
+testing signup email delivery.
+
+The current frontend signup call sends only `email`, without
+`custom:preferred_locale`; changing the app locale PATCHes `/api/me` but does
+not update the Cognito attribute. Thuc owns that UI integration before the
+email matrix can be completed. Hoang's terminology review is also pending.
 
 ## Contract to confirm with Kien, Thuc and Hoang
 
