@@ -13,7 +13,6 @@ riêng được Kiên xác nhận. File Word hướng dẫn tuần tiếp tục 
 | 2 | **#39 / sự cố DLQ thuộc theo dõi #33** | Phục hồi có kiểm soát PASS: receipt `1` → `NEEDS_REVIEW`; một transaction `39` ở `DRAFT`; ảnh gốc và DLQ message được giữ. Chờ chủ hộ đối chiếu draft; không auto-confirm. | Kiên review amount/merchant/date/category trong HomeWallet rồi sửa hoặc từ chối theo hóa đơn. Không chạy lại recovery hay redrive DLQ. Xem [biên bản và postcheck](33-receipt1-recovery-20261110.md). |
 | 3 | **#38 — README và bàn giao** | **README hiện chỉ 2 byte**, không có hướng dẫn sử dụng. Đây là thiếu sót xác định được trong repo. | Hoàng bổ sung cài đặt, biến môi trường mẫu, chạy/test/deploy/log, kiến trúc, chi phí có nguồn/ngày và giới hạn. Người khác clone và làm theo được. Dẫn tới các biên bản nghiệm thu hiện hành. |
 | 4 | **#25 / #37 — nghiệm thu ngân sách** | PASS trong phạm vi đã định: API dev 57/57; Gemini thật, fallback, lịch sử, ngưỡng 80/100, chống gửi trùng trên schema riêng; một email thật D1 đã được Kiên xác nhận; cleanup PASS. CLI job chạy trong ECS jobs. Lịch EventBridge định kỳ vẫn DISABLED. | Xem [biên bản](25-37-budget-20261110.md) và [artifact email](37-mailbox-20261110.json). Không chạy lại trên household thật; việc bật lịch định kỳ cần quyết định rollout riêng. |
-| 5 | **#40 — mobile** | Kiên xác nhận Thức đã nghiệm thu và gửi bằng chứng riêng cho Kiên; bằng chứng không lưu trong repo. | Đã xác nhận hoàn tất theo Kiên; không yêu cầu Thức chạy lại. |
 | 6 | **Fixture D4 / #36** | #36 đã CLOSED; receipt `28` ở household `12` có disposition chưa chốt trong biên bản, local terminal/capture của Hoàng chưa được review. | Hoàng xác nhận nguồn fixture và bàn giao evidence đã che dữ liệu; Kiên chốt giữ/dọn đúng ID. Giữ nguyên dữ liệu khi chưa có quyết định. Không mở lại AC3/tải đã nghiệm thu. |
 | 7 | **#38 / #41 — báo cáo, phụ lục, video demo** | Chưa xác nhận đủ bản cuối qua repo; tài liệu có thể nằm ngoài repo. Slide nằm ngoài phần rà soát này. | Hoàng tổng hợp trạng thái Done/Partial/Not deployed, PR/commit, số liệu có nguồn và video demo bằng tài khoản test. Cả nhóm đối chiếu với dev; không mô tả OCR benchmark đã thành công. |
 
@@ -29,6 +28,8 @@ riêng được Kiên xác nhận. File Word hướng dẫn tuần tiếp tục 
   với giới hạn D3 và fixture được ghi rõ.
 - **#42 / #43:** locale và email E2E trong phạm vi chốt đã PASS. Xem
   [43-final-acceptance-20261110.md](43-final-acceptance-20261110.md).
+- **#40:** Kiên xác nhận Thức đã nghiệm thu mobile và gửi bằng chứng riêng cho
+  Kiên. Bằng chứng được giữ ngoài repo; không yêu cầu chạy lại.
 - **#26 và một phần #37:** API thông báo/đọc, đăng ký-hủy push và nhận push đã
   có bằng chứng; Scheduler chạy ba CLI job thật trên schema test, gửi SES
   simulator và push; chạy lặp bỏ qua theo key. Không coi phần này vẫn BLOCKED
