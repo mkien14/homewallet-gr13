@@ -1,14 +1,21 @@
 # D2 / #29 — Các bước kiểm chứng và bàn giao
 
 Nhánh: `feat/29-community-admin-api`. Contract: [community-api.md](community-api.md).
-Ngày chuẩn bị: 2026-11-07. **Local đã kiểm thử; dev/CI remote và xác nhận contract còn chờ.**
+Ngày chuẩn bị: 2026-11-07; đối chiếu lại ngày 2026-11-10. Kiên đã chốt contract
+ngày 2026-11-10. Unit tests, MySQL acceptance job trên GitHub Actions và route
+preflight dev đã có kết quả; full member/admin API, UI và DB-audit runtime vẫn
+cần tài khoản test và xác nhận deployment/migration.
 
-## Bước 1 — Review contract
+## Bước 1 — Đối chiếu và review contract
 
-Hoàng gửi link contract trong PR để Kiên/Thức xác nhận. Bản hướng dẫn tuần 10
-không chứa mục 2 nên chưa được coi tài liệu mới là contract đã thống nhất.
-Cần chốt user chưa có household, các chuyển status, author null, mẫu ngân sách
-dạng text và audit chung `COMMUNITY_POST_UPDATED`.
+Đã tìm thấy `docs/Huong_dan_cong_viec_tuan_10.docx` tại máy làm việc. Mục 2 có
+tiểu mục `#29` và xác nhận baseline: bài mẹo tiết kiệm/mẫu ngân sách, tạo ở
+`PENDING`, member chỉ xem `APPROVED`; admin duyệt/sửa/ẩn; quyền dựa trên Cognito
+group `homewallet-dev-admins`, backend phải kiểm tra; audit ghi actor/action/entity
+nhưng không ghi body hoặc giao dịch hộ; không làm comment/chat/quản lý user/CRUD
+danh mục. Kiên đã chốt các chi tiết implementation mà mục 2 chưa quy định; xem
+bảng quyết định trong [community-api.md](community-api.md). Đây là quyết định của
+Kiên; không ghi đây là review cá nhân của Thức.
 
 ## Bước 2 — Chạy test local không cần AWS
 
@@ -64,7 +71,7 @@ phải xem kết quả job này, không chỉ job backend chung.
 
 | ID | Ca | Kỳ vọng | Bằng chứng local | Dev |
 | --- | --- | --- | --- | --- |
-| D2-01 | Thiếu token trên cả bốn endpoint | 401 | `test_all_routes_require_auth` PASS | Chờ |
+| D2-01 | Thiếu token trên cả bốn endpoint | 401 | `test_all_routes_require_auth` PASS | Community GET và admin GET trả 401 qua CloudFront; xem route preflight artifact. Hai route POST/PATCH và request có token còn chờ |
 | D2-02 | Member/role owner/admin tự khai báo/group sai | GET/PATCH admin 403 | `test_only_exact_verified_group_grants_admin` PASS | Chờ |
 | D2-03 | Token sửa payload, hết hạn, sai issuer/client, ID token | 401 dù khai group admin | Các test JWT trong `test_community.py` PASS | Chờ |
 | D2-04 | POST hợp lệ cho hai type, kể cả admin gửi bài | 201, PENDING, trim, đúng giới hạn | Test lifecycle/boundaries MySQL PASS | Chờ |
@@ -156,6 +163,25 @@ Lưu các mục sau trong PR/báo cáo nhóm:
 - Bằng chứng migration 005/group membership và kiểm tra UI member/admin.
 - Kiên/Thức xác nhận contract; lỗi còn lại có owner và quyết định xử lý.
 
+## Kết quả kiểm chứng cập nhật ngày 2026-11-10
+
+- Kiên chốt contract; chi tiết và lựa chọn được ghi tại
+  [community-api.md](community-api.md). Chữ ký cá nhân của Thức không được giả định.
+- Cognito group `homewallet-dev-admins` tồn tại tại pool dev, có đúng một thành
+  viên và khớp tài khoản admin đã chọn; không ghi định danh vào artifact.
+- GET `/api/community/posts` và GET `/api/admin/community/posts` qua CloudFront
+  đều trả 401 khi không gửi token, cho thấy route đi vào auth middleware. Request
+  IDs đã lưu trong [route preflight](acceptance/29-api-route-preflight-20261110.json).
+  Đây chưa phải kiểm tra quyền member/admin có token.
+- GitHub Actions CI run `42780738463` trên `main`, commit `ab0eb19`, hoàn tất
+  `success`; workflow có job riêng `Community authorization and MySQL acceptance`.
+- Local `tests/test_auth.py tests/test_community.py`: 87 passed. MySQL service
+  local từ chối root không mật khẩu; không thử đoán hoặc đọc mật khẩu. MySQL D2
+  integration đã chạy xanh trong CI.
+- Chưa xác nhận image/migration đang chạy trong dev, chưa chạy signed-token
+  acceptance script, chưa kiểm tra các dòng audit trong DB dev và chưa nghiệm
+  thu UI bằng trình duyệt member/admin.
+
 ## Kết quả local ngày 2026-11-07
 
 | Kiểm tra | Kết quả | Giới hạn |
@@ -166,7 +192,9 @@ Lưu các mục sau trong PR/báo cáo nhóm:
 | Terraform fmt / validate dev | PASS | Chưa plan/apply |
 | Frontend lint | PASS | Không phải UI acceptance |
 | Frontend tests / production build | 72 passed / PASS, exit 0 | Không thay thế UI acceptance trên dev |
-| CI remote / AWS dev / review contract | Chưa chạy / chờ | Không đánh dấu D2 Done |
+| CI remote | PASS ngày 2026-11-10 trên commit `ab0eb19` | Không thay thế signed-token dev/UI/audit acceptance |
+| AWS dev signed-token / UI / DB audit | Chưa hoàn tất | Không đánh dấu D2 Done |
 
-Đóng D2 sau khi contract được xác nhận, CI mới xanh, các ca dev bắt buộc pass,
-audit được đối chiếu và không có khả năng user tự nâng quyền.
+Kiên đã chốt contract. Đóng D2 sau khi xác nhận đúng admin/member test identities,
+backend image và migration dev, signed-token matrix, UI member/admin, và 5 dòng
+audit của bài synthetic; CI đã xanh nhưng không thay cho các kiểm tra runtime này.

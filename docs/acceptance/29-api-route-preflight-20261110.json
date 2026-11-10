@@ -1,0 +1,42 @@
+{
+  "status": "PARTIAL_ROUTE_PREFLIGHT",
+  "environment": "dev CloudFront",
+  "date": "2026-11-10",
+  "checks": [
+    {
+      "method": "GET",
+      "path": "/api/community/posts",
+      "expected_without_token": 401,
+      "actual": 401,
+      "x_request_id": "f836f334-2e0a-48ce-87f8-d93e249de5fc"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/community/posts",
+      "expected_without_token": 401,
+      "actual": 401,
+      "x_request_id": "cb9bd0b7-7d33-4a38-beda-0d509c0d3864"
+    }
+  ],
+  "cognito_group": {
+    "name": "homewallet-dev-admins",
+    "exists": true,
+    "member_count": 1,
+    "expected_admin_present": true
+  },
+  "github_actions": {
+    "workflow": "CI",
+    "run_id": "42780738463",
+    "head_branch": "main",
+    "head_commit": "ab0eb19cad84b7172618b5264cf27538edf5b8c9",
+    "conclusion": "success",
+    "community_mysql_job": "included_in_successful_workflow",
+    "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/42780738463"
+  },
+  "limitations": [
+    "No signed member/admin API requests were run.",
+    "The group member identity was not checked.",
+    "The deployed image and migration 005 were not independently verified.",
+    "Database audit rows and authenticated browser UI remain unverified."
+  ]
+}

@@ -1,15 +1,38 @@
 # D2 / #29 — Community và quyền moderation
 
-Ngày cập nhật: 2026-11-07. Trạng thái: contract triển khai, **chờ Kiên và Thức xác nhận**.
-Bản hướng dẫn tuần 10 được cung cấp không chứa “mục 2” được D2 tham chiếu;
-cần đối chiếu mục đó trước khi chốt. Tài liệu này mô tả implementation hiện tại.
+Ngày đối chiếu: 2026-11-10. Nguồn baseline: **Hướng dẫn công việc tuần 10, mục 2,
+“Quyết định đã chốt để áp dụng trong tuần 10”**, tiểu mục `#29`. Bản hướng dẫn
+đã được tìm thấy trong `docs/Huong_dan_cong_viec_tuan_10.docx` tại máy làm việc.
+File DOCX vẫn là tài liệu cục bộ bị Git ignore; phần đối chiếu dưới đây được ghi
+trong Markdown để review và theo dõi bằng Git.
+
+**Trạng thái:** Kiên đã chốt các chi tiết implementation còn mở trong cuộc trao
+đổi ngày 2026-11-10. Đây là quyết định của Kiên theo chỉ đạo trực tiếp; không
+được hiểu là xác nhận cá nhân của Thức.
+
+| Nội dung | Baseline tuần 10, mục 2 | Contract/implementation |
+| --- | --- | --- |
+| Bài cộng đồng | Mẹo tiết kiệm hoặc mẫu ngân sách; gửi ở `PENDING`; member chỉ xem `APPROVED` | Khớp; `tip` và `budget_template`; feed công khai chỉ trả `APPROVED` |
+| Moderation | Admin duyệt, sửa hoặc ẩn | Khớp; admin có thể PATCH nội dung/trạng thái |
+| Phân quyền | Cognito group `homewallet-dev-admins` trong `cognito:groups`; Terraform tạo group, Kiên chỉ thêm user dev đã chọn; backend bắt buộc kiểm tra, frontend chỉ ẩn/hiện nút | Khớp; role/household/body/localStorage không cấp quyền |
+| Dữ liệu/audit | Ghi actor/action/entity; không ghi body bài hoặc giao dịch hộ | Khớp; audit giữ actor/action/entity/id/time, không giữ nội dung riêng tư |
+| Ngoài phạm vi | Comment, chat, quản lý Cognito user, CRUD danh mục | Được loại trừ |
+| User không có household | Mục 2 không nói rõ | Quyết định Kiên: cho phép mọi user Cognito đã xác thực tham gia; không yêu cầu household. “Member” là user không thuộc admin group; admin cũng được gửi bài |
+| Chuyển trạng thái | Mục 2 nêu duyệt/ẩn nhưng không liệt kê mọi cặp trạng thái | Quyết định Kiên: giữ implementation hiện tại; admin có thể đặt bất kỳ trạng thái hợp lệ nào từ bất kỳ trạng thái hiện tại nào, kể cả khôi phục bài ẩn hoặc đưa lại `PENDING`; PATCH lặp vẫn được ghi audit |
+| Response, `author=null`, filter và mã lỗi | Mục 2 không quy định schema hay mã HTTP | Kiên chốt giữ schema/status/error contract dưới đây; `author=null` không fallback sang email; GET feed chỉ trả bài đã duyệt |
+| Tên audit action chính xác | Mục 2 yêu cầu lưu action nhưng không quy định literal | Kiên chốt `COMMUNITY_POST_CREATED` cho POST và `COMMUNITY_POST_UPDATED` cho mọi PATCH; không lưu nội dung cũ/mới |
+| UI | Mục 2 yêu cầu frontend chỉ ẩn/hiện nút, backend vẫn là nguồn phân quyền | Kiên chốt UI hiện tại: feed approved và form gửi bài cho user đăng nhập; hàng chờ/moderation controls chỉ hiện admin; mock role switch chỉ có trong mock mode |
+
+Các quyết định trên là phần bổ sung của Kiên vào baseline tuần 10. Chúng giữ
+implementation đã có, không mở rộng quyền backend ngoài admin group và không
+thêm phạm vi tính năng mới.
 
 ## Phạm vi và quyền
 
 - Nội dung gồm mẹo tiết kiệm (`tip`) và mẫu ngân sách dạng văn bản (`budget_template`).
 - Community dùng chung giữa các user đã đăng nhập; không lấy nội dung từ giao dịch hộ.
-  Không yêu cầu user đã tham gia household. “Member” trong contract này là user
-  đăng nhập không có group admin; cần Kiên/Thức xác nhận cách hiểu này.
+  Không yêu cầu user đã tham gia household. “Member” là user đăng nhập không có
+  group admin; admin cũng có thể gửi bài.
 - Mọi endpoint yêu cầu `Authorization: Bearer <access token>`. Backend verify
   RS256/JWKS, hạn token, issuer, `token_use=access`, client_id trước khi đọc quyền.
 - Admin phải có phần tử chính xác `homewallet-dev-admins` trong mảng `cognito:groups`.
@@ -100,7 +123,7 @@ member luôn bị `403` trước khi tra cứu ID. Không có DELETE trong phạ
 ## Audit và transaction
 
 Tạo bài ghi `COMMUNITY_POST_CREATED`; mọi PATCH ghi `COMMUNITY_POST_UPDATED`.
-Action hiện chưa phân biệt riêng approve/edit/hide; Kiên/Thức cần xác nhận semantics này.
+Action không phân biệt riêng approve/edit/hide; đây là semantics Kiên đã chốt.
 Không lưu before/after body để phân biệt thao tác.
 
 Audit chỉ có `id`, `actor_id`, `action`, `entity='community_post'`, `entity_id`, `at`.
@@ -134,8 +157,8 @@ Lỗi cấu hình/JWKS/profile vẫn theo middleware auth chung (500/503/502).
 
 | Người | Nội dung | Trạng thái |
 | --- | --- | --- |
-| Kiên | Đối chiếu mục 2; quyền user chưa có household; chuyển trạng thái; audit action | Chờ xác nhận |
-| Thức | Schema response, `author=null`, filter, lỗi, UI với token mới và API thật | Chờ xác nhận |
-| Chi | Resource group và plan Terraform | Chờ review |
+| Kiên | Baseline mục 2 và các lựa chọn contract mở | Đã chốt trong chỉ đạo ngày 2026-11-10; nội dung được ghi ở bảng đối chiếu |
+| Thức | Review schema/UI theo contract và nghiệm thu UI với token mới/API thật | Chưa có xác nhận cá nhân; kiểm tra runtime UI vẫn là bước nghiệm thu riêng |
+| Chi | Resource group và plan Terraform | Hạ tầng group đã triển khai; đối chiếu kết quả trong hồ sơ #29 trước khi kết luận review plan |
 
 Ma trận và cách chạy: [test-cases-community.md](test-cases-community.md).
