@@ -10,6 +10,8 @@ Mã #42, cấu hình VAPID, script runtime và bằng chứng #43 hiện có ở
 - [Ma trận CM01–CM16](acceptance/43-cognito-email.md).
 - [Trạng thái công việc của Chi](acceptance/chi-week10-status-20261109.md).
 - [Biên bản D4/#36 đã đóng](acceptance/36-d4-evidence.md).
+- [Rà soát việc nhóm còn lại](acceptance/team-open-work-20261110.md).
+- [Khắc phục Bedrock/#34 và bước hoàn tất](acceptance/34-bedrock-remediation-20261110.md).
 
 Các thư mục có hậu tố là Git worktree cho từng nhánh công việc. Nhánh ở các
 worktree sau đã được hợp nhất vào `main` local:

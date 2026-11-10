@@ -1,0 +1,14 @@
+{
+  "status": "BLOCKED_CREDENTIAL_PROFILE",
+  "started_utc": "2026-11-10T11:55:17.116129+00:00",
+  "region": "ap-southeast-1",
+  "model": "apac.amazon.nova-lite-v1:0",
+  "pilot_images_sent": 0,
+  "synthetic_requests_attempted": 0,
+  "sdk_total_attempts": 1,
+  "benchmark_status": "NOT_RUN",
+  "error": {
+    "error_type": "ProfileNotFound"
+  },
+  "completed_utc": "2026-11-10T11:55:17.206949+00:00"
+}

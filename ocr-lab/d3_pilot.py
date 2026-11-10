@@ -157,6 +157,8 @@ def invoke_bedrock(client, image):
 
 
 def main():
+    from pilot_run_guard import require_unconsumed_run
+    require_unconsumed_run("d3-pilot")
     if LOCK.exists():
         raise RuntimeError(f"One-shot guard exists ({LOCK}); this pilot must never be rerun.")
     samples = load_pilot()

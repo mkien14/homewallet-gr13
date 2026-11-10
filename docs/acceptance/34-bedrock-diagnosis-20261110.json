@@ -1,0 +1,131 @@
+{
+  "status": "ROOT_CAUSE_CONFIRMED_CURRENT_POLICY_FIXED",
+  "checked_utc": "2026-11-10T11:54:19.839182+00:00",
+  "operator_arn": "arn:aws:iam::179923444714:user/kien",
+  "aws_writes_performed": 0,
+  "model_invocations_in_this_diagnosis": 0,
+  "cloudtrail": {
+    "event_id": "7cf96de8-6d85-469a-82b3-73bc94ed1887",
+    "event_time_utc": "2026-11-08T11:19:14Z",
+    "event_source": "bedrock.amazonaws.com",
+    "event_name": "Converse",
+    "aws_region": "ap-southeast-1",
+    "caller_arn": "arn:aws:iam::179923444714:user/hoang",
+    "error_code": "AccessDenied",
+    "explicit_identity_policy_deny": true,
+    "denied_resource": "arn:aws:bedrock:ap-southeast-2::foundation-model/amazon.nova-lite-v1:0",
+    "request_id": "76c75251-f8ba-4ea4-8fe6-990b79ee1378"
+  },
+  "regional_guard": {
+    "policy_arn": "arn:aws:iam::179923444714:policy/homewallet-dev-d1-testing",
+    "current_default_version": "v4",
+    "historical_version": "v3",
+    "historical_created_utc": "2026-11-08T09:48:22+00:00",
+    "historical_statement": {
+      "Sid": "GuardOnlyApSoutheast1",
+      "Effect": "Deny",
+      "Resource": "*",
+      "Condition": {
+        "StringNotEquals": {
+          "aws:RequestedRegion": "ap-southeast-1"
+        }
+      },
+      "NotAction": [
+        "iam:SimulatePrincipalPolicy"
+      ]
+    },
+    "fixed_version": "v4",
+    "fixed_created_utc": "2026-11-08T12:37:11+00:00",
+    "fixed_statement": {
+      "Sid": "GuardOnlyApSoutheast1",
+      "Effect": "Deny",
+      "Resource": "*",
+      "Condition": {
+        "StringNotEquals": {
+          "aws:RequestedRegion": "ap-southeast-1"
+        }
+      },
+      "NotAction": [
+        "iam:SimulatePrincipalPolicy",
+        "bedrock:InvokeModel"
+      ]
+    }
+  },
+  "historical_policy_reproduction": {
+    "policy_set": [
+      "homewallet-dev-d1-testing:v3",
+      "homewallet-dev-d3-pilot:v1"
+    ],
+    "limitation": "Custom policy simulation of the two relevant policies; not a replacement for the recorded live CloudTrail denial.",
+    "legacy_source_region_only": {
+      "resource": "arn:aws:bedrock:ap-southeast-2::foundation-model/amazon.nova-lite-v1:0",
+      "requested_region": "ap-southeast-1",
+      "inference_profile_context": "arn:aws:bedrock:ap-southeast-1:179923444714:inference-profile/apac.amazon.nova-lite-v1:0",
+      "decision": "allowed",
+      "missing_context": [],
+      "allowed": true
+    },
+    "correct_destination_region": {
+      "resource": "arn:aws:bedrock:ap-southeast-2::foundation-model/amazon.nova-lite-v1:0",
+      "requested_region": "ap-southeast-2",
+      "inference_profile_context": "arn:aws:bedrock:ap-southeast-1:179923444714:inference-profile/apac.amazon.nova-lite-v1:0",
+      "decision": "explicitDeny",
+      "missing_context": [],
+      "allowed": false
+    }
+  },
+  "current_profile": {
+    "arn": "arn:aws:bedrock:ap-southeast-1:179923444714:inference-profile/apac.amazon.nova-lite-v1:0",
+    "status": "ACTIVE",
+    "models": [
+      "arn:aws:bedrock:ap-southeast-2::foundation-model/amazon.nova-lite-v1:0",
+      "arn:aws:bedrock:ap-northeast-1::foundation-model/amazon.nova-lite-v1:0",
+      "arn:aws:bedrock:ap-south-1::foundation-model/amazon.nova-lite-v1:0",
+      "arn:aws:bedrock:ap-northeast-2::foundation-model/amazon.nova-lite-v1:0",
+      "arn:aws:bedrock:ap-southeast-1::foundation-model/amazon.nova-lite-v1:0",
+      "arn:aws:bedrock:ap-northeast-3::foundation-model/amazon.nova-lite-v1:0"
+    ]
+  },
+  "foundation_model_availability": {
+    "modelId": "amazon.nova-lite-v1",
+    "agreementAvailability": {
+      "status": "AVAILABLE"
+    },
+    "authorizationStatus": "AUTHORIZED",
+    "entitlementAvailability": "AVAILABLE",
+    "regionAvailability": "AVAILABLE"
+  },
+  "negative_controls": {
+    "wrong_inference_profile": {
+      "resource": "arn:aws:bedrock:ap-southeast-2::foundation-model/amazon.nova-lite-v1:0",
+      "requested_region": "ap-southeast-2",
+      "inference_profile_context": "arn:aws:bedrock:ap-southeast-1:179923444714:inference-profile/apac.amazon.nova-pro-v1:0",
+      "decision": "implicitDeny",
+      "missing_context": [
+        "ecs:cluster",
+        "iam:PassedToService",
+        "s3:prefix"
+      ],
+      "allowed": false
+    },
+    "unapproved_model": {
+      "resource": "arn:aws:bedrock:ap-southeast-1::foundation-model/amazon.nova-pro-v1:0",
+      "requested_region": "ap-southeast-1",
+      "inference_profile_context": "arn:aws:bedrock:ap-southeast-1:179923444714:inference-profile/apac.amazon.nova-lite-v1:0",
+      "decision": "implicitDeny",
+      "missing_context": [
+        "ecs:cluster",
+        "iam:PassedToService",
+        "s3:prefix"
+      ],
+      "allowed": false
+    }
+  },
+  "current_live_admin_probe": "34-bedrock-admin-smoke-20261110.json",
+  "hoang_live_identity_verified": false,
+  "paired_ocr_benchmark_complete": false,
+  "sources": [
+    "https://docs.aws.amazon.com/bedrock/latest/userguide/inference-profiles-prereq.html",
+    "https://docs.aws.amazon.com/bedrock/latest/userguide/security_iam_id-based-policy-examples.html"
+  ]
+}

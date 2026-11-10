@@ -1,8 +1,18 @@
 # D3 pilot v2 runbook
 
-This is a new pilot with a new lock and report. The original files
-`ocr-lab/out/d3-pilot-run.json` and `ocr-lab/out/d3-pilot-report.json` are
-preserved; never rerun `ocr-lab/d3_pilot.py` or remove its lock. The new runner
+**Archived / consumed (updated 2026-11-10).** V2 ran on 2026-11-08 and ended
+with failures; it cannot be run again. Its tracked history guard blocks `--run`
+before provider access even on a fresh checkout without the ignored locks.
+Read-only preflight remains available and cannot mark this consumed run ready.
+For current IAM diagnosis, the one-request text probe, and the gates for a
+separate future benchmark, use
+[34-bedrock-remediation-20261110.md](acceptance/34-bedrock-remediation-20261110.md).
+
+The sections below record the configuration of the historical v2 attempt.
+The original paths `ocr-lab/out/d3-pilot-run.json` and
+`ocr-lab/out/d3-pilot-report.json` refer to operator-local ignored artifacts;
+they are absent in this main checkout. Never rerun `ocr-lab/d3_pilot.py` or remove
+its lock. The v2 runner
 uses the same approved test set, `021.jpg`–`030.jpg`, with the corresponding
 labels. The team's prior written approval covers both providers and this exact
 sample, with Roboflow recorded as the source and no disallowed personal or
@@ -44,7 +54,10 @@ AI Studio before setting `api_key_project_matches` to true.
    paste or print the API key.
 3. AWS preflight checks STS identity, active APAC inference profile, and
    `bedrock:InvokeModel` through IAM `SimulatePrincipalPolicy` on the profile and
-   destination model ARNs. This is a no-inference authorization check. The
+   destination model ARNs, using each resource's own region and supplying the
+   inference-profile context only for destination foundation models. The old
+   source-region-only check missed a destination-region Deny; this was fixed
+   on 2026-11-10. This is a no-inference authorization check. The
    simulation API itself may require `iam:SimulatePrincipalPolicy`. If denied,
    ask the AWS administrator to run that simulation or grant this narrowly
    scoped read-only simulation action. The simulator does not make an actual
@@ -74,14 +87,10 @@ python -m unittest test_d3_pilot_v2.py
 python d3_pilot_v2.py --preflight
 ```
 
-After all preflight checks pass and the quota fields are filled, make the one
-authorized run:
+The former `--run` entrypoint is now blocked because this pilot was consumed.
+Do not modify its tracked ledger or delete an ignored lock to bypass the guard.
 
-```powershell
-python d3_pilot_v2.py --run
-```
-
-The new lock is `ocr-lab/out/d3-pilot-v2-run.json`; the report is
+The historical lock is `ocr-lab/out/d3-pilot-v2-run.json`; the report is
 `ocr-lab/out/d3-pilot-v2-report.json`. Both are ignored by Git. Do not run
 `--run` again if it fails or stops partway through. Share the report artifact
 with the team without adding secrets or raw receipt/model text.

@@ -1,0 +1,97 @@
+{
+  "status": "LIVE_CALL_PASS",
+  "started_utc": "2026-11-10T11:53:16.628527+00:00",
+  "region": "ap-southeast-1",
+  "model": "apac.amazon.nova-lite-v1:0",
+  "pilot_images_sent": 0,
+  "synthetic_requests_attempted": 1,
+  "sdk_total_attempts": 1,
+  "benchmark_status": "NOT_RUN",
+  "caller_arn": "arn:aws:iam::179923444714:user/kien",
+  "simulated_principal_arn": "arn:aws:iam::179923444714:user/hoang",
+  "iam_evaluations": [
+    {
+      "resource": "arn:aws:bedrock:ap-southeast-1:179923444714:inference-profile/apac.amazon.nova-lite-v1:0",
+      "requested_region": "ap-southeast-1",
+      "inference_profile_context": null,
+      "decision": "allowed",
+      "missing_context": [],
+      "allowed": true
+    },
+    {
+      "resource": "arn:aws:bedrock:ap-southeast-2::foundation-model/amazon.nova-lite-v1:0",
+      "requested_region": "ap-southeast-2",
+      "inference_profile_context": "arn:aws:bedrock:ap-southeast-1:179923444714:inference-profile/apac.amazon.nova-lite-v1:0",
+      "decision": "allowed",
+      "missing_context": [],
+      "allowed": true
+    },
+    {
+      "resource": "arn:aws:bedrock:ap-northeast-1::foundation-model/amazon.nova-lite-v1:0",
+      "requested_region": "ap-northeast-1",
+      "inference_profile_context": "arn:aws:bedrock:ap-southeast-1:179923444714:inference-profile/apac.amazon.nova-lite-v1:0",
+      "decision": "allowed",
+      "missing_context": [],
+      "allowed": true
+    },
+    {
+      "resource": "arn:aws:bedrock:ap-south-1::foundation-model/amazon.nova-lite-v1:0",
+      "requested_region": "ap-south-1",
+      "inference_profile_context": "arn:aws:bedrock:ap-southeast-1:179923444714:inference-profile/apac.amazon.nova-lite-v1:0",
+      "decision": "allowed",
+      "missing_context": [],
+      "allowed": true
+    },
+    {
+      "resource": "arn:aws:bedrock:ap-northeast-2::foundation-model/amazon.nova-lite-v1:0",
+      "requested_region": "ap-northeast-2",
+      "inference_profile_context": "arn:aws:bedrock:ap-southeast-1:179923444714:inference-profile/apac.amazon.nova-lite-v1:0",
+      "decision": "allowed",
+      "missing_context": [],
+      "allowed": true
+    },
+    {
+      "resource": "arn:aws:bedrock:ap-southeast-1::foundation-model/amazon.nova-lite-v1:0",
+      "requested_region": "ap-southeast-1",
+      "inference_profile_context": "arn:aws:bedrock:ap-southeast-1:179923444714:inference-profile/apac.amazon.nova-lite-v1:0",
+      "decision": "allowed",
+      "missing_context": [],
+      "allowed": true
+    },
+    {
+      "resource": "arn:aws:bedrock:ap-northeast-3::foundation-model/amazon.nova-lite-v1:0",
+      "requested_region": "ap-northeast-3",
+      "inference_profile_context": "arn:aws:bedrock:ap-southeast-1:179923444714:inference-profile/apac.amazon.nova-lite-v1:0",
+      "decision": "allowed",
+      "missing_context": [],
+      "allowed": true
+    }
+  ],
+  "iam_all_resources_allowed": true,
+  "direct_model_without_profile": {
+    "resource": "arn:aws:bedrock:ap-southeast-1::foundation-model/amazon.nova-lite-v1:0",
+    "requested_region": "ap-southeast-1",
+    "inference_profile_context": null,
+    "decision": "implicitDeny",
+    "missing_context": [
+      "bedrock:InferenceProfileArn",
+      "ecs:cluster",
+      "iam:PassedToService",
+      "s3:prefix"
+    ],
+    "allowed": false
+  },
+  "direct_model_without_profile_denied": true,
+  "invocation_scope": "kien_admin_connectivity_only",
+  "runtime": {
+    "http_status": 200,
+    "request_id": "1eb9e1f9-c7a9-44ef-954b-5f13d99c06ae",
+    "latency_seconds": 0.717,
+    "response_text_present": true,
+    "matches_synthetic_answer": true,
+    "stop_reason": "end_turn",
+    "input_tokens": 9,
+    "output_tokens": 2
+  },
+  "completed_utc": "2026-11-10T11:53:23.061591+00:00"
+}

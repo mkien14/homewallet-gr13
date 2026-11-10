@@ -1,0 +1,21 @@
+{
+  "runs": {
+    "d3-pilot": {
+      "consumed": true,
+      "date": "2026-11-07",
+      "gemini_attempts": 7,
+      "bedrock_attempts": 0,
+      "status": "PARTIAL",
+      "evidence_summary": "docs/bedrock-benchmark.md"
+    },
+    "d3-pilot-v2": {
+      "consumed": true,
+      "date": "2026-11-08",
+      "gemini_attempts": 3,
+      "bedrock_attempts": 1,
+      "status": "PARTIAL",
+      "evidence_summary": "docs/bedrock-benchmark.md"
+    }
+  },
+  "note": "Completed pilot identities remain consumed even when ignored local report/lock files are absent. New image inference requires a separately approved run identity."
+}

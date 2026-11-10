@@ -1,7 +1,19 @@
 # D3 / #34: Gemini and Amazon Bedrock pilot
 
-**Status:** Both D3 attempts ended partially; no paired accuracy comparison is available.
-**Prepared:** 2026-11-07; updated 2026-11-08
+**Status (2026-11-10): PARTIAL.** Both image pilots are consumed; no paired OCR
+accuracy comparison is available. CloudTrail confirmed the old Bedrock denial
+was caused by the regional guard in `homewallet-dev-d1-testing:v3`. Current v4
+already fixes that guard. The preflight's destination-region context is now
+fixed; current Hoang IAM simulation allows all seven resources, and one small
+synthetic text call by Kien returned HTTP 200. Hoang's live identity is still
+unverified because his AWS profile is absent on this machine.
+
+See [current remediation and remaining gates](acceptance/34-bedrock-remediation-20261110.md)
+and [sanitized evidence](acceptance/34-bedrock-diagnosis-20261110.json).
+The historical results below remain unchanged. **Do not rerun either old pilot**;
+the tracked run ledger now blocks them even without ignored local lock files.
+
+**Prepared:** 2026-11-07; updated 2026-11-10
 
 ## Approved scope and data
 
@@ -50,16 +62,12 @@ one-shot lock is created before the first inference; its presence permanently
 blocks reruns, including after a partial failure. The report and lock are
 written under ignored `ocr-lab/out/`.
 
-Run from the repository root in PowerShell after activating the OCR lab venv:
-
-```powershell
-.\ocr-lab\.venv\Scripts\Activate.ps1
-Set-Location ocr-lab
-python d3_pilot.py
-```
-
-If any provider call fails, stop and retain the partial report and lock; do not
-rerun. Review `out/d3-pilot-report.json` for request counts and token usage.
+This runner is archived as consumed. Its tracked history gate runs before any
+provider access. Use the current remediation document for the separate small
+access check; a new image pilot needs a separately approved run identity.
+Historical report/lock paths below describe the artifacts recorded at run time;
+those ignored files are not present in this main checkout on 2026-11-10. Obtain
+the originals from the operator's machine rather than reconstructing them.
 
 ## Evidence and decision
 

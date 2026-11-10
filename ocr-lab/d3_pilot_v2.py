@@ -16,6 +16,7 @@ from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
+from bedrock_access import simulate_inference_access
 
 ROOT = pathlib.Path(__file__).resolve().parent
 IDS = tuple(f"{n:03d}" for n in range(21, 31))
@@ -246,26 +247,13 @@ def verify_aws_access():
 
     iam = session.client("iam", config=no_retry)
     try:
-        sim = iam.simulate_principal_policy(
-            PolicySourceArn=AWS_USER_ARN,
-            ActionNames=["bedrock:InvokeModel"],
-            ResourceArns=resources,
-            ContextEntries=[{
-                "ContextKeyName": "bedrock:InferenceProfileArn",
-                "ContextKeyValues": [profile_arn],
-                "ContextKeyType": "string",
-            }, {
-                "ContextKeyName": "aws:RequestedRegion",
-                "ContextKeyValues": [AWS_REGION],
-                "ContextKeyType": "string",
-            }],
-        )
+        evaluations = simulate_inference_access(iam, AWS_USER_ARN, profile)
     except Exception as exc:
         raise PilotError(
             f"IAM authorization simulation failed ({error_code(exc)}); "
             "the caller may lack iam:SimulatePrincipalPolicy."
         ) from exc
-    if not simulation_allows_resources(sim, resources):
+    if not all(item["allowed"] for item in evaluations):
         raise PilotError("IAM simulation did not allow bedrock:InvokeModel on every profile resource.")
     return {
         "identity": "verified",
@@ -273,6 +261,8 @@ def verify_aws_access():
         "profile_type": profile.get("type"),
         "invoke_policy_simulation": "allowed",
         "resources_checked": len(resources),
+        "iam_evaluations": evaluations,
+        "live_invocation_verified": False,
         "model": AWS_MODEL,
         "region": AWS_REGION,
     }, session
@@ -297,6 +287,12 @@ def simulation_allows_resources(simulation, resources):
 
 
 def run_preflight():
+    from pilot_run_guard import require_unconsumed_run
+    try:
+        require_unconsumed_run("d3-pilot-v2")
+        run_authorized = True
+    except RuntimeError:
+        run_authorized = False
     approval, quota = load_approval()
     samples = sample_rows()
     gemini = verify_gemini_model()
@@ -313,7 +309,9 @@ def run_preflight():
         "bedrock": aws,
         "max_cost_estimate_usd": max_costs,
         "cost_ceiling_each_usd": CEILING_USD,
-        "ready_to_run": quota_is_ready(quota),
+        "run_identity": "d3-pilot-v2",
+        "run_authorization": "UNCONSUMED" if run_authorized else "CONSUMED_OR_UNAPPROVED",
+        "ready_to_run": run_authorized and quota_is_ready(quota),
     }
     ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
     PREFLIGHT_REPORT.write_text(json.dumps(result, indent=2), encoding="utf-8")
@@ -446,6 +444,11 @@ def summarize_provider(calls, provider):
 
 
 def execute_run():
+    from pilot_run_guard import require_unconsumed_run
+    try:
+        require_unconsumed_run("d3-pilot-v2")
+    except RuntimeError as exc:
+        raise PilotError(str(exc)) from None
     if RUN_LOCK.exists() or REPORT.exists():
         raise PilotError("New-pilot v2 artifact already exists; this pilot cannot be rerun.")
     preflight = run_preflight()
@@ -557,7 +560,7 @@ def execute_run():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--preflight", action="store_true", help="Run read-only checks only; sends no images.")
-    parser.add_argument("--run", action="store_true", help="Run the approved new one-shot pilot after all gates pass.")
+    parser.add_argument("--run", action="store_true", help="Historical entrypoint; consumed runs are blocked before preflight.")
     args = parser.parse_args()
     if args.preflight == args.run:
         parser.error("choose exactly one of --preflight or --run")
