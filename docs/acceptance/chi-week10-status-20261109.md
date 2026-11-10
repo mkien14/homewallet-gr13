@@ -25,10 +25,11 @@ cung cấp. Region mặc định
    CM13 N/A được duyệt. Email qua hộp thư thật và job-push nhận trên thiết bị
    có bằng chứng. Pool test, client và permission riêng đã dọn.
    Xem [biên bản cuối](43-final-acceptance-20261110.md). Auth cutover là thay đổi riêng.
-4. **DLQ:** Receipt `id=1` đã `FAILED/WORKER_MAX_ATTEMPTS`. Đây là sự cố dữ
-   liệu cũ, không phải lỗi cấu hình #33. Giữ bằng chứng; không redrive trực
-   tiếp hoặc xóa message để làm alarm xanh. Chủ receipt/backend quyết định
-   phục hồi hoặc đóng sự cố sau khi điều tra.
+4. **DLQ:** Receipt `id=1` đã `FAILED/WORKER_MAX_ATTEMPTS`. Điều tra read-only
+   ngày 10/11 xác nhận queue/alarm và giới hạn retention; không còn đủ log để
+   tìm nguyên nhân gốc. Đây là disposition của dữ liệu cũ, không phải lỗi cấu
+   hình #33. Giữ nguyên receipt/message; chủ dữ liệu/backend cần quyết định
+   phục hồi hay cho phép cleanup. Xem [báo cáo #33](33-monitoring-kien-20261109.md).
 
 Giới hạn về chi phí: AWS Budgets đang có ngưỡng nhóm 50 USD/tháng. Giá trị
 `Actual=0` từ API Budgets không chứng minh chi phí WAF/Lambda/SNS bằng 0; cần
