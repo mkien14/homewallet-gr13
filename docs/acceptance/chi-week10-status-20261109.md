@@ -1,13 +1,14 @@
 # Tình trạng nghiệm thu phần việc Chi — 09/11/2026
 
-Kiểm tra từ mã đã merge tới `origin/main` commit `22542ab` và các API đọc AWS
-bằng IAM user `kien`, account `179923444714`. Region mặc định
+Kiểm tra từ mã đã merge tới `origin/main` commit `22542ab`, các API đọc AWS
+bằng IAM user `kien`, account `179923444714`, và bằng chứng nghiệm thu do Kiên
+cung cấp. Region mặc định
 `ap-southeast-1`; WAF CloudFront được kiểm tra ở `us-east-1`.
 
 | Việc | Kết luận hiện tại | Bằng chứng và giới hạn |
 | --- | --- | --- |
 | #29 Cognito admin group | Đã triển khai | Pool có group `homewallet-dev-admins` và một user enabled. Kiểm thử quyền API D2 thuộc phần Hoàng/Kiên. |
-| #31 WAF CloudFront | Fully accepted per user confirmation | User confirmed #31 is fully accepted; no remaining #31 work for Chi. |
+| #31 WAF CloudFront | Đã nghiệm thu hoàn toàn trong phạm vi tuần 10 | CloudFront distribution `E1FBDSJYV9WAKM` gắn Web ACL `homewallet-dev-cloudfront`. ACL mặc định `ALLOW`, `AWSManagedRulesCommonRuleSet` chạy `COUNT` theo cấu hình đã duyệt. GET `/` và `/api/ping` qua CloudFront đều HTTP 200; CloudWatch có AllowedRequests; ảnh UI ngày 09/11 ghi `/api/me`, receipt và ảnh hoạt động. Kiên xác nhận đã cung cấp đầy đủ bằng chứng nghiệm thu #31 trước đó. Tiếp tục giữ `COUNT` theo quyết định tuần 10; không còn việc #31 cho Chi. |
 | #32 DB runtime least privilege | Kiên đã nghiệm thu phase 2 | Biên bản chạy trước đó xác nhận API, worker, jobs đọc runtime DB; task jobs probe kết thúc exit 0 với `RUNTIME_DB_READ_OK`, grants đã được DB admin kiểm tra. Rà soát thêm: RDS vẫn single-AZ, một NAT đang available, chỉ có S3 Gateway Endpoint, không có CloudTrail trail mới. RDS và S3 dùng khóa KMS do AWS quản lý; IAM worker giới hạn `kms:ViaService` qua S3. Không đổi mật khẩu, secret hoặc key trong lần rà này. |
 | #33 Alarm/SNS/dashboard | Đạt phần giám sát | Xem [33-monitoring-kien-20261109.md](33-monitoring-kien-20261109.md). 8 alarm và 8 widget có mặt; email SNS test đã nhận. DLQ còn một receipt cũ `FAILED`, theo dõi riêng. |
 | #42 Cognito locale sync | Đã nghiệm thu cho Hosted UI/PKCE locale sync; email thật chưa nằm trong kết quả | User đã đăng nhập lại qua Hosted UI/PKCE sau khi apply scope. Ảnh DevTools ngày 09/11 cho thấy Cognito `UpdateUserAttributes` trả HTTP 200 khi đổi `en` và `vi`, còn `/api/me` trả đúng `preferred_locale` ở cả hai locale. Giữ bằng chứng dạng tóm tắt; không commit ảnh gốc vì ảnh chứa email/mã mời. SES pool vẫn `DEVELOPER`, SES production access GRANTED on 2026-11-10 under the user-approved decision change. |
@@ -17,8 +18,6 @@ bằng IAM user `kien`, account `179923444714`. Region mặc định
 ## Việc cần đóng tiếp
 
 1. **#31:** Fully accepted per user confirmation; closed.
-   Hosted UI/PKCE callback sau WAF. Ghi thời gian, HTTP status, request ID đã
-   che dữ liệu. Không chuyển rule sang `BLOCK` trong tuần 10.
 2. **#42:** Đã nghiệm thu live locale sync cho Hosted UI/PKCE bằng chứng
    `UpdateUserAttributes=200` và `/api/me` `en/vi`. Ghi trạng thái vào PR/artifact;
    không đưa email, token, mã mời hoặc ảnh chưa che dữ liệu vào Git.
