@@ -46,3 +46,6 @@ ocr-lab/data_small/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Local weekly work guides
+/docs/Huong_dan_cong_viec_tuan_*.docx

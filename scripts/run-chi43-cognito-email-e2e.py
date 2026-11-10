@@ -45,12 +45,23 @@ class Runner:
         self.pool,self.client=pool['Id'],environment['client_id']
         self.recipient='success@simulator.amazonses.com' if args.simulator else args.recipient
         require(self.recipient and '@' in self.recipient,'controlled_mailbox_required')
+        if args.gmail_aliases:
+            require(not args.simulator and self.recipient.rsplit('@',1)[1].lower() in ('gmail.com','googlemail.com'),
+                    'gmail_aliases_require_controlled_gmail_address')
         self.users=[]
         result['recipient_sha256']=hashlib.sha256(self.recipient.encode()).hexdigest()
         self.lm=self.session.client('lambda')
         self.config=self.lm.get_function_configuration(FunctionName=environment['custom_message_lambda'])
         result['lambda_code_sha256']=self.config['CodeSha256']
         self.start_ms=int(time.time()*1000)
+
+    def recipient_for(self,username):
+        if self.args.simulator:
+            return 'success+'+username+'@simulator.amazonses.com'
+        if self.args.gmail_aliases:
+            local,domain=self.recipient.rsplit('@',1)
+            return local.split('+',1)[0]+'+'+username+'@'+domain
+        return self.recipient
 
     def api(self,case,operation,**kwargs):
         response=getattr(self.c,operation)(**kwargs)
@@ -76,7 +87,7 @@ class Runner:
         username='chi43-'+self.result['run_id']+'-'+case.lower()
         pw=password()
         self.users.append(username)
-        recipient=('success+'+username+'@simulator.amazonses.com') if self.args.simulator else self.recipient
+        recipient=self.recipient_for(username)
         attrs=[{'Name':'email','Value':recipient}]
         if locale:
             attrs.append({'Name':'custom:preferred_locale','Value':locale})
@@ -139,7 +150,7 @@ class Runner:
             invitation='chi43-'+self.result['run_id']+'-cm15-'+locale
             self.users.append(invitation)
             self.api(case,'admin_create_user',UserPoolId=self.pool,Username=invitation,
-                     DesiredDeliveryMediums=['EMAIL'],UserAttributes=[{'Name':'email','Value':('success+'+invitation+'@simulator.amazonses.com') if self.args.simulator else self.recipient},
+                     DesiredDeliveryMediums=['EMAIL'],UserAttributes=[{'Name':'email','Value':self.recipient_for(invitation)},
                      {'Name':'email_verified','Value':'true'},{'Name':'custom:preferred_locale','Value':locale}])
             if not self.args.simulator:
                 print(case+': username trong thu phai la '+invitation,flush=True)
@@ -216,6 +227,7 @@ def main():
     p.add_argument('--environment',default='docs/acceptance/43-email-e2e-environment-20261110.json')
     p.add_argument('--recipient')
     p.add_argument('--second-recipient',help='Second controlled address for changed-email verification, CM16')
+    p.add_argument('--gmail-aliases',action='store_true',help='Use a unique +tag per fixture user, delivered to the controlled Gmail inbox')
     p.add_argument('--simulator',action='store_true')
     p.add_argument('--output',required=True)
     args=p.parse_args()

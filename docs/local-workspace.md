@@ -43,12 +43,13 @@ hợp nhất. Không cần apply stash lên bản mới vì các file đã đư�
 Bản nháp D4 local được giữ tại
 [archive/36-d4-evidence-local-before-consolidation-20261110.md](acceptance/archive/36-d4-evidence-local-before-consolidation-20261110.md).
 Biên bản D4 hiện hành giữ quyết định đóng của nhóm và bằng chứng đầy đủ hơn.
-Hai file Word hướng dẫn và `hw33-receipt-probe.json` vẫn được giữ ở vị trí cũ,
-ở trạng thái untracked như trước.
+Hai file Word hướng dẫn vẫn được giữ ở vị trí cũ, chỉ lưu local và được Git
+ignore theo yêu cầu của người dùng; không đưa vào các commit sẽ push.
+`hw33-receipt-probe.json` đã được đưa vào Git cùng các file công việc khác.
 
 ## Phạm vi
 
 Việc hợp nhất này cập nhật repository local. Trạng thái #43 vẫn PARTIAL cho
-phần hộp thư/mã thật và xác nhận thiết bị nhận push của ca job; hợp nhất Git
-không thay thế những bằng chứng còn thiếu đó. Việc publish lên GitHub được
+phần hộp thư/nội dung/mã thật; người dùng đã xác nhận nhận push của ca job.
+Hợp nhất Git không thay thế bằng chứng email còn thiếu. Việc publish lên GitHub được
 thông báo riêng khi thực hiện.

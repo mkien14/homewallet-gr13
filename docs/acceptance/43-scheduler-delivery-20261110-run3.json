@@ -434,7 +434,7 @@
   "recipient_type": "ses_mailbox_simulator",
   "recipient_sha256": "f9a9cc07f76e5c0f01623eb15e2fb1361374806e3b699ff9364c10cd81e14e46",
   "inbox_receipt": "NOT_PROVEN",
-  "device_receipt": "PENDING_USER_CONFIRMATION",
+  "device_receipt": "PASS_USER_CONFIRMED",
   "fixture_source_sha256": "97732099c481c98f1eb5b4446d144d339c49f08eed11a0c00cec4aba496f5d81",
   "fixture_payload_sha256": "f649cd8bfa9767d43768f36bae42e8d74342a6931b1e63033c224e59659e4a4d",
   "recurring_schedules_before": {
@@ -454,5 +454,10 @@
     "hw-budget-alerts": "DISABLED"
   },
   "cleanup": "PASS",
-  "finished_at_utc": "2026-11-10T07:11:03.054430+00:00"
+  "finished_at_utc": "2026-11-10T07:11:03.054430+00:00",
+  "device_receipt_evidence": {
+    "source": "User confirmation in conversation",
+    "reported_window": "2026-11-10 14:08-14:10 Asia/Bangkok",
+    "scope": "A new job notification was received; observation of all four individual pushes is not claimed."
+  }
 }

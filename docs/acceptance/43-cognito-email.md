@@ -16,8 +16,10 @@ Three one-time Scheduler schedules ran unmodified `hw-jobs:3` CLIs against two
 isolated schemas: all three jobs succeeded in vi/en, six SES simulator sends
 completed and four pushes were provider-accepted. Repeated keys skipped without
 duplicate sends. Temporary schedules, schemas and schema grants were removed;
-the original recurring schedules remain DISABLED. Job-push device receipt and
-controlled inbox/code acceptance are pending. See [delivery report](43-delivery-20261110.md).
+the original recurring schedules remain DISABLED. The user confirmed receipt
+of a new job notification in the 14:08–14:10 Asia/Bangkok window on 2026-11-10:
+job-push send/receive smoke PASS, without claiming observation of every push.
+Controlled inbox/code acceptance remains pending. See [delivery report](43-delivery-20261110.md).
 
 #42 remains accepted for live Hosted UI/PKCE locale sync. The active pool uses
 SES `DEVELOPER`, the verified sender and `custom:preferred_locale`. Its client,
@@ -246,8 +248,9 @@ A one-off configuration probe using the jobs task role and Scheduler network
 confirmed key loading/parsing, configured subject, and DB read access with exit
 code 0. See [jobs configuration evidence](43-jobs-vapid-configuration-20261110.json).
 The subsequent [one-time Scheduler delivery run](43-delivery-20261110.md) passed
-CLI execution, simulator SES sends and push provider acceptance. Controlled
-inbox/code and job-push device receipt remain pending; sandbox is no longer a block.
+CLI execution, simulator SES sends and push provider acceptance. Job-push device
+receipt is now user-confirmed PASS for the send/receive smoke. Controlled
+inbox/code acceptance remains pending; sandbox is no longer a block.
 
 Local regression checks on 2026-11-09: Lambda handler 4 passed; frontend lint
 passed, 72 frontend tests passed, and production build succeeded (Vite emitted
@@ -261,7 +264,7 @@ Invalid-locale fallback is verified locally by #42 handler tests; do not inject 
 
 1. #42 is deployed and accepted for fresh Hosted UI/PKCE locale synchronization; retain Hosted UI and SRP entrypoints.
 2. SES production access is GRANTED under the user-approved decision change. Use the isolated pool and controlled recipients for inbox/code acceptance.
-3. API/UI and Scheduler/CLI/provider checks have their own evidence; confirm job-push receipt on the device. Local tests alone do not establish runtime acceptance.
+3. API/UI, Scheduler/CLI/provider checks and user-confirmed job-push receipt have their own evidence. Local tests alone do not establish runtime acceptance.
 4. Complete the interactive controlled-mailbox cases, then remove the test pool and its scoped Lambda permission. Simulator acceptance does not establish received-code E2E.
 5. Report PASS/PARTIAL/BLOCKED/N/A with owners and sanitized evidence. This email matrix alone does not establish whole-app #43 acceptance.
 6. Auth cutover remains a separately reviewed change by Kien only after required #42–43 acceptance is complete.
