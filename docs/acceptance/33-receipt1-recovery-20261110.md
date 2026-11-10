@@ -2,12 +2,12 @@
 
 Decision date: 2026-11-10 (Asia/Bangkok). Operator: Kiên.
 
-Status: **RECOVERED TO DRAFT / MANUAL REVIEW PENDING**. The first controlled
-attempt failed with provider `ServerError`. A fresh readiness check later passed,
-and one additional guarded generation succeeded. A read-only postcheck confirmed
-receipt `1` is `NEEDS_REVIEW` with exactly one `DRAFT` transaction (`39`), while
-the original S3 object remains unchanged. The draft has not been approved or
-confirmed as a transaction.
+Status: **SCOPE MISMATCH — EXTERNAL HOUSEHOLD DATA; DO NOT REVIEW OR CONFIRM**.
+Kiên later clarified that household `1` belongs to a person outside the group.
+The controlled attempt described below sent the receipt image to Gemini once and
+created transaction `39` as `DRAFT`. It was not confirmed. Do not use this record
+as a group test fixture, access it through another account, or process it further
+until the data owner and group decide how to handle it.
 
 Kiên selected retaining the original receipt and recovering it through a controlled
 workflow. The scope is receipt `1`, household `1`; this does not reopen the D3 pilot
@@ -106,10 +106,12 @@ duplicate/transaction guards; no recovery is scheduled or automatically retried.
   `NEEDS_REVIEW`; original S3 size, ETag fingerprint and version fingerprint match.
 - All three ECS tasks stopped successfully. No second recovery was attempted.
 
-The owner must compare draft `39` with the original receipt in HomeWallet and
-correct or reject it as appropriate. Do not confirm it until the amount, merchant,
-date and category have been checked. The old DLQ message remains retained under
-the prior decision; this recovery did not receive, delete, redrive or purge it.
+The postcheck showed draft `39` exists, but the group has no confirmed authority to
+review or confirm the outside person's transaction. Keep it unconfirmed. The old
+DLQ message remains retained; this recovery did not receive, delete, redrive or
+purge it. The group must decide, with appropriate authority, whether to remove the
+mis-scoped data and how to handle the retained queue message. No further reads or
+mutations should be made for acceptance purposes.
 
 The DLQ alarm remains a separate operational follow-up until the stale message is
 handled under a subsequent decision. A restored draft does not prove the original
