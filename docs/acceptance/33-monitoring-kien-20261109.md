@@ -79,3 +79,23 @@ quyết định receipt/S3 object còn cần phục hồi hay được phép lo�
 receipt, object và DLQ message cho tới khi có quyết định đó; chưa chạy redrive hoặc
 cleanup. Việc này là disposition của dữ liệu cũ, tách biệt với nghiệm thu cấu hình
 monitoring #33 đã đạt.
+
+## Quyết định và phục hồi có kiểm soát ngày 2026-11-10
+
+Kiên đã chọn **giữ dữ liệu để phục hồi có kiểm soát**. Task chỉ đọc xác nhận receipt
+`1`/household `1` còn ảnh JPEG gốc trên S3 (97503 byte), chưa có giao dịch liên quan,
+uploader còn là member và danh mục mặc định tồn tại. Bucket bật versioning; object
+hiện tại không có expiration trong các lifecycle rules áp dụng, chuyển lớp lưu trữ
+sau 90 ngày; noncurrent versions có retention 30 ngày.
+
+Đã bổ sung công cụ scope đúng một receipt, kiểm tra fingerprint DB/S3/code, khóa
+bản ghi và chặn giao dịch trùng. Một lần gọi Gemini duy nhất được thực hiện; SDK và
+ứng dụng đều giới hạn một attempt, tắt fallback. Lần gọi trả `ServerError`; task
+rollback và dừng. Kiểm tra độc lập sau đó xác nhận receipt/status/timestamps và
+metadata S3 không đổi, không tạo giao dịch, DLQ vẫn 1 visible/0 in-flight. Không
+redrive, nhận body hoặc xóa message. Lỗi provider hiện tại không chứng minh nguyên
+nhân lỗi cũ tháng 10.
+
+Trạng thái sự cố: **đã giữ dữ liệu, phục hồi còn chờ provider**, chưa gọi là phục hồi
+thành công. Quy trình, giới hạn, kết quả test và artifacts:
+[33-receipt1-recovery-20261110.md](33-receipt1-recovery-20261110.md).

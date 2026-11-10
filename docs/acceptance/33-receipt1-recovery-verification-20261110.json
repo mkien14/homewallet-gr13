@@ -1,0 +1,49 @@
+{
+  "status": "RETAINED_RECOVERY_PENDING_PROVIDER",
+  "verified_at_utc": "2026-11-10T11:13:20.409186+00:00",
+  "operator_arn": "arn:aws:iam::179923444714:user/kien",
+  "receipt_id": 1,
+  "household_id": 1,
+  "state_comparison": {
+    "receipt_id": true,
+    "household_id": true,
+    "status": true,
+    "error_code": true,
+    "created_at": true,
+    "processed_at": true,
+    "key_sha256": true,
+    "stored_content_sha256_present": true,
+    "transaction_count": true,
+    "transaction_statuses": true,
+    "source_object": true
+  },
+  "persistent_state_unchanged": true,
+  "receipt_status": "FAILED",
+  "linked_transaction_count": 0,
+  "source_object_present": true,
+  "controlled_generation_calls": 1,
+  "provider_error_type": "ServerError",
+  "provider_http_code": "NOT_CAPTURED_FOR_THIS_ATTEMPT",
+  "fallback_used": false,
+  "automatic_retries": false,
+  "dlq_visible": 1,
+  "dlq_in_flight": 0,
+  "dlq_contents_received": false,
+  "temporary_tasks_all_stopped": true,
+  "artifacts": [
+    "33-receipt1-inspection-20261110.json",
+    "33-receipt1-readiness-20261110.json",
+    "33-receipt1-recovery-attempt-20261110.json",
+    "33-receipt1-postcheck-20261110.json"
+  ],
+  "storage_retention": {
+    "versioning": "Enabled",
+    "current_version_expiration": null,
+    "current_version_transition": {
+      "days": 90,
+      "storage_class": "GLACIER_IR"
+    },
+    "noncurrent_version_expiration_days": 30,
+    "policy_changed": false
+  }
+}

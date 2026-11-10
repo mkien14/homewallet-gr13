@@ -1,0 +1,79 @@
+{
+  "status": "FAILED",
+  "mode": "CONTROLLED_RECOVERY",
+  "provider_metadata_check": true,
+  "receipt_id": 1,
+  "household_id": 1,
+  "started_at": "2026-11-10T11:09:44.486085+00:00",
+  "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-worker:3",
+  "runtime_source_sha256": "68145e836b1c1ba4ebf2aec9fa9513cc0085b30ab4917e30269fb54f1226e118",
+  "readiness_artifact": "33-receipt1-readiness-20261110.json",
+  "expected_inspection_sha256": "482d105fecfbf482015c00b9b5809b71ea19adf1e4d54a02afc85caec107e977",
+  "generation_limit": 1,
+  "fallback_enabled": false,
+  "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/3936fa1ac177411ab29d9a60e5b117f1",
+  "exit_code": 1,
+  "image_digest": "sha256:28e13fd5bcf16e1663be2e9b03ebe8ac21cbc52469f91d6211096a71700ff264",
+  "events": [
+    {
+      "event": "RECEIPT_RECOVERY_INSPECTION",
+      "at_utc": "2026-11-10T11:10:07.672595+00:00",
+      "receipt_id": 1,
+      "household_id": 1,
+      "status": "FAILED",
+      "error_code": "WORKER_MAX_ATTEMPTS",
+      "created_at": "2026-10-25 08:25:44",
+      "processed_at": "2026-10-25 08:31:46",
+      "key_sha256": "f357480856bd41f4bacd130426e4a6a006c7a5e97124d89212e9cb78878bab99",
+      "key_has_upload_prefix": true,
+      "stored_content_sha256_present": false,
+      "transaction_count": 0,
+      "transaction_statuses": [],
+      "uploader_is_current_member": true,
+      "uncategorized_exists": true,
+      "source_object": {
+        "exists": true,
+        "bytes": 97503,
+        "content_type": "image/jpeg",
+        "last_modified": "2026-10-25T08:25:45+00:00",
+        "etag_sha256": "a0866a009e13b46fff0ba534437255b894e7e49fd39962c7ac55805f02e9b106",
+        "version_id_sha256": "81ffd58a9eb18daa85110b384db60505d29f73d15f44f7b81b43b3a4d8b507a6"
+      },
+      "gemini_key_configured": true,
+      "gemini_model": "gemini-3.6-flash",
+      "normal_gemini_max_tries": 6,
+      "pipeline_sha256": "86ec3f1da7dba152e76f34d3d2a28e3366e4874322d75d10bb2815f316144cab",
+      "llm_sha256": "eb2767ec33cd031670aae7c0bd7d66bbe12157505bda756329f79963d02eac04",
+      "provider_metadata_probe": {
+        "performed": true,
+        "available": true
+      },
+      "inspection_sha256": "482d105fecfbf482015c00b9b5809b71ea19adf1e4d54a02afc85caec107e977"
+    },
+    {
+      "event": "RECEIPT_RECOVERY_ATTEMPT",
+      "at_utc": "2026-11-10T11:10:07.857148+00:00",
+      "receipt_id": 1,
+      "household_id": 1,
+      "generation_limit": 1,
+      "sdk_retry_attempts": 1,
+      "fallback_enabled": false,
+      "original_object_retained": true,
+      "original_dlq_message_retained": true
+    },
+    {
+      "event": "RECEIPT_RECOVERY_ATTEMPT_FAILED",
+      "at_utc": "2026-11-10T11:10:27.274125+00:00",
+      "receipt_id": 1,
+      "generation_calls": 1,
+      "persistence_returned": false,
+      "reinspection_required": true
+    },
+    {
+      "event": "RECEIPT_RECOVERY_FAILED",
+      "at_utc": "2026-11-10T11:10:27.274535+00:00",
+      "error_type": "ServerError"
+    }
+  ],
+  "completed_at": "2026-11-10T11:10:52.757307+00:00"
+}
