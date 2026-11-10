@@ -9,6 +9,19 @@ created transaction `39` as `DRAFT`. It was not confirmed. Do not use this recor
 as a group test fixture, access it through another account, or process it further
 until the data owner and group decide how to handle it.
 
+## Disposition decision after scope clarification
+
+For now, preserve transaction `39` as an unconfirmed draft, receipt `1` and its
+original S3 object, and the single DLQ message. Do not confirm, edit, delete,
+redrive, receive, or reprocess them. Deleting the draft or image could destroy the
+outside owner's data; redriving the stale message cannot recover the failed
+receipt and could create another processing attempt. Keep the existing acceptance
+metadata as the audit record, restrict any further access to an authorized data
+owner/operator, and ask the data owner or the account's designated data steward
+to choose retention or deletion through the normal controlled process. This is a
+containment decision, not a claim that the outsider consented or that the incident
+has been fully remediated. No further AWS action was taken for this decision.
+
 Kiên selected retaining the original receipt and recovering it through a controlled
 workflow. The scope is receipt `1`, household `1`; this does not reopen the D3 pilot
 or authorize batch OCR, Bedrock, Textract, queue purge, or automatic confirmation.
@@ -110,8 +123,10 @@ The postcheck showed draft `39` exists, but the group has no confirmed authority
 review or confirm the outside person's transaction. Keep it unconfirmed. The old
 DLQ message remains retained; this recovery did not receive, delete, redrive or
 purge it. The group must decide, with appropriate authority, whether to remove the
-mis-scoped data and how to handle the retained queue message. No further reads or
-mutations should be made for acceptance purposes.
+mis-scoped data and how to handle the retained queue message. The immediate
+disposition is to preserve and restrict access pending a decision by the data
+owner or designated data steward. No further reads or mutations should be made for
+acceptance purposes.
 
 The DLQ alarm remains a separate operational follow-up until the stale message is
 handled under a subsequent decision. A restored draft does not prove the original

@@ -8,6 +8,25 @@ hiện hành đã có bản sửa, sửa lỗi preflight và gọi thử Bedrock
 Kiên. **#34 vẫn PARTIAL:** chưa có runtime bằng chính Hoàng sau sửa và chưa có
 benchmark OCR hợp lệ theo cặp Gemini/Bedrock.
 
+### Quyết định tiếp tục ngày 10/11/2026
+
+Phiên AWS hiện có chỉ liệt kê profile `default`, và STS xác nhận đó là IAM user
+`kien`; không có phiên Hoàng để tạo bằng chứng runtime theo danh tính Hoàng.
+Không có bằng chứng quota generate Gemini mới trong hồ sơ hiện có. Hai lượt
+pilot lịch sử đã tiêu thụ guard và không được chạy lại. Vì vậy quyết định tốt
+nhất hiện tại là **PARTIAL / NO-GO cho OCR benchmark mới**: không gửi ảnh
+`021–030`, không dùng receipt của người ngoài nhóm, không xóa guard/ledger, và
+không chạy model chỉ để đổi nhãn nghiệm thu. Đây là giới hạn do thiếu điều kiện,
+không phải lỗi Bedrock còn mở.
+
+Đã hoàn tất phần có thể làm an toàn từ phiên hiện tại: chẩn đoán IAM, sửa
+preflight, mô phỏng quyền đúng vùng, và một lần gọi văn bản tổng hợp bằng Kiên
+trả HTTP `200` (đã có artifact ở trên). Để mở lại benchmark, Hoàng cần tự cung
+cấp phiên AWS của mình để chạy đúng smoke test không ảnh; Kiên cần xác nhận quota
+Gemini mới và giới hạn chi phí; sau đó nhóm phải chốt một run ID mới cùng bộ ảnh
+được phép dùng. Nếu không đáp ứng các điều kiện đó, giữ #34 ở `PARTIAL` khi bàn
+giao.
+
 ## 1. Nguyên nhân đã có bằng chứng
 
 [Artifact chẩn đoán](34-bedrock-diagnosis-20261110.json) ghi CloudTrail event
