@@ -1,16 +1,24 @@
 # #43 — Cognito email locale acceptance (Chi)
 
-Status as of 2026-11-10: **#43 PARTIAL**. The user explicitly approved SES
+Status as of 2026-11-10: **#43 PASS within the agreed acceptance scope**.
+CM01–12 and CM14–16 PASS; CM13 is user-approved N/A. The controlled mailbox run
+completed at 14:59:53 Asia/Bangkok: 47 API calls returned HTTP 200, localized
+content was operator-confirmed, received codes completed the flows, and seven
+temporary users were removed. The empty test pool/client and scoped Lambda
+permission were subsequently removed. See [final acceptance](43-final-acceptance-20261110.md)
+and [mailbox evidence](43-cognito-mailbox-20261110.json).
+
+The user explicitly approved SES
 production-access submission, superseding the earlier shared-account sandbox
 decision. AWS granted access in `ap-southeast-1` (case `179429386000476`);
 `ProductionAccessEnabled=true`. Cognito email is no longer blocked by sandbox.
 
 An isolated pool/client now exercises the deployed Custom Message Lambda.
-Labeled SES simulator requests passed for signup/resend/forgot, fallback,
-locale changes and invitation. Controlled inbox/content/code evidence remains
-pending. CM16 needs a second controlled address. CM14 PASS is scoped to the
-controlled email-trigger window: 11 invocations, 33 lifecycle log lines, no
-application payload lines. Six temporary simulator users were deleted.
+The initial labeled simulator run passed send requests; the later controlled
+mailbox run completed signup/resend/forgot, fallback, locale changes, invitation
+and changed-email verification in vi/en. CM14 PASS is scoped to its controlled
+email-trigger window: 14 invocations, 42 lifecycle log lines, no application
+payload lines. Six earlier simulator users and seven mailbox users were deleted.
 
 Three one-time Scheduler schedules ran unmodified `hw-jobs:3` CLIs against two
 isolated schemas: all three jobs succeeded in vi/en, six SES simulator sends
@@ -19,7 +27,7 @@ duplicate sends. Temporary schedules, schemas and schema grants were removed;
 the original recurring schedules remain DISABLED. The user confirmed receipt
 of a new job notification in the 14:08–14:10 Asia/Bangkok window on 2026-11-10:
 job-push send/receive smoke PASS, without claiming observation of every push.
-Controlled inbox/code acceptance remains pending. See [delivery report](43-delivery-20261110.md).
+Controlled inbox/code acceptance is now PASS. See [delivery report](43-delivery-20261110.md).
 
 #42 remains accepted for live Hosted UI/PKCE locale sync. The active pool uses
 SES `DEVELOPER`, the verified sender and `custom:preferred_locale`. Its client,
@@ -79,31 +87,33 @@ Use these exact subject pairs in #42/#43 evidence. Hoàng can flag a product ter
 
 ## Dev test matrix
 
-All rows start NOT_RUN. Replace status only after executing the case; record expected/actual, sanitized evidence reference, UTC timestamp and deployed commit. Never mark an email pass based only on a unit test.
+The rows below contain the final observed status. Runtime evidence, operator
+content confirmation and request IDs are linked in the final acceptance;
+historical local tests are recorded separately.
 
 | ID | Locale | Case | Expected | Status |
 | --- | --- | --- | --- | --- |
-| CM01 | vi | New signup, then confirm | Vietnamese subject/body, received code confirms account | PARTIAL — labeled simulator send accepted; controlled inbox and received code pending |
-| CM02 | en | New signup, then confirm | English subject/body, received code confirms account | PARTIAL — labeled simulator send accepted; controlled inbox and received code pending |
-| CM03 | vi | Resend signup verification | Vietnamese, new code works | PARTIAL — labeled simulator send accepted; controlled inbox and received code pending |
-| CM04 | en | Resend signup verification | English, new code works | PARTIAL — labeled simulator send accepted; controlled inbox and received code pending |
-| CM05 | vi | Forgot password, then confirm reset | Vietnamese reset email; login with changed password works | PARTIAL — labeled simulator send accepted; controlled inbox and received code pending |
-| CM06 | en | Forgot password, then confirm reset | English reset email; login with changed password works | PARTIAL — labeled simulator send accepted; controlled inbox and received code pending |
-| CM07 | absent | Message for user without locale | Vietnamese fallback; existing accounts remain usable | PARTIAL — local fallback and simulator request accepted; inbox content pending |
-| CM08 | vi→en | Change backend and Cognito locale, then request message | Both stores consistent, subsequent message English | PARTIAL — stores verified; simulator request accepted, inbox content/code pending |
-| CM09 | en→vi | Change backend and Cognito locale, then request message | Both stores consistent, subsequent message Vietnamese | PARTIAL — stores verified; simulator request accepted, inbox content/code pending |
+| CM01 | vi | New signup, then confirm | Vietnamese subject/body, received code confirms account | PASS — controlled mailbox content confirmed; received code confirms signup, login 200 |
+| CM02 | en | New signup, then confirm | English subject/body, received code confirms account | PASS — controlled mailbox content confirmed; received code confirms signup, login 200 |
+| CM03 | vi | Resend signup verification | Vietnamese, new code works | PASS — received new code confirms signup, login 200 |
+| CM04 | en | Resend signup verification | English, new code works | PASS — received new code confirms signup, login 200 |
+| CM05 | vi | Forgot password, then confirm reset | Vietnamese reset email; login with changed password works | PASS — received reset code succeeds, login with changed password 200 |
+| CM06 | en | Forgot password, then confirm reset | English reset email; login with changed password works | PASS — received reset code succeeds, login with changed password 200 |
+| CM07 | absent | Message for user without locale | Vietnamese fallback; existing accounts remain usable | PASS — Vietnamese inbox content confirmed, received code and login succeed |
+| CM08 | vi→en | Change backend and Cognito locale, then request message | Both stores consistent, subsequent message English | PASS — stores previously verified; controlled English email, reset code and login succeed |
+| CM09 | en→vi | Change backend and Cognito locale, then request message | Both stores consistent, subsequent message Vietnamese | PASS — stores previously verified; controlled Vietnamese email, reset code and login succeed |
 | CM10 | both | One locale update destination fails | UI reports partial failure and retries; no false synchronized state | PASS — simulated Cognito request blocking showed the partial-save alert; after unblocking, retry cleared the alert, Cognito returned 200, and `/api/me` confirmed `preferred_locale=en` |
 | CM11 | both | SRP login, refresh, session persistence | Existing behavior preserved | PASS — after access-token expiry, Cognito `GetTokensFromRefreshToken` returned 200; the app remained signed in and `GET /api/me` returned 200 |
 | CM12 | both | Hosted UI/PKCE login and callback | Existing entrypoint works; no cutover | PASS — fresh login/callback verified |
 | CM13 | both | TOTP MFA challenge | Authenticator challenge works; no email MFA expected | N/A — user approved N/A; pool is OPTIONAL and software-token MFA is not configured |
-| CM14 | both | Review Lambda logs | No events, real codes, passwords or tokens | PASS — controlled Cognito email-request window on 2026-11-10: 11 invocations, 33 lifecycle-only lines, zero application payload lines; no per-trigger payload logging |
-| CM15 | both | Invitation if approved for testing | Both username and temporary-password placeholders replaced | PARTIAL — invitation request accepted; inbox placeholders and temporary-password login pending |
-| CM16 | both | Verify a changed email if approved for testing | Correct locale and verification succeeds for controlled recipient | NOT_RUN — second controlled recipient and received code required |
+| CM14 | both | Review Lambda logs | No events, real codes, passwords or tokens | PASS — controlled mailbox run: 14 invocations, 42 lifecycle-only lines, zero application payload lines; no per-trigger payload logging |
+| CM15 | both | Invitation if approved for testing | Both username and temporary-password placeholders replaced | PASS — vi/en inbox content confirmed; temporary-password challenge and subsequent login succeed |
+| CM16 | both | Verify a changed email if approved for testing | Correct locale and verification succeeds for controlled recipient | PASS — vi/en received codes verified; GetUser confirms changed email and email_verified=true |
 
 The locale-store portions of CM08 and CM09 are supported by the live browser
 evidence: changing each locale caused a successful Cognito attribute update and
-the matching locale in `/api/me`. Isolated simulator requests now pass; controlled
-inbox/content/code checks remain pending.
+the matching locale in `/api/me`. Controlled inbox/content/code checks now also
+PASS in the isolated mailbox run; see the final acceptance artifact.
 CM10 was exercised in the deployed browser on 2026-11-09 (Asia/Bangkok):
 DevTools Network request blocking was enabled for the Cognito IdP domain; the UI
 showed "Your language was saved only in part. Please try again." After the rule
@@ -173,7 +183,8 @@ selecting exactly one delivery target. It called the deployed `pywebpush`
 library directly with the same generic payload shape used by the job helper:
 `{"event_type":"budget_alert","deep_link":"/notifications"}`. It did not run
 a scheduled job, send SES email, insert an in-app notification, or write to the
-database. Scheduled job integration remains NOT_RUN.
+database. This was the earlier transport probe; the subsequent one-time
+Scheduler job integration passed as recorded in the final acceptance.
 
 - Accepted task: `arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/ea095c3894ce4d3fb354f316dc1924a8`.
 - CloudWatch log group/stream: `/ecs/hw-api` / `api/api/ea095c3894ce4d3fb354f316dc1924a8`.
@@ -238,7 +249,7 @@ read/click step **PASS**: `PATCH /api/notifications/41` returned `200 OK`, with
 `X-Request-Id=9389bdb0-83bc-40ee-b129-1e3bbf92de34`. The UI shows the read marker.
 A subsequent screenshot shows GET after PATCH with the read marker retained
 after reload: browser persistence is also PASS.
-Notification `41` is retained pending agreed cleanup. Screenshots were reviewed
+Notification `41` is retained as the controlled browser evidence fixture. Screenshots were reviewed
 in the conversation and are not committed.
 
 The jobs task's missing VAPID secret reference was added after reviewing the
@@ -250,7 +261,7 @@ code 0. See [jobs configuration evidence](43-jobs-vapid-configuration-20261110.j
 The subsequent [one-time Scheduler delivery run](43-delivery-20261110.md) passed
 CLI execution, simulator SES sends and push provider acceptance. Job-push device
 receipt is now user-confirmed PASS for the send/receive smoke. Controlled
-inbox/code acceptance remains pending; sandbox is no longer a block.
+inbox/code acceptance also passed in the later mailbox run.
 
 Local regression checks on 2026-11-09: Lambda handler 4 passed; frontend lint
 passed, 72 frontend tests passed, and production build succeeded (Vite emitted
@@ -265,7 +276,7 @@ Invalid-locale fallback is verified locally by #42 handler tests; do not inject 
 1. #42 is deployed and accepted for fresh Hosted UI/PKCE locale synchronization; retain Hosted UI and SRP entrypoints.
 2. SES production access is GRANTED under the user-approved decision change. Use the isolated pool and controlled recipients for inbox/code acceptance.
 3. API/UI, Scheduler/CLI/provider checks and user-confirmed job-push receipt have their own evidence. Local tests alone do not establish runtime acceptance.
-4. Complete the interactive controlled-mailbox cases, then remove the test pool and its scoped Lambda permission. Simulator acceptance does not establish received-code E2E.
+4. Controlled-mailbox cases and cleanup are complete; the isolated pool/client and scoped Lambda permission were removed. The final artifact establishes received-code E2E separately from simulator evidence.
 5. Report PASS/PARTIAL/BLOCKED/N/A with owners and sanitized evidence. This email matrix alone does not establish whole-app #43 acceptance.
 6. Auth cutover remains a separately reviewed change by Kien only after required #42–43 acceptance is complete.
 

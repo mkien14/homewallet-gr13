@@ -1,0 +1,16 @@
+{
+  "at_utc": "2026-11-10T08:04:27.786356+00:00",
+  "account": "179923444714",
+  "region": "ap-southeast-1",
+  "user_pool_id": "ap-southeast-1_Hm6fFrq0M",
+  "test_users_remaining_before_pool_delete": 0,
+  "test_users_deleted_by_e2e_script": 7,
+  "delete_pool_http_status": 200,
+  "delete_pool_request_id": "a039cde4-adda-4877-9bec-35723f141dc2",
+  "remove_permission_http_status": 204,
+  "remove_permission_request_id": "2a3e8b95-b75e-4f05-bf92-d062e895757a",
+  "user_pool_deletion_verified": true,
+  "scoped_lambda_permission_removal_verified": true,
+  "live_pool_preserved": true,
+  "status": "PASS"
+}

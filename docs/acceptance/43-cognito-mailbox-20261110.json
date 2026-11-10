@@ -1,0 +1,400 @@
+{
+  "run_id": "2e1a13cdc88d",
+  "started_at_utc": "2026-11-10T07:52:45.877742+00:00",
+  "user_pool_id": "ap-southeast-1_Hm6fFrq0M",
+  "recipient_type": "controlled_mailbox",
+  "api": [
+    {
+      "case": "CM01",
+      "operation": "sign_up",
+      "http_status": 200,
+      "aws_request_id": "b920d239-7693-49a5-8fe6-272c266f3188",
+      "at_utc": "2026-11-10T07:52:48.453847+00:00",
+      "delivery_medium": "EMAIL"
+    },
+    {
+      "case": "CM01",
+      "operation": "confirm_sign_up",
+      "http_status": 200,
+      "aws_request_id": "f6c344de-8170-4599-8248-94d42f9dde3a",
+      "at_utc": "2026-11-10T07:53:03.991136+00:00"
+    },
+    {
+      "case": "CM01",
+      "operation": "initiate_auth",
+      "http_status": 200,
+      "aws_request_id": "764bce3e-4639-4b27-b5a5-3711c8d2c686",
+      "at_utc": "2026-11-10T07:53:05.506744+00:00"
+    },
+    {
+      "case": "CM03",
+      "operation": "sign_up",
+      "http_status": 200,
+      "aws_request_id": "7b7767bc-9270-4b77-8287-5370376fe07e",
+      "at_utc": "2026-11-10T07:53:07.242193+00:00",
+      "delivery_medium": "EMAIL"
+    },
+    {
+      "case": "CM03",
+      "operation": "resend_confirmation_code",
+      "http_status": 200,
+      "aws_request_id": "863826b3-6a1b-4634-a14d-54cca2e30435",
+      "at_utc": "2026-11-10T07:53:39.311332+00:00",
+      "delivery_medium": "EMAIL"
+    },
+    {
+      "case": "CM03",
+      "operation": "confirm_sign_up",
+      "http_status": 200,
+      "aws_request_id": "35d2fa27-4e45-43a3-80a4-34219175f42a",
+      "at_utc": "2026-11-10T07:54:14.795716+00:00"
+    },
+    {
+      "case": "CM03",
+      "operation": "initiate_auth",
+      "http_status": 200,
+      "aws_request_id": "de36b7c1-de4f-4531-a180-ee86858d5a4c",
+      "at_utc": "2026-11-10T07:54:16.367429+00:00"
+    },
+    {
+      "case": "CM05",
+      "operation": "forgot_password",
+      "http_status": 200,
+      "aws_request_id": "f6382aee-8c0d-4ec8-ba50-f9bf76d02d68",
+      "at_utc": "2026-11-10T07:54:17.909434+00:00",
+      "delivery_medium": "EMAIL"
+    },
+    {
+      "case": "CM05",
+      "operation": "confirm_forgot_password",
+      "http_status": 200,
+      "aws_request_id": "eb86f6bb-1e7e-4736-b383-60a83828276b",
+      "at_utc": "2026-11-10T07:54:46.327354+00:00"
+    },
+    {
+      "case": "CM05",
+      "operation": "initiate_auth",
+      "http_status": 200,
+      "aws_request_id": "7ea85f9b-0303-4e79-8d0c-e423bdb03084",
+      "at_utc": "2026-11-10T07:54:47.881780+00:00"
+    },
+    {
+      "case": "CM02",
+      "operation": "sign_up",
+      "http_status": 200,
+      "aws_request_id": "b04e8af2-b040-4b5b-b5c7-7b3ca6f3e81d",
+      "at_utc": "2026-11-10T07:54:49.603913+00:00",
+      "delivery_medium": "EMAIL"
+    },
+    {
+      "case": "CM02",
+      "operation": "confirm_sign_up",
+      "http_status": 200,
+      "aws_request_id": "ff3176c5-2164-4d98-ae43-be3673bd80eb",
+      "at_utc": "2026-11-10T07:55:06.034502+00:00"
+    },
+    {
+      "case": "CM02",
+      "operation": "initiate_auth",
+      "http_status": 200,
+      "aws_request_id": "bc4b621b-3b29-4841-a16d-3113dabe7a00",
+      "at_utc": "2026-11-10T07:55:07.571688+00:00"
+    },
+    {
+      "case": "CM04",
+      "operation": "sign_up",
+      "http_status": 200,
+      "aws_request_id": "b0c85535-1d62-487a-a9bb-23494318f15c",
+      "at_utc": "2026-11-10T07:55:09.363213+00:00",
+      "delivery_medium": "EMAIL"
+    },
+    {
+      "case": "CM04",
+      "operation": "resend_confirmation_code",
+      "http_status": 200,
+      "aws_request_id": "6f02a77b-2e0f-4b5c-aad6-4bde896a3e0e",
+      "at_utc": "2026-11-10T07:55:14.110031+00:00",
+      "delivery_medium": "EMAIL"
+    },
+    {
+      "case": "CM04",
+      "operation": "confirm_sign_up",
+      "http_status": 200,
+      "aws_request_id": "db60e682-b200-4a8a-a384-d512ed842c00",
+      "at_utc": "2026-11-10T07:55:49.205514+00:00"
+    },
+    {
+      "case": "CM04",
+      "operation": "initiate_auth",
+      "http_status": 200,
+      "aws_request_id": "13289906-a3ea-4793-a08d-8db08d7c660f",
+      "at_utc": "2026-11-10T07:55:50.760940+00:00"
+    },
+    {
+      "case": "CM06",
+      "operation": "forgot_password",
+      "http_status": 200,
+      "aws_request_id": "809b4163-dd0a-4e0e-b1c1-3c6b7aa21bc6",
+      "at_utc": "2026-11-10T07:55:52.296899+00:00",
+      "delivery_medium": "EMAIL"
+    },
+    {
+      "case": "CM06",
+      "operation": "confirm_forgot_password",
+      "http_status": 200,
+      "aws_request_id": "6fad95ca-b83e-4b9a-8928-6d6ab21f4980",
+      "at_utc": "2026-11-10T07:56:18.822363+00:00"
+    },
+    {
+      "case": "CM06",
+      "operation": "initiate_auth",
+      "http_status": 200,
+      "aws_request_id": "4868cfd8-fb74-4fd2-ae94-99a8ead9ffe8",
+      "at_utc": "2026-11-10T07:56:20.296441+00:00"
+    },
+    {
+      "case": "CM07",
+      "operation": "sign_up",
+      "http_status": 200,
+      "aws_request_id": "ec57df5c-15cf-4196-a4bf-316e954cabba",
+      "at_utc": "2026-11-10T07:56:22.030568+00:00",
+      "delivery_medium": "EMAIL"
+    },
+    {
+      "case": "CM07",
+      "operation": "confirm_sign_up",
+      "http_status": 200,
+      "aws_request_id": "2a9d29d2-0882-4eea-b0b3-c8427cf4f7e3",
+      "at_utc": "2026-11-10T07:56:36.119467+00:00"
+    },
+    {
+      "case": "CM07",
+      "operation": "initiate_auth",
+      "http_status": 200,
+      "aws_request_id": "518c0ca5-fe64-4ae5-8d72-7b665d25d9c2",
+      "at_utc": "2026-11-10T07:56:37.629247+00:00"
+    },
+    {
+      "case": "CM08",
+      "operation": "admin_update_user_attributes",
+      "http_status": 200,
+      "aws_request_id": "a5b4385b-897e-4ff6-ade6-d11e4511adf1",
+      "at_utc": "2026-11-10T07:56:39.036566+00:00"
+    },
+    {
+      "case": "CM08",
+      "operation": "forgot_password",
+      "http_status": 200,
+      "aws_request_id": "a5123686-98f3-46c9-823c-18c272850f0c",
+      "at_utc": "2026-11-10T07:56:40.562441+00:00",
+      "delivery_medium": "EMAIL"
+    },
+    {
+      "case": "CM08",
+      "operation": "confirm_forgot_password",
+      "http_status": 200,
+      "aws_request_id": "c1d28249-88fd-4344-9919-f37937751ca0",
+      "at_utc": "2026-11-10T07:57:02.587636+00:00"
+    },
+    {
+      "case": "CM08",
+      "operation": "initiate_auth",
+      "http_status": 200,
+      "aws_request_id": "e1ca732d-87a8-4e48-b02a-2f42c85df618",
+      "at_utc": "2026-11-10T07:57:04.080218+00:00"
+    },
+    {
+      "case": "CM09",
+      "operation": "admin_update_user_attributes",
+      "http_status": 200,
+      "aws_request_id": "bed5dee6-65d8-4792-bfa6-cddc2d923efa",
+      "at_utc": "2026-11-10T07:57:05.520110+00:00"
+    },
+    {
+      "case": "CM09",
+      "operation": "forgot_password",
+      "http_status": 200,
+      "aws_request_id": "4d534cc2-209d-4642-86e0-75815c5c6ee1",
+      "at_utc": "2026-11-10T07:57:07.076070+00:00",
+      "delivery_medium": "EMAIL"
+    },
+    {
+      "case": "CM09",
+      "operation": "confirm_forgot_password",
+      "http_status": 200,
+      "aws_request_id": "92f69dc2-b18a-44a1-8779-57d8def44362",
+      "at_utc": "2026-11-10T07:57:31.196173+00:00"
+    },
+    {
+      "case": "CM09",
+      "operation": "initiate_auth",
+      "http_status": 200,
+      "aws_request_id": "1934aa91-60b7-4ef1-bf9d-6259d27f7557",
+      "at_utc": "2026-11-10T07:57:32.712927+00:00"
+    },
+    {
+      "case": "CM15_vi",
+      "operation": "admin_create_user",
+      "http_status": 200,
+      "aws_request_id": "613efde9-120d-4c4c-8af9-437b9d949728",
+      "at_utc": "2026-11-10T07:57:34.504557+00:00"
+    },
+    {
+      "case": "CM15_vi",
+      "operation": "initiate_auth",
+      "http_status": 200,
+      "aws_request_id": "9b0f0df2-58a2-4341-9085-8479ea29444a",
+      "at_utc": "2026-11-10T07:58:09.009276+00:00"
+    },
+    {
+      "case": "CM15_vi",
+      "operation": "respond_to_auth_challenge",
+      "http_status": 200,
+      "aws_request_id": "4b3b76b1-19c5-466c-a648-939409510dd0",
+      "at_utc": "2026-11-10T07:58:10.714154+00:00"
+    },
+    {
+      "case": "CM15_vi",
+      "operation": "initiate_auth",
+      "http_status": 200,
+      "aws_request_id": "fe6089bc-7b51-445d-b9eb-4df02e3b9977",
+      "at_utc": "2026-11-10T07:58:12.194207+00:00"
+    },
+    {
+      "case": "CM15_en",
+      "operation": "admin_create_user",
+      "http_status": 200,
+      "aws_request_id": "5f478083-2920-4d1a-bc9b-6c061c02172e",
+      "at_utc": "2026-11-10T07:58:13.943775+00:00"
+    },
+    {
+      "case": "CM15_en",
+      "operation": "initiate_auth",
+      "http_status": 200,
+      "aws_request_id": "6ca823d4-45be-4200-8544-8f3ff5c36a4f",
+      "at_utc": "2026-11-10T07:58:58.155308+00:00"
+    },
+    {
+      "case": "CM15_en",
+      "operation": "respond_to_auth_challenge",
+      "http_status": 200,
+      "aws_request_id": "eac3727f-05ba-4978-8919-ee5a74d0a903",
+      "at_utc": "2026-11-10T07:58:59.885545+00:00"
+    },
+    {
+      "case": "CM15_en",
+      "operation": "initiate_auth",
+      "http_status": 200,
+      "aws_request_id": "f5dfc685-e2d3-4fa7-8a1b-908357d833ad",
+      "at_utc": "2026-11-10T07:59:01.388014+00:00"
+    },
+    {
+      "case": "CM16_vi",
+      "operation": "initiate_auth",
+      "http_status": 200,
+      "aws_request_id": "5f6ed4d4-4a1a-44ee-86a8-bcf9d4ebbd56",
+      "at_utc": "2026-11-10T07:59:02.897479+00:00"
+    },
+    {
+      "case": "CM16_vi",
+      "operation": "update_user_attributes",
+      "http_status": 200,
+      "aws_request_id": "a7ad2a08-8a59-47d0-a1c7-c947e3be062f",
+      "at_utc": "2026-11-10T07:59:04.517305+00:00"
+    },
+    {
+      "case": "CM16_vi",
+      "operation": "verify_user_attribute",
+      "http_status": 200,
+      "aws_request_id": "89593271-7906-4131-a4db-c029b4642e2b",
+      "at_utc": "2026-11-10T07:59:20.566178+00:00"
+    },
+    {
+      "case": "CM16_vi",
+      "operation": "get_user",
+      "http_status": 200,
+      "aws_request_id": "86d6ebae-03c6-4b86-a222-71ea1869454c",
+      "at_utc": "2026-11-10T07:59:21.975578+00:00"
+    },
+    {
+      "case": "CM16_en",
+      "operation": "initiate_auth",
+      "http_status": 200,
+      "aws_request_id": "d3838cdb-44de-4f34-b207-8ad2d169f55b",
+      "at_utc": "2026-11-10T07:59:23.536193+00:00"
+    },
+    {
+      "case": "CM16_en",
+      "operation": "update_user_attributes",
+      "http_status": 200,
+      "aws_request_id": "84e965bc-c5a4-4bba-8d39-6e1545caf636",
+      "at_utc": "2026-11-10T07:59:25.210963+00:00"
+    },
+    {
+      "case": "CM16_en",
+      "operation": "verify_user_attribute",
+      "http_status": 200,
+      "aws_request_id": "c953821c-43bd-4a0b-b229-29b0a375503b",
+      "at_utc": "2026-11-10T07:59:39.823157+00:00"
+    },
+    {
+      "case": "CM16_en",
+      "operation": "get_user",
+      "http_status": 200,
+      "aws_request_id": "916b126a-0b3a-4a25-9dee-455265061492",
+      "at_utc": "2026-11-10T07:59:41.254125+00:00"
+    }
+  ],
+  "cases": {
+    "CM01": "PASS",
+    "CM03": "PASS",
+    "CM05": "PASS",
+    "CM02": "PASS",
+    "CM04": "PASS",
+    "CM06": "PASS",
+    "CM07": "PASS",
+    "CM08": "PASS",
+    "CM09": "PASS",
+    "CM15": "PASS",
+    "CM15_vi": "PASS",
+    "CM15_en": "PASS",
+    "CM16": "PASS",
+    "CM16_vi": "PASS",
+    "CM16_en": "PASS",
+    "CM14": "PASS_CONTROLLED_EMAIL_TRIGGER_WINDOW"
+  },
+  "status": "COMPLETED_INTERACTIVE_CORE_CASES",
+  "recipient_sha256": "5c05c7679aaa1efd76d4cc451b5e89f036197987f45f47ebe5db434d9d636c46",
+  "lambda_code_sha256": "6/eTPUWQsrxpGMzUzA875R4H9iXeSdO+fFpvhsmsFdM=",
+  "temporary_users_created_or_attempted": 7,
+  "temporary_users_deleted": 7,
+  "cleanup": "PASS",
+  "lambda_log_review": {
+    "log_group": "/aws/lambda/homewallet-dev-cognito-custom-message",
+    "start_ms": 1794297167819,
+    "end_ms": 1794297592301,
+    "counts": {
+      "total": 42,
+      "start": 14,
+      "application_lines": 0
+    },
+    "invocation_request_ids": [
+      "0beb403a-e614-48c9-92c1-b03fb4039ff2",
+      "34c0e200-dafb-45b0-9986-772c360343d7",
+      "e797fca1-62be-46a9-947f-ee18bcfa3b26",
+      "8c52f2db-838e-4d47-9eba-fe5823a71568",
+      "976c1ae0-f883-4729-85ac-12cb0e2d5595",
+      "bd9fbe65-86f5-4a5d-95a2-24cf5923f185",
+      "eab25369-8fca-4862-80cf-a2c85c6ebe53",
+      "2178be12-1c4d-4a05-8c2a-38bb7d26862c",
+      "554f8fdb-e819-43ef-936d-704374261b91",
+      "75b45ee9-1e06-48dc-8a34-af5ab4fa5232",
+      "93834ff3-db4c-4104-a1ac-bba8ac09d779",
+      "39a2fe48-3661-4277-82c8-36dd7b889946",
+      "25995bfe-7d14-460f-8bdb-0123569caa72",
+      "7521aa04-ab49-4560-ba57-717c5167da0d"
+    ],
+    "scope": "Controlled email-request window; shared stateless Lambda, no per-trigger payload logging"
+  },
+  "finished_at_utc": "2026-11-10T07:59:53.196243+00:00"
+}

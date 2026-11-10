@@ -10,9 +10,11 @@
   "lambda_permission_sid": "chi43-email-e2e-5fc232b06155",
   "production_access_enabled": true,
   "existing_live_pool_changed": false,
-  "status": "READY_AWAITING_CONTROLLED_MAILBOX",
-  "cleanup": "RETAINED_FOR_EMAIL_ACCEPTANCE",
+  "status": "EMAIL_E2E_PASS_ENVIRONMENT_REMOVED",
+  "cleanup": "PASS_POOL_CLIENT_AND_SCOPED_PERMISSION_REMOVED",
   "simulator_email_requests_accepted": 12,
   "simulator_users_deleted": 6,
-  "updated_at_utc": "2026-11-10T07:16:13.228366+00:00"
+  "updated_at_utc": "2026-11-10T08:04:27.786356+00:00",
+  "controlled_mailbox_evidence": "43-cognito-mailbox-20261110.json",
+  "controlled_mailbox_users_deleted": 7
 }

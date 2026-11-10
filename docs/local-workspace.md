@@ -5,7 +5,8 @@
 Tiếp tục mở **`homewallet-gr13`**, nhánh **`main`**, trong VS Code.
 Mã #42, cấu hình VAPID, script runtime và bằng chứng #43 hiện có ở thư mục này.
 
-- [Kết quả SES/Scheduler và bước email E2E còn lại](acceptance/43-delivery-20261110.md).
+- [Biên bản nghiệm thu #43 đã hoàn tất](acceptance/43-final-acceptance-20261110.md).
+- [Kết quả SES/Scheduler và quy trình email E2E](acceptance/43-delivery-20261110.md).
 - [Ma trận CM01–CM16](acceptance/43-cognito-email.md).
 - [Trạng thái công việc của Chi](acceptance/chi-week10-status-20261109.md).
 - [Biên bản D4/#36 đã đóng](acceptance/36-d4-evidence.md).
@@ -49,7 +50,7 @@ ignore theo yêu cầu của người dùng; không đưa vào các commit sẽ 
 
 ## Phạm vi
 
-Việc hợp nhất này cập nhật repository local. Trạng thái #43 vẫn PARTIAL cho
-phần hộp thư/nội dung/mã thật; người dùng đã xác nhận nhận push của ca job.
-Hợp nhất Git không thay thế bằng chứng email còn thiếu. Việc publish lên GitHub được
-thông báo riêng khi thực hiện.
+Việc hợp nhất này cập nhật repository local. #43 đã PASS trong phạm vi nghiệm
+thu đã chốt, gồm hộp thư/nội dung/mã thật và xác nhận nhận push từ job.
+Biên bản, artifact và cleanup đã hoàn tất; việc push lên GitHub do người dùng
+thực hiện theo hướng dẫn tiếp theo. File Word hướng dẫn tuần chỉ giữ local.
