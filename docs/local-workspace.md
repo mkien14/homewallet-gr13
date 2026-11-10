@@ -12,6 +12,7 @@ Mã #42, cấu hình VAPID, script runtime và bằng chứng #43 hiện có ở
 - [Biên bản D4/#36 đã đóng](acceptance/36-d4-evidence.md).
 - [Rà soát việc nhóm còn lại](acceptance/team-open-work-20261110.md).
 - [Khắc phục Bedrock/#34 và bước hoàn tất](acceptance/34-bedrock-remediation-20261110.md).
+- [Nghiệm thu ngân sách #25/#37](acceptance/25-37-budget-20261110.md).
 
 Các thư mục có hậu tố là Git worktree cho từng nhánh công việc. Nhánh ở các
 worktree sau đã được hợp nhất vào `main` local:

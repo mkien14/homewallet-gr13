@@ -1,0 +1,1077 @@
+{
+  "run_id": "2e6501f83070",
+  "started_utc": "2026-11-10T12:37:26+00:00",
+  "api": [
+    {
+      "case": "SETUP-profile-owner",
+      "method": "GET",
+      "path": "/api/me",
+      "status": 200,
+      "expected": 200,
+      "request_id": "2ec9eb34-313c-4271-904a-dccc22ee6a17",
+      "pass": true
+    },
+    {
+      "case": "SETUP-profile-member",
+      "method": "GET",
+      "path": "/api/me",
+      "status": 200,
+      "expected": 200,
+      "request_id": "6ed42f59-a5f6-4c93-938d-c938a665a19c",
+      "pass": true
+    },
+    {
+      "case": "SETUP-profile-outsider",
+      "method": "GET",
+      "path": "/api/me",
+      "status": 200,
+      "expected": 200,
+      "request_id": "0d9a3cdc-3621-4109-8ad1-4afe3a91efec",
+      "pass": true
+    },
+    {
+      "case": "SETUP-household",
+      "method": "POST",
+      "path": "/api/households",
+      "status": 201,
+      "expected": 201,
+      "request_id": "7f249ac3-bd68-4bee-9dc2-2886cc91e47e",
+      "pass": true
+    },
+    {
+      "case": "SETUP-member",
+      "method": "POST",
+      "path": "/api/households/join",
+      "status": 200,
+      "expected": 200,
+      "request_id": "85147838-68b8-4c07-ac84-1df39036b0cd",
+      "pass": true
+    },
+    {
+      "case": "AUTH-without-household",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 404,
+      "expected": 404,
+      "request_id": "3e5ae857-f169-4bdb-a38a-923ff5709e36",
+      "pass": true
+    },
+    {
+      "case": "SETUP-outsider-household",
+      "method": "POST",
+      "path": "/api/households",
+      "status": 201,
+      "expected": 201,
+      "request_id": "db4643b5-6a27-4205-9902-5fbae79d0240",
+      "pass": true
+    },
+    {
+      "case": "SETUP-categories",
+      "method": "GET",
+      "path": "/api/categories",
+      "status": 200,
+      "expected": 200,
+      "request_id": "d23ae792-f412-4146-9595-d1702c23c6a7",
+      "pass": true
+    },
+    {
+      "case": "BUD-01",
+      "method": "PUT",
+      "path": "/api/budgets/2026-10",
+      "status": 201,
+      "expected": 201,
+      "request_id": "e23ee587-0481-4422-9f4b-f74c6eb1b8d4",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-9",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "4bcc1c3c-5249-41af-a6e5-3736974c8496",
+      "pass": true
+    },
+    {
+      "case": "BUD-02",
+      "method": "PUT",
+      "path": "/api/budgets/2026-11",
+      "status": 201,
+      "expected": 201,
+      "request_id": "e58bfd65-5ac3-4cda-8067-d502390c3e6a",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-11",
+      "method": "GET",
+      "path": "/api/budgets/2026-11",
+      "status": 200,
+      "expected": 200,
+      "request_id": "5bda40f6-63de-4688-bef6-cc3b189f616a",
+      "pass": true
+    },
+    {
+      "case": "BUD-03",
+      "method": "PUT",
+      "path": "/api/budgets/2026-12",
+      "status": 201,
+      "expected": 201,
+      "request_id": "c02ec720-ee27-43ec-9d2d-79bff065c727",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-13",
+      "method": "GET",
+      "path": "/api/budgets/2026-12",
+      "status": 200,
+      "expected": 200,
+      "request_id": "34e65bb1-2348-4293-9c05-ce9295f3f83f",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-14",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "6cee83fb-434b-4fa2-bac1-cd51456a5293",
+      "pass": true
+    },
+    {
+      "case": "BUD-04",
+      "method": "PUT",
+      "path": "/api/budgets/2026-10",
+      "status": 422,
+      "expected": 422,
+      "request_id": "7a471702-d27e-4f6b-9da9-ce62070ed82b",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-16",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "2cf21797-8bcb-49ae-ace7-8a169c70683e",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-17",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "b0baa28d-773a-4f1b-850f-cb79cf365599",
+      "pass": true
+    },
+    {
+      "case": "BUD-05",
+      "method": "PUT",
+      "path": "/api/budgets/2026-10",
+      "status": 422,
+      "expected": 422,
+      "request_id": "2584f758-ee49-4ab1-a44d-e646f167a411",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-19",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "e3441ee6-1048-4032-b552-8c24a306488f",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-20",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "31e98fe7-2775-44c9-b82f-b867537c11a8",
+      "pass": true
+    },
+    {
+      "case": "BUD-06",
+      "method": "PUT",
+      "path": "/api/budgets/2026-10",
+      "status": 422,
+      "expected": 422,
+      "request_id": "90f4dbe0-0f5b-4b7f-9ad5-e86448f77ffa",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-22",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "861bed5f-3763-478a-aa58-07580e4e7500",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-23",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "73382f2c-5aba-4ad1-b074-7aff0adfeedf",
+      "pass": true
+    },
+    {
+      "case": "BUD-07",
+      "method": "PUT",
+      "path": "/api/budgets/2026-10",
+      "status": 422,
+      "expected": 422,
+      "request_id": "bd96be5e-f300-4e1b-b470-67120e062664",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-25",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "59e83608-0b36-4ffa-8c80-ce8efa0b9407",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-26",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "fc2f8163-a594-41c9-a46b-474f050a05b4",
+      "pass": true
+    },
+    {
+      "case": "BUD-08",
+      "method": "PUT",
+      "path": "/api/budgets/2026-10",
+      "status": 422,
+      "expected": 422,
+      "request_id": "ba48aae7-d40a-4c2d-80e2-f0392b6178c8",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-28",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "fa593cf8-65f4-44dd-8f75-61a8d9b66128",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-29",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "8e8604c0-7bed-4f30-9386-7b765f5bd644",
+      "pass": true
+    },
+    {
+      "case": "BUD-09",
+      "method": "PUT",
+      "path": "/api/budgets/2026-10",
+      "status": 422,
+      "expected": 422,
+      "request_id": "39e792ed-1d66-474e-bcdb-980dbeb46239",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-31",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "e6759192-75c2-4419-b191-405c17b2d4f8",
+      "pass": true
+    },
+    {
+      "case": "BUD-10-upsert",
+      "method": "PUT",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "ac82e5ee-e704-4843-ac52-549eb4b103d6",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-33",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "20fe88cf-3a1f-459f-8c98-bc035988d445",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-34",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "f48a9097-5388-4a19-91b5-d5ae8f48274e",
+      "pass": true
+    },
+    {
+      "case": "BUD-duplicate-category",
+      "method": "PUT",
+      "path": "/api/budgets/2026-10",
+      "status": 422,
+      "expected": 422,
+      "request_id": "ec4b3b1a-1f49-4c5a-9cde-12face94f0ee",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-36",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "720dda23-7095-4c6a-b48d-2653286656cd",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-37",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "df74bd58-a990-45f4-af48-cfc3ff572008",
+      "pass": true
+    },
+    {
+      "case": "BUD-savings-above-income",
+      "method": "PUT",
+      "path": "/api/budgets/2026-10",
+      "status": 422,
+      "expected": 422,
+      "request_id": "b10f8294-a396-471b-be43-17c4d6bda568",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-39",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "825255a9-bad1-4371-9e49-6eb6521ff0a7",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-40",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "8776e1b3-30f1-4230-9846-b8d443297c9c",
+      "pass": true
+    },
+    {
+      "case": "BUD-boolean-income",
+      "method": "PUT",
+      "path": "/api/budgets/2026-10",
+      "status": 422,
+      "expected": 422,
+      "request_id": "7c874d35-9056-4387-a518-b54d1c9b6934",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-42",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "7bb5ea35-97ea-45b0-8fd6-e5583801ed36",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-43",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "5d0cb6d0-8876-495b-90c6-0358cae2b8b9",
+      "pass": true
+    },
+    {
+      "case": "BUD-fractional-amount",
+      "method": "PUT",
+      "path": "/api/budgets/2026-10",
+      "status": 422,
+      "expected": 422,
+      "request_id": "ef03cabe-3d61-4637-aec2-648b467d1abc",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-45",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "769f174e-a7b8-4d12-86fa-cf533da81535",
+      "pass": true
+    },
+    {
+      "case": "AUTH-anonymous-read",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 401,
+      "expected": 401,
+      "request_id": "67fa56b1-eb9c-4ad6-aca2-f9093ec0a34b",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-47",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "dba62ca7-5976-4360-96a1-c13c0ed8566a",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-48",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "426ee482-8634-4cb0-bcb3-07e3ce6aeb6d",
+      "pass": true
+    },
+    {
+      "case": "AUTH-member-write-denied",
+      "method": "PUT",
+      "path": "/api/budgets/2026-10",
+      "status": 403,
+      "expected": 403,
+      "request_id": "8140a4bb-8df4-46cb-b7e9-fa4fd4614812",
+      "pass": true
+    },
+    {
+      "case": "AUTH-member-suggest-denied",
+      "method": "POST",
+      "path": "/api/budgets/2026-10/suggest",
+      "status": 403,
+      "expected": 403,
+      "request_id": "2f4ae9d5-bcf9-4919-8556-558847b62959",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-51",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "154de81c-729f-43e5-8fe2-99848e168dea",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-52",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "39eb2ae4-38d5-42b1-909e-9afa8e730f2b",
+      "pass": true
+    },
+    {
+      "case": "SUG-invalid-period",
+      "method": "POST",
+      "path": "/api/budgets/2026-13/suggest",
+      "status": 422,
+      "expected": 422,
+      "request_id": "0542799a-76ff-4e5d-93ce-3ab1e07142b8",
+      "pass": true
+    },
+    {
+      "case": "SUG-negative-income",
+      "method": "POST",
+      "path": "/api/budgets/2026-10/suggest",
+      "status": 422,
+      "expected": 422,
+      "request_id": "243af3a7-557b-41ba-be96-a80b7456ce3d",
+      "pass": true
+    },
+    {
+      "case": "SUG-negative-savings",
+      "method": "POST",
+      "path": "/api/budgets/2026-10/suggest",
+      "status": 422,
+      "expected": 422,
+      "request_id": "82eb675d-3005-4fde-a040-1433e57ca957",
+      "pass": true
+    },
+    {
+      "case": "SUG-savings-above-income",
+      "method": "POST",
+      "path": "/api/budgets/2026-10/suggest",
+      "status": 422,
+      "expected": 422,
+      "request_id": "ec1aab90-72bc-404f-b474-1b581dacce9a",
+      "pass": true
+    }
+  ],
+  "runtime_tasks": [
+    {
+      "mode": "prepare",
+      "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/f51554de1afa4dae84610f71405e1f18",
+      "task_definition": "hw-db-runtime-bootstrap:2",
+      "credential_role": "bootstrap_admin",
+      "log_group": "/ecs/hw-db-runtime-bootstrap",
+      "log_stream": "bootstrap/bootstrap/f51554de1afa4dae84610f71405e1f18",
+      "exit_code": 0,
+      "image": "179923444714.dkr.ecr.ap-southeast-1.amazonaws.com/homewallet-backend:sha-95658d3b2bdfaad9b1930416f4b265e5861da16e",
+      "image_digest": "sha256:28e13fd5bcf16e1663be2e9b03ebe8ac21cbc52469f91d6211096a71700ff264",
+      "events": [
+        {
+          "event": "D1_PREPARED",
+          "at_utc": "2026-11-10T12:38:05.584471+00:00",
+          "schema": "hw_d1_2e6501f83070_test",
+          "migrations_applied": 5,
+          "grants_scope": "disposable_schema_only",
+          "production_grants_changed": false
+        }
+      ]
+    },
+    {
+      "mode": "exercise",
+      "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/bb9be2c1c0df44879e131ff44083360a",
+      "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-api:21",
+      "credential_role": "runtime",
+      "log_group": "/ecs/hw-api",
+      "log_stream": "api/api/bb9be2c1c0df44879e131ff44083360a",
+      "exit_code": 0,
+      "image": "179923444714.dkr.ecr.ap-southeast-1.amazonaws.com/homewallet-backend:sha-95658d3b2bdfaad9b1930416f4b265e5861da16e",
+      "image_digest": "sha256:28e13fd5bcf16e1663be2e9b03ebe8ac21cbc52469f91d6211096a71700ff264",
+      "events": [
+        {
+          "event": "D1_GEMINI_ATTEMPT_STARTED",
+          "at_utc": "2026-11-10T12:38:57.776049+00:00",
+          "attempts": 1,
+          "synthetic_aggregates_only": true
+        },
+        {
+          "event": "D1_LIVE_LLM_RESULT",
+          "at_utc": "2026-11-10T12:39:03.293020+00:00",
+          "attempts": 1,
+          "sdk_total_attempts": 1,
+          "max_output_tokens": 1024,
+          "input_tokens": 456,
+          "output_tokens": 38,
+          "thought_tokens": 796,
+          "finish_reason": "FinishReason.STOP",
+          "status": "PASS",
+          "response_source": "LLM",
+          "model": "gemini-3.6-flash",
+          "raw_text_saved": false
+        },
+        {
+          "event": "D1_EXERCISE_PASS",
+          "at_utc": "2026-11-10T12:39:03.439366+00:00",
+          "checks": [
+            {
+              "case": "HISTORY-three-months-confirmed-only-missing-month-zero",
+              "status": "PASS"
+            },
+            {
+              "case": "SUG-valid-llm-output",
+              "status": "PASS",
+              "source": "LLM",
+              "draft_only": true,
+              "saved_state_unchanged": true
+            },
+            {
+              "case": "SUG-timeout-fallback",
+              "status": "PASS",
+              "source": "RULE",
+              "draft_only": true,
+              "saved_state_unchanged": true
+            },
+            {
+              "case": "SUG-invalid-json-fallback",
+              "status": "PASS",
+              "source": "RULE",
+              "draft_only": true,
+              "saved_state_unchanged": true
+            },
+            {
+              "case": "SUG-unknown-category-fallback",
+              "status": "PASS",
+              "source": "RULE",
+              "draft_only": true,
+              "saved_state_unchanged": true
+            },
+            {
+              "case": "SUG-foreign-category-fallback",
+              "status": "PASS",
+              "source": "RULE",
+              "draft_only": true,
+              "saved_state_unchanged": true
+            },
+            {
+              "case": "SUG-duplicate-category-fallback",
+              "status": "PASS",
+              "source": "RULE",
+              "draft_only": true,
+              "saved_state_unchanged": true
+            },
+            {
+              "case": "SUG-negative-amount-fallback",
+              "status": "PASS",
+              "source": "RULE",
+              "draft_only": true,
+              "saved_state_unchanged": true
+            },
+            {
+              "case": "SUG-overallocation-fallback",
+              "status": "PASS",
+              "source": "RULE",
+              "draft_only": true,
+              "saved_state_unchanged": true
+            },
+            {
+              "case": "SUG-empty-response-fallback",
+              "status": "PASS",
+              "source": "RULE",
+              "draft_only": true,
+              "saved_state_unchanged": true
+            },
+            {
+              "case": "SUG-fallback-scales-to-income",
+              "status": "PASS",
+              "source": "RULE",
+              "draft_only": true,
+              "saved_state_unchanged": true
+            },
+            {
+              "case": "SUG-no-history-empty-draft",
+              "status": "PASS",
+              "source": "RULE",
+              "draft_only": true,
+              "saved_state_unchanged": true
+            },
+            {
+              "case": "SUG-fallback-and-draft-contract",
+              "status": "PASS",
+              "branch_cases": 11
+            },
+            {
+              "case": "JOB-five-threshold-boundaries-and-repeat",
+              "status": "PASS",
+              "period_keys": [
+                "2026-11-10",
+                "2026-11-11",
+                "2026-11-12",
+                "2026-11-13",
+                "2026-11-14"
+              ]
+            }
+          ],
+          "live_llm": {
+            "attempts": 1,
+            "sdk_total_attempts": 1,
+            "max_output_tokens": 1024,
+            "input_tokens": 456,
+            "output_tokens": 38,
+            "thought_tokens": 796,
+            "finish_reason": "FinishReason.STOP",
+            "status": "PASS",
+            "response_source": "LLM",
+            "model": "gemini-3.6-flash",
+            "raw_text_saved": false
+          },
+          "job_cases": [
+            {
+              "period_key": "2026-11-10",
+              "spent": 799999,
+              "thresholds": [],
+              "cumulative_captured_emails": 0,
+              "repeat_skipped": true
+            },
+            {
+              "period_key": "2026-11-11",
+              "spent": 800000,
+              "thresholds": [
+                80
+              ],
+              "cumulative_captured_emails": 2,
+              "repeat_skipped": true
+            },
+            {
+              "period_key": "2026-11-12",
+              "spent": 999999,
+              "thresholds": [
+                80
+              ],
+              "cumulative_captured_emails": 2,
+              "repeat_skipped": true
+            },
+            {
+              "period_key": "2026-11-13",
+              "spent": 1000000,
+              "thresholds": [
+                80,
+                100
+              ],
+              "cumulative_captured_emails": 4,
+              "repeat_skipped": true
+            },
+            {
+              "period_key": "2026-11-14",
+              "spent": 1000001,
+              "thresholds": [
+                80,
+                100
+              ],
+              "cumulative_captured_emails": 4,
+              "repeat_skipped": true
+            }
+          ],
+          "deployed_source_sha256": {
+            "app/budgets.py": "588bad2f10b1dae0a15573a65ff2013dc177345e4c824b4e83e53c51c46f452f",
+            "app/budget_suggestions.py": "28da92f469eba5af406c64122b5323c3ce7029dbf6453f1fee9a572dbb7ae7d4",
+            "app/budget_rules.py": "32a4644d81fd6a8d7c5da91f712cd31fd9599a5a82852df92ee6a668ed8a5dee",
+            "jobs/recurring_alerts.py": "524660950f7a52bb63a474abd5798e3933ecdd201ab8d947907686e3f845577a",
+            "jobs/job_runs.py": "6f6369adf73a31c26544acad4279e18b9466851e80286bab6446efd28ab2e9cc"
+          },
+          "email_capture_count": 4,
+          "real_ses_calls": 0,
+          "real_push_sends": 0,
+          "schema": "hw_d1_2e6501f83070_test",
+          "database_user": "hw_runtime",
+          "auth_scope": "route-body integration; signed Cognito HTTP authorization checked separately"
+        }
+      ]
+    },
+    {
+      "mode": "cleanup",
+      "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/9b336e60bd584bbf9ede1cba5d1bbb47",
+      "task_definition": "hw-db-runtime-bootstrap:2",
+      "credential_role": "bootstrap_admin",
+      "log_group": "/ecs/hw-db-runtime-bootstrap",
+      "log_stream": "bootstrap/bootstrap/9b336e60bd584bbf9ede1cba5d1bbb47",
+      "exit_code": 0,
+      "image": "179923444714.dkr.ecr.ap-southeast-1.amazonaws.com/homewallet-backend:sha-95658d3b2bdfaad9b1930416f4b265e5861da16e",
+      "image_digest": "sha256:28e13fd5bcf16e1663be2e9b03ebe8ac21cbc52469f91d6211096a71700ff264",
+      "events": [
+        {
+          "event": "D1_CLEANUP_PASS",
+          "at_utc": "2026-11-10T12:39:54.876101+00:00",
+          "schema_removed": true,
+          "temporary_grants_removed": true,
+          "api_fixture_users_removed": 3,
+          "api_fixture_households_removed": 2
+        }
+      ]
+    }
+  ],
+  "status": "PASS_CORE_PENDING_MAILBOX",
+  "real_job_email": "PENDING_MAILBOX_CONFIRMATION",
+  "email_transport": "INTERCEPTED_NOT_SENT",
+  "gemini_max_attempts": 1,
+  "account": "179923444714",
+  "runtime_source_sha256": "1c2df131909c19a6e36d5f8cd11d447536a038075e63aca0e62cab2ad7ee6757",
+  "runtime_payload_sha256": "84cc38432be429d6831e9db8495c60ac651d74cf4653ca8d8de4eca4db9744bf",
+  "packed_runtime_override_upper_bound": 7904,
+  "fixture": {
+    "run_id": "2e6501f83070",
+    "household_id": 20,
+    "vi_user_id": 28,
+    "en_user_id": 29
+  },
+  "cognito_created_roles": [
+    "owner",
+    "member",
+    "outsider"
+  ],
+  "api_matrix": [
+    {
+      "case": "BUD-01",
+      "period": "2026-10",
+      "http_status": 201,
+      "status": "PASS",
+      "saved_state_unchanged": null
+    },
+    {
+      "case": "BUD-02",
+      "period": "2026-11",
+      "http_status": 201,
+      "status": "PASS",
+      "saved_state_unchanged": null
+    },
+    {
+      "case": "BUD-03",
+      "period": "2026-12",
+      "http_status": 201,
+      "status": "PASS",
+      "saved_state_unchanged": null
+    },
+    {
+      "case": "BUD-04",
+      "period": "2026-10",
+      "http_status": 422,
+      "status": "PASS",
+      "saved_state_unchanged": true
+    },
+    {
+      "case": "BUD-05",
+      "period": "2026-10",
+      "http_status": 422,
+      "status": "PASS",
+      "saved_state_unchanged": true
+    },
+    {
+      "case": "BUD-06",
+      "period": "2026-10",
+      "http_status": 422,
+      "status": "PASS",
+      "saved_state_unchanged": true
+    },
+    {
+      "case": "BUD-07",
+      "period": "2026-10",
+      "http_status": 422,
+      "status": "PASS",
+      "saved_state_unchanged": true
+    },
+    {
+      "case": "BUD-08",
+      "period": "2026-10",
+      "http_status": 422,
+      "status": "PASS",
+      "saved_state_unchanged": true
+    },
+    {
+      "case": "BUD-09",
+      "period": "2026-10",
+      "http_status": 422,
+      "status": "PASS",
+      "saved_state_unchanged": true
+    },
+    {
+      "case": "BUD-10-upsert",
+      "period": "2026-10",
+      "http_status": 200,
+      "status": "PASS",
+      "saved_state_unchanged": null
+    },
+    {
+      "case": "BUD-duplicate-category",
+      "period": "2026-10",
+      "http_status": 422,
+      "status": "PASS",
+      "saved_state_unchanged": true
+    },
+    {
+      "case": "BUD-savings-above-income",
+      "period": "2026-10",
+      "http_status": 422,
+      "status": "PASS",
+      "saved_state_unchanged": true
+    },
+    {
+      "case": "BUD-boolean-income",
+      "period": "2026-10",
+      "http_status": 422,
+      "status": "PASS",
+      "saved_state_unchanged": true
+    },
+    {
+      "case": "BUD-fractional-amount",
+      "period": "2026-10",
+      "http_status": 422,
+      "status": "PASS",
+      "saved_state_unchanged": true
+    }
+  ],
+  "live_api_pass": true,
+  "runtime_checks": {
+    "event": "D1_EXERCISE_PASS",
+    "at_utc": "2026-11-10T12:39:03.439366+00:00",
+    "checks": [
+      {
+        "case": "HISTORY-three-months-confirmed-only-missing-month-zero",
+        "status": "PASS"
+      },
+      {
+        "case": "SUG-valid-llm-output",
+        "status": "PASS",
+        "source": "LLM",
+        "draft_only": true,
+        "saved_state_unchanged": true
+      },
+      {
+        "case": "SUG-timeout-fallback",
+        "status": "PASS",
+        "source": "RULE",
+        "draft_only": true,
+        "saved_state_unchanged": true
+      },
+      {
+        "case": "SUG-invalid-json-fallback",
+        "status": "PASS",
+        "source": "RULE",
+        "draft_only": true,
+        "saved_state_unchanged": true
+      },
+      {
+        "case": "SUG-unknown-category-fallback",
+        "status": "PASS",
+        "source": "RULE",
+        "draft_only": true,
+        "saved_state_unchanged": true
+      },
+      {
+        "case": "SUG-foreign-category-fallback",
+        "status": "PASS",
+        "source": "RULE",
+        "draft_only": true,
+        "saved_state_unchanged": true
+      },
+      {
+        "case": "SUG-duplicate-category-fallback",
+        "status": "PASS",
+        "source": "RULE",
+        "draft_only": true,
+        "saved_state_unchanged": true
+      },
+      {
+        "case": "SUG-negative-amount-fallback",
+        "status": "PASS",
+        "source": "RULE",
+        "draft_only": true,
+        "saved_state_unchanged": true
+      },
+      {
+        "case": "SUG-overallocation-fallback",
+        "status": "PASS",
+        "source": "RULE",
+        "draft_only": true,
+        "saved_state_unchanged": true
+      },
+      {
+        "case": "SUG-empty-response-fallback",
+        "status": "PASS",
+        "source": "RULE",
+        "draft_only": true,
+        "saved_state_unchanged": true
+      },
+      {
+        "case": "SUG-fallback-scales-to-income",
+        "status": "PASS",
+        "source": "RULE",
+        "draft_only": true,
+        "saved_state_unchanged": true
+      },
+      {
+        "case": "SUG-no-history-empty-draft",
+        "status": "PASS",
+        "source": "RULE",
+        "draft_only": true,
+        "saved_state_unchanged": true
+      },
+      {
+        "case": "SUG-fallback-and-draft-contract",
+        "status": "PASS",
+        "branch_cases": 11
+      },
+      {
+        "case": "JOB-five-threshold-boundaries-and-repeat",
+        "status": "PASS",
+        "period_keys": [
+          "2026-11-10",
+          "2026-11-11",
+          "2026-11-12",
+          "2026-11-13",
+          "2026-11-14"
+        ]
+      }
+    ],
+    "live_llm": {
+      "attempts": 1,
+      "sdk_total_attempts": 1,
+      "max_output_tokens": 1024,
+      "input_tokens": 456,
+      "output_tokens": 38,
+      "thought_tokens": 796,
+      "finish_reason": "FinishReason.STOP",
+      "status": "PASS",
+      "response_source": "LLM",
+      "model": "gemini-3.6-flash",
+      "raw_text_saved": false
+    },
+    "job_cases": [
+      {
+        "period_key": "2026-11-10",
+        "spent": 799999,
+        "thresholds": [],
+        "cumulative_captured_emails": 0,
+        "repeat_skipped": true
+      },
+      {
+        "period_key": "2026-11-11",
+        "spent": 800000,
+        "thresholds": [
+          80
+        ],
+        "cumulative_captured_emails": 2,
+        "repeat_skipped": true
+      },
+      {
+        "period_key": "2026-11-12",
+        "spent": 999999,
+        "thresholds": [
+          80
+        ],
+        "cumulative_captured_emails": 2,
+        "repeat_skipped": true
+      },
+      {
+        "period_key": "2026-11-13",
+        "spent": 1000000,
+        "thresholds": [
+          80,
+          100
+        ],
+        "cumulative_captured_emails": 4,
+        "repeat_skipped": true
+      },
+      {
+        "period_key": "2026-11-14",
+        "spent": 1000001,
+        "thresholds": [
+          80,
+          100
+        ],
+        "cumulative_captured_emails": 4,
+        "repeat_skipped": true
+      }
+    ],
+    "deployed_source_sha256": {
+      "app/budgets.py": "588bad2f10b1dae0a15573a65ff2013dc177345e4c824b4e83e53c51c46f452f",
+      "app/budget_suggestions.py": "28da92f469eba5af406c64122b5323c3ce7029dbf6453f1fee9a572dbb7ae7d4",
+      "app/budget_rules.py": "32a4644d81fd6a8d7c5da91f712cd31fd9599a5a82852df92ee6a668ed8a5dee",
+      "jobs/recurring_alerts.py": "524660950f7a52bb63a474abd5798e3933ecdd201ab8d947907686e3f845577a",
+      "jobs/job_runs.py": "6f6369adf73a31c26544acad4279e18b9466851e80286bab6446efd28ab2e9cc"
+    },
+    "email_capture_count": 4,
+    "real_ses_calls": 0,
+    "real_push_sends": 0,
+    "schema": "hw_d1_2e6501f83070_test",
+    "database_user": "hw_runtime",
+    "auth_scope": "route-body integration; signed Cognito HTTP authorization checked separately"
+  },
+  "reviewed_source_matches_deployed": true,
+  "fixture_cleanup": "PASS",
+  "cognito_cleanup": {
+    "expected": 3,
+    "removed_or_absent": 3,
+    "pass": true
+  },
+  "finished_utc": "2026-11-10T12:40:21+00:00"
+}

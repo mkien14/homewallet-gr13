@@ -1,0 +1,49 @@
+{
+  "run_id": "64b13128ec91",
+  "started_utc": "2026-11-10T12:35:50+00:00",
+  "api": [],
+  "runtime_tasks": [
+    {
+      "mode": "cleanup",
+      "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/6ec6ab362124411ca831ec476866004c",
+      "task_definition": "hw-db-runtime-bootstrap:2",
+      "credential_role": "bootstrap_admin",
+      "log_group": "/ecs/hw-db-runtime-bootstrap",
+      "log_stream": "bootstrap/bootstrap/6ec6ab362124411ca831ec476866004c",
+      "exit_code": 0,
+      "image": "179923444714.dkr.ecr.ap-southeast-1.amazonaws.com/homewallet-backend:sha-95658d3b2bdfaad9b1930416f4b265e5861da16e",
+      "image_digest": "sha256:28e13fd5bcf16e1663be2e9b03ebe8ac21cbc52469f91d6211096a71700ff264",
+      "events": [
+        {
+          "event": "D1_CLEANUP_PASS",
+          "at_utc": "2026-11-10T12:36:19.066655+00:00",
+          "schema_removed": true,
+          "temporary_grants_removed": true,
+          "api_fixture_users_removed": 3,
+          "api_fixture_households_removed": 2
+        }
+      ]
+    }
+  ],
+  "status": "CLEANUP_PASS",
+  "real_job_email": "PENDING_MAILBOX_CONFIRMATION",
+  "email_transport": "INTERCEPTED_NOT_SENT",
+  "gemini_max_attempts": 1,
+  "fixture": {
+    "run_id": "64b13128ec91",
+    "household_id": 18,
+    "vi_user_id": 25,
+    "en_user_id": 26
+  },
+  "account": "179923444714",
+  "runtime_source_sha256": "c122a365b0a4025f63d8fc89741ede489c3b030cc8c60bffdabeb9838ace797f",
+  "runtime_payload_sha256": "86e86949aff8185a7dae22340088a12f254cd461738b47a6c898125e1063f7ba",
+  "packed_runtime_override_upper_bound": 7884,
+  "fixture_cleanup": "PASS",
+  "cognito_cleanup": {
+    "expected": 3,
+    "removed_or_absent": 3,
+    "pass": true
+  },
+  "finished_utc": "2026-11-10T12:36:47+00:00"
+}

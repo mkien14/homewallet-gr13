@@ -1,0 +1,693 @@
+{
+  "run_id": "64b13128ec91",
+  "started_utc": "2026-11-10T12:32:11+00:00",
+  "api": [
+    {
+      "case": "SETUP-profile-owner",
+      "method": "GET",
+      "path": "/api/me",
+      "status": 200,
+      "expected": 200,
+      "request_id": "19b458d3-6a21-44dc-903b-4e3eb0c2e471",
+      "pass": true
+    },
+    {
+      "case": "SETUP-profile-member",
+      "method": "GET",
+      "path": "/api/me",
+      "status": 200,
+      "expected": 200,
+      "request_id": "386d3486-b5b0-4d61-8f2d-5c9aaff6ec57",
+      "pass": true
+    },
+    {
+      "case": "SETUP-profile-outsider",
+      "method": "GET",
+      "path": "/api/me",
+      "status": 200,
+      "expected": 200,
+      "request_id": "64e5c09c-628c-4500-bd96-2350079189af",
+      "pass": true
+    },
+    {
+      "case": "SETUP-household",
+      "method": "POST",
+      "path": "/api/households",
+      "status": 201,
+      "expected": 201,
+      "request_id": "c7a7f8b8-8269-4d86-94dc-c53aee8bcca7",
+      "pass": true
+    },
+    {
+      "case": "SETUP-member",
+      "method": "POST",
+      "path": "/api/households/join",
+      "status": 200,
+      "expected": 200,
+      "request_id": "96a8e235-37df-4219-86a5-2f429916bcae",
+      "pass": true
+    },
+    {
+      "case": "AUTH-without-household",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 404,
+      "expected": 404,
+      "request_id": "74aef6e4-fbc2-48c3-83dc-39073a8de9ae",
+      "pass": true
+    },
+    {
+      "case": "SETUP-outsider-household",
+      "method": "POST",
+      "path": "/api/households",
+      "status": 201,
+      "expected": 201,
+      "request_id": "c0f475c0-db3d-40d0-b770-51cc76e5559b",
+      "pass": true
+    },
+    {
+      "case": "SETUP-categories",
+      "method": "GET",
+      "path": "/api/categories",
+      "status": 200,
+      "expected": 200,
+      "request_id": "c333e67a-8dab-4d0a-8e79-a989bd656beb",
+      "pass": true
+    },
+    {
+      "case": "BUD-01",
+      "method": "PUT",
+      "path": "/api/budgets/2026-10",
+      "status": 201,
+      "expected": 201,
+      "request_id": "4d3216fb-6966-4a65-b23a-d22bd842981e",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-9",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "4cc2334e-3d59-43d7-bb22-069848be6260",
+      "pass": true
+    },
+    {
+      "case": "BUD-02",
+      "method": "PUT",
+      "path": "/api/budgets/2026-11",
+      "status": 201,
+      "expected": 201,
+      "request_id": "f2dc3dd0-65e5-422e-97dc-38d465f339b5",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-11",
+      "method": "GET",
+      "path": "/api/budgets/2026-11",
+      "status": 200,
+      "expected": 200,
+      "request_id": "fb4d96f2-9bec-459a-989d-619252898630",
+      "pass": true
+    },
+    {
+      "case": "BUD-03",
+      "method": "PUT",
+      "path": "/api/budgets/2026-12",
+      "status": 201,
+      "expected": 201,
+      "request_id": "1b89265b-d051-48f0-b94e-bd2d812444f6",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-13",
+      "method": "GET",
+      "path": "/api/budgets/2026-12",
+      "status": 200,
+      "expected": 200,
+      "request_id": "fa48ec7a-e623-4ae9-8471-78146ee0dd0a",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-14",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "569b8a03-3134-45df-a0b6-6f701781e363",
+      "pass": true
+    },
+    {
+      "case": "BUD-04",
+      "method": "PUT",
+      "path": "/api/budgets/2026-10",
+      "status": 422,
+      "expected": 422,
+      "request_id": "3d3f5a76-9814-49d9-b6a2-98ab9922dc66",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-16",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "f9c25e9e-ca59-4832-bb4b-56d7fc72c55d",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-17",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "a32387d2-80c9-4c60-8430-13685a2b837a",
+      "pass": true
+    },
+    {
+      "case": "BUD-05",
+      "method": "PUT",
+      "path": "/api/budgets/2026-10",
+      "status": 422,
+      "expected": 422,
+      "request_id": "47b3d8f9-484e-4b29-a56b-7a77c76fb371",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-19",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "afffceae-7f13-4d90-96e6-5051705bd61d",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-20",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "c78540c7-12ef-49de-91b5-d4a1b3779f42",
+      "pass": true
+    },
+    {
+      "case": "BUD-06",
+      "method": "PUT",
+      "path": "/api/budgets/2026-10",
+      "status": 422,
+      "expected": 422,
+      "request_id": "57d68b62-4114-4fa2-ac6c-0ec3a5137409",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-22",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "f5df8940-1af5-4771-8142-09f58d278097",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-23",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "7d3f6b3e-b54c-4a1d-957d-d7655c99173f",
+      "pass": true
+    },
+    {
+      "case": "BUD-07",
+      "method": "PUT",
+      "path": "/api/budgets/2026-10",
+      "status": 422,
+      "expected": 422,
+      "request_id": "c5721c1a-ac96-4cbb-b791-b541d1b2d635",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-25",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "d7692908-4cca-4eb0-b708-01776ef56c54",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-26",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "6be4b0c3-db97-483f-9c0e-2b3a448a9307",
+      "pass": true
+    },
+    {
+      "case": "BUD-08",
+      "method": "PUT",
+      "path": "/api/budgets/2026-10",
+      "status": 422,
+      "expected": 422,
+      "request_id": "24fbb696-ffbf-451d-88ae-3da203768d45",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-28",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "2364021b-0ccd-4e19-8963-418e8baf34f4",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-29",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "5e2a3f1f-6ace-413b-9e1f-b9071f781fbf",
+      "pass": true
+    },
+    {
+      "case": "BUD-09",
+      "method": "PUT",
+      "path": "/api/budgets/2026-10",
+      "status": 422,
+      "expected": 422,
+      "request_id": "c1a71453-63f4-430c-b0c2-dbb49a7278e8",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-31",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "fb771372-8e53-4fe6-ad4f-e8e39682afc1",
+      "pass": true
+    },
+    {
+      "case": "BUD-10-upsert",
+      "method": "PUT",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "909441e4-50ca-4677-bb5a-5077a44d7477",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-33",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "b190850b-07da-4336-be54-fa05e06a98c3",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-34",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "e567cc86-95cb-4aee-ac21-16d16ac9a706",
+      "pass": true
+    },
+    {
+      "case": "BUD-duplicate-category",
+      "method": "PUT",
+      "path": "/api/budgets/2026-10",
+      "status": 422,
+      "expected": 422,
+      "request_id": "baa70e18-a0e5-46be-acff-caf01ecd4ae4",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-36",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "c57d01f1-b359-4a73-8aaa-3284a4b09a43",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-37",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "5e290ba3-176c-4317-b679-e89651a45eec",
+      "pass": true
+    },
+    {
+      "case": "BUD-savings-above-income",
+      "method": "PUT",
+      "path": "/api/budgets/2026-10",
+      "status": 422,
+      "expected": 422,
+      "request_id": "24fd4e14-6b43-4f1d-a0d0-0398760d2795",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-39",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "1eeb4a3c-1a64-49c4-b651-df43eea2f666",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-40",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "56add2a3-7b46-4430-a1d9-b2b74dcd5c6b",
+      "pass": true
+    },
+    {
+      "case": "BUD-boolean-income",
+      "method": "PUT",
+      "path": "/api/budgets/2026-10",
+      "status": 422,
+      "expected": 422,
+      "request_id": "bf612df8-992b-4761-a96d-f50f749eeecf",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-42",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "041a45ca-3a5c-4956-8f4a-be4469835ab4",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-43",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "0c539353-f51d-4d5c-86f0-6efdc17d3020",
+      "pass": true
+    },
+    {
+      "case": "BUD-fractional-amount",
+      "method": "PUT",
+      "path": "/api/budgets/2026-10",
+      "status": 422,
+      "expected": 422,
+      "request_id": "c346e30a-1006-469a-8146-ef5f86ded200",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-45",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "c0058b53-fe0d-42b7-a27b-597e8bfb7f0e",
+      "pass": true
+    },
+    {
+      "case": "AUTH-anonymous-read",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 401,
+      "expected": 401,
+      "request_id": "e8604810-5853-4fc5-b14f-9bfc3afd54a1",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-47",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "451a765e-7d5a-4988-b7f5-a99a9ba76fea",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-48",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "bafbfa77-bd4b-4c09-9eeb-966c501fc0d4",
+      "pass": true
+    },
+    {
+      "case": "AUTH-member-write-denied",
+      "method": "PUT",
+      "path": "/api/budgets/2026-10",
+      "status": 403,
+      "expected": 403,
+      "request_id": "69f0fa04-4e34-4887-a8bf-00830592f70a",
+      "pass": true
+    },
+    {
+      "case": "AUTH-member-suggest-denied",
+      "method": "POST",
+      "path": "/api/budgets/2026-10/suggest",
+      "status": 403,
+      "expected": 403,
+      "request_id": "490303fd-2516-4ce1-8df3-9ce77ad3886c",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-51",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "671f541c-cddb-46ca-897f-7ca1a093575a",
+      "pass": true
+    },
+    {
+      "case": "CHECK-saved-state-52",
+      "method": "GET",
+      "path": "/api/budgets/2026-10",
+      "status": 200,
+      "expected": 200,
+      "request_id": "5fbd8cde-4d6d-4b2b-8456-9cb6d84664f4",
+      "pass": true
+    },
+    {
+      "case": "SUG-invalid-period",
+      "method": "POST",
+      "path": "/api/budgets/2026-13/suggest",
+      "status": 422,
+      "expected": 422,
+      "request_id": "f06bfe02-801a-4246-8234-44f5eca6daf1",
+      "pass": true
+    },
+    {
+      "case": "SUG-negative-income",
+      "method": "POST",
+      "path": "/api/budgets/2026-10/suggest",
+      "status": 422,
+      "expected": 422,
+      "request_id": "6e1b7fbb-cc96-477b-9401-8d22f83cce07",
+      "pass": true
+    },
+    {
+      "case": "SUG-negative-savings",
+      "method": "POST",
+      "path": "/api/budgets/2026-10/suggest",
+      "status": 422,
+      "expected": 422,
+      "request_id": "392e0598-d4f1-4a76-947c-fad78037cb0c",
+      "pass": true
+    },
+    {
+      "case": "SUG-savings-above-income",
+      "method": "POST",
+      "path": "/api/budgets/2026-10/suggest",
+      "status": 422,
+      "expected": 422,
+      "request_id": "505284f4-1b94-4e1e-a561-5aae828ce4aa",
+      "pass": true
+    }
+  ],
+  "runtime_tasks": [
+    {
+      "mode": "prepare",
+      "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/4e5a900368184890a3b542294727fc8f",
+      "task_definition": "hw-db-runtime-bootstrap:2",
+      "credential_role": "bootstrap_admin",
+      "log_group": "/ecs/hw-db-runtime-bootstrap",
+      "log_stream": "bootstrap/bootstrap/4e5a900368184890a3b542294727fc8f",
+      "exit_code": 1,
+      "image": "179923444714.dkr.ecr.ap-southeast-1.amazonaws.com/homewallet-backend:sha-95658d3b2bdfaad9b1930416f4b265e5861da16e",
+      "image_digest": "sha256:28e13fd5bcf16e1663be2e9b03ebe8ac21cbc52469f91d6211096a71700ff264",
+      "events": [
+        {
+          "event": "D1_FAILED",
+          "at_utc": "2026-11-10T12:32:55.658653+00:00",
+          "mode": "prepare",
+          "error_type": "ProgrammingError",
+          "reason": null,
+          "numeric_error_code": null
+        }
+      ]
+    },
+    {
+      "mode": "cleanup",
+      "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/53469d7c2dc64d77948c87da0d404a75",
+      "task_definition": "hw-db-runtime-bootstrap:2",
+      "credential_role": "bootstrap_admin",
+      "log_group": "/ecs/hw-db-runtime-bootstrap",
+      "log_stream": "bootstrap/bootstrap/53469d7c2dc64d77948c87da0d404a75",
+      "exit_code": 1,
+      "image": "179923444714.dkr.ecr.ap-southeast-1.amazonaws.com/homewallet-backend:sha-95658d3b2bdfaad9b1930416f4b265e5861da16e",
+      "image_digest": "sha256:28e13fd5bcf16e1663be2e9b03ebe8ac21cbc52469f91d6211096a71700ff264",
+      "events": [
+        {
+          "event": "D1_FAILED",
+          "at_utc": "2026-11-10T12:33:43.737120+00:00",
+          "mode": "cleanup",
+          "error_type": "ProgrammingError",
+          "reason": null,
+          "numeric_error_code": null
+        }
+      ]
+    }
+  ],
+  "status": "FAILED",
+  "real_job_email": "PENDING_MAILBOX_CONFIRMATION",
+  "email_transport": "INTERCEPTED_NOT_SENT",
+  "gemini_max_attempts": 1,
+  "account": "179923444714",
+  "runtime_source_sha256": "8bf9aa3a9fc8e6e0196636dcdcc1205a3f4531bab39a81984267ca40ebe1486b",
+  "runtime_payload_sha256": "5cd663d1a0eae36b8164e8ea780a74e4cec16995392805406db6d0a0b205de84",
+  "packed_runtime_override_upper_bound": 8136,
+  "fixture": {
+    "run_id": "64b13128ec91",
+    "household_id": 18,
+    "vi_user_id": 25,
+    "en_user_id": 26
+  },
+  "cognito_created_roles": [
+    "owner",
+    "member",
+    "outsider"
+  ],
+  "api_matrix": [
+    {
+      "case": "BUD-01",
+      "period": "2026-10",
+      "http_status": 201,
+      "status": "PASS",
+      "saved_state_unchanged": null
+    },
+    {
+      "case": "BUD-02",
+      "period": "2026-11",
+      "http_status": 201,
+      "status": "PASS",
+      "saved_state_unchanged": null
+    },
+    {
+      "case": "BUD-03",
+      "period": "2026-12",
+      "http_status": 201,
+      "status": "PASS",
+      "saved_state_unchanged": null
+    },
+    {
+      "case": "BUD-04",
+      "period": "2026-10",
+      "http_status": 422,
+      "status": "PASS",
+      "saved_state_unchanged": true
+    },
+    {
+      "case": "BUD-05",
+      "period": "2026-10",
+      "http_status": 422,
+      "status": "PASS",
+      "saved_state_unchanged": true
+    },
+    {
+      "case": "BUD-06",
+      "period": "2026-10",
+      "http_status": 422,
+      "status": "PASS",
+      "saved_state_unchanged": true
+    },
+    {
+      "case": "BUD-07",
+      "period": "2026-10",
+      "http_status": 422,
+      "status": "PASS",
+      "saved_state_unchanged": true
+    },
+    {
+      "case": "BUD-08",
+      "period": "2026-10",
+      "http_status": 422,
+      "status": "PASS",
+      "saved_state_unchanged": true
+    },
+    {
+      "case": "BUD-09",
+      "period": "2026-10",
+      "http_status": 422,
+      "status": "PASS",
+      "saved_state_unchanged": true
+    },
+    {
+      "case": "BUD-10-upsert",
+      "period": "2026-10",
+      "http_status": 200,
+      "status": "PASS",
+      "saved_state_unchanged": null
+    },
+    {
+      "case": "BUD-duplicate-category",
+      "period": "2026-10",
+      "http_status": 422,
+      "status": "PASS",
+      "saved_state_unchanged": true
+    },
+    {
+      "case": "BUD-savings-above-income",
+      "period": "2026-10",
+      "http_status": 422,
+      "status": "PASS",
+      "saved_state_unchanged": true
+    },
+    {
+      "case": "BUD-boolean-income",
+      "period": "2026-10",
+      "http_status": 422,
+      "status": "PASS",
+      "saved_state_unchanged": true
+    },
+    {
+      "case": "BUD-fractional-amount",
+      "period": "2026-10",
+      "http_status": 422,
+      "status": "PASS",
+      "saved_state_unchanged": true
+    }
+  ],
+  "live_api_pass": true,
+  "fixture_cleanup": "FAILED",
+  "cleanup_error_type": "RuntimeError",
+  "cognito_cleanup": {
+    "expected": 3,
+    "removed_or_absent": 3,
+    "pass": true
+  },
+  "error_type": "RuntimeError",
+  "reason": "runtime_task_failed_prepare",
+  "finished_utc": "2026-11-10T12:34:09+00:00"
+}

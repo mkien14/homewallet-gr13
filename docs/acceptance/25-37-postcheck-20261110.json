@@ -1,0 +1,18 @@
+{
+  "tasks_total": 6,
+  "all_stopped": true,
+  "services": [
+    {
+      "serviceName": "api",
+      "runningCount": 1,
+      "desiredCount": 1,
+      "pendingCount": 0
+    },
+    {
+      "serviceName": "worker",
+      "runningCount": 1,
+      "desiredCount": 1,
+      "pendingCount": 0
+    }
+  ]
+}

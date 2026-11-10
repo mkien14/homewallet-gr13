@@ -1,9 +1,16 @@
 # Ca kiểm tra ngân sách mẫu (#25)
 
+**Cập nhật 10/11/2026:** BUD-01–10 và các ca bổ sung đã PASS trên API dev với
+token Cognito thật. Gợi ý LLM/fallback, lịch sử và ngưỡng/chống trùng của #37
+đã PASS trên schema MySQL test riêng. Xem [biên bản và artifact](acceptance/25-37-budget-20261110.md).
+Ca đọc email budget alert thật của #37 còn chờ xác nhận hộp thư; có
+[hướng dẫn một lệnh](acceptance/25-37-mailbox-guide.md).
+
 Các ca dưới đây là dữ liệu và kỳ vọng dùng cho phần 0,25 của #25. Đơn vị tiền là
 VND; `period` dùng định dạng `YYYY-MM`. Tên danh mục phải được ánh xạ sang
-`category_id` trước khi gọi API. Kỳ vọng về status code là đề xuất cho contract
-validation, cần giữ nhất quán khi endpoint ngân sách được triển khai.
+`category_id` trước khi gọi API. Contract đã kiểm tra: `PUT /api/budgets/{period}`
+tạo mới trả `201`, cập nhật cùng kỳ trả `200`, lưu `MANUAL/ACTIVE`. Endpoint
+suggest trả `LLM/DRAFT` hoặc `RULE/DRAFT`, không tự lưu.
 
 | ID | Dữ liệu chính | Kỳ vọng | Nhóm |
 | --- | --- | --- | --- |
@@ -16,7 +23,7 @@ validation, cần giữ nhất quán khi endpoint ngân sách được triển k
 | BUD-07 | `income_estimate=10000000`, `savings_goal=-1`, một dòng `Ăn uống=100000` | Từ chối `422 VALIDATION`; mục tiêu tiết kiệm không được âm | Số âm |
 | BUD-08 | `income_estimate=10000000`, `savings_goal=0`, một dòng `Ăn uống=-100000` | Từ chối `422 VALIDATION`; amount của budget line không được âm | Số âm |
 | BUD-09 | `income_estimate=10000000`, `savings_goal=0`, dòng `Ăn uống=100000`, `Danh mục không tồn tại=200000` | Từ chối `422 VALIDATION` (hoặc mã lỗi danh mục theo contract); không tự tạo danh mục lạ | Danh mục lạ |
-| BUD-10 | `period=2026-10` lần hai cho cùng household, dữ liệu hợp lệ | Từ chối `409 CONFLICT` hoặc cập nhật theo contract đã chốt; không tạo hai budget trùng kỳ | Trùng kỳ |
+| BUD-10 | `period=2026-10` lần hai cho cùng household, dữ liệu hợp lệ | Cập nhật ngân sách hiện có, trả `200`; đọc lại đúng bản mới; không tạo hai budget trùng kỳ | Upsert cùng kỳ |
 
 ## Quy tắc kiểm tra chung
 
