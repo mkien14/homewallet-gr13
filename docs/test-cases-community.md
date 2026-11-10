@@ -1,10 +1,15 @@
 # D2 / #29 — Các bước kiểm chứng và bàn giao
 
-Nhánh: `feat/29-community-admin-api`. Contract: [community-api.md](community-api.md).
-Ngày chuẩn bị: 2026-11-07; đối chiếu lại ngày 2026-11-10. Kiên đã chốt contract
-ngày 2026-11-10. Unit tests, MySQL acceptance job trên GitHub Actions và route
-preflight dev đã có kết quả; full member/admin API, UI và DB-audit runtime vẫn
-cần tài khoản test và xác nhận deployment/migration.
+**Trạng thái: CLOSED / PASS (2026-11-10).** Kiên xác nhận nghiệm thu runtime dev
+đã hoàn tất; bằng chứng chi tiết được Kiên lưu riêng và không đưa vào repo. Các
+kết quả CI/local dưới đây là bằng chứng bổ trợ, không thay thế bộ bằng chứng runtime.
+
+Nhánh implementation: `feat/29-community-admin-api`. Contract:
+[community-api.md](community-api.md). Ngày chuẩn bị: 2026-11-07; đối chiếu lại
+ngày 2026-11-10. Kiên đã chốt contract và xác nhận full member/admin API, UI,
+deployment/migration và DB-audit runtime đã hoàn tất; bằng chứng chi tiết được
+Kiên giữ riêng. Unit tests, MySQL acceptance job trên GitHub Actions và route
+preflight dev là các bằng chứng bổ trợ được lưu trong repo.
 
 ## Bước 1 — Đối chiếu và review contract
 
@@ -71,22 +76,22 @@ phải xem kết quả job này, không chỉ job backend chung.
 
 | ID | Ca | Kỳ vọng | Bằng chứng local | Dev |
 | --- | --- | --- | --- | --- |
-| D2-01 | Thiếu token trên cả bốn endpoint | 401 | `test_all_routes_require_auth` PASS | Community GET và admin GET trả 401 qua CloudFront; xem route preflight artifact. Hai route POST/PATCH và request có token còn chờ |
-| D2-02 | Member/role owner/admin tự khai báo/group sai | GET/PATCH admin 403 | `test_only_exact_verified_group_grants_admin` PASS | Chờ |
-| D2-03 | Token sửa payload, hết hạn, sai issuer/client, ID token | 401 dù khai group admin | Các test JWT trong `test_community.py` PASS | Chờ |
-| D2-04 | POST hợp lệ cho hai type, kể cả admin gửi bài | 201, PENDING, trim, đúng giới hạn | Test lifecycle/boundaries MySQL PASS | Chờ |
-| D2-05 | Tự gửi status/author/household/role/group; tự nâng qua /me | 422, không cấp quyền | Test validation/self-promote PASS | Chờ |
-| D2-06 | Member đọc feed với status=PENDING/HIDDEN/ALL | Chỉ APPROVED | Test lifecycle MySQL PASS | Chờ |
-| D2-07 | Admin không filter/filter từng trạng thái | Đủ dữ liệu, đúng sort | Test filters/order MySQL PASS | Chờ |
-| D2-08 | Duyệt/sửa/ẩn/đưa lại PENDING | Feed phản ánh trạng thái và nội dung | Test lifecycle MySQL PASS | Chờ |
-| D2-09 | JSON sai, thiếu/thừa trường, sai kiểu/giới hạn/status | 400/422; không ghi bài | Test validation PASS; invalid PATCH MySQL PASS | Chờ |
-| D2-10 | Admin PATCH ID không tồn tại | 404, không audit | Test missing post MySQL PASS | Chờ |
-| D2-11 | Audit cho mỗi create/PATCH thành công | Đúng actor/action/entity/time; không body/email/dữ liệu hộ | Test private audit MySQL PASS | Chờ DB |
+| D2-01 | Thiếu token trên cả bốn endpoint | 401 | `test_all_routes_require_auth` PASS | PASS — Kiên xác nhận runtime; bằng chứng giữ riêng |
+| D2-02 | Member/role owner/admin tự khai báo/group sai | GET/PATCH admin 403 | `test_only_exact_verified_group_grants_admin` PASS | PASS — Kiên xác nhận runtime; bằng chứng giữ riêng |
+| D2-03 | Token sửa payload, hết hạn, sai issuer/client, ID token | 401 dù khai group admin | Các test JWT trong `test_community.py` PASS | PASS — Kiên xác nhận runtime; bằng chứng giữ riêng |
+| D2-04 | POST hợp lệ cho hai type, kể cả admin gửi bài | 201, PENDING, trim, đúng giới hạn | Test lifecycle/boundaries MySQL PASS | PASS — Kiên xác nhận runtime; bằng chứng giữ riêng |
+| D2-05 | Tự gửi status/author/household/role/group; tự nâng qua /me | 422, không cấp quyền | Test validation/self-promote PASS | PASS — Kiên xác nhận runtime; bằng chứng giữ riêng |
+| D2-06 | Member đọc feed với status=PENDING/HIDDEN/ALL | Chỉ APPROVED | Test lifecycle MySQL PASS | PASS — Kiên xác nhận runtime; bằng chứng giữ riêng |
+| D2-07 | Admin không filter/filter từng trạng thái | Đủ dữ liệu, đúng sort | Test filters/order MySQL PASS | PASS — Kiên xác nhận runtime; bằng chứng giữ riêng |
+| D2-08 | Duyệt/sửa/ẩn/đưa lại PENDING | Feed phản ánh trạng thái và nội dung | Test lifecycle MySQL PASS | PASS — Kiên xác nhận runtime; bằng chứng giữ riêng |
+| D2-09 | JSON sai, thiếu/thừa trường, sai kiểu/giới hạn/status | 400/422; không ghi bài | Test validation PASS; invalid PATCH MySQL PASS | PASS — Kiên xác nhận runtime; bằng chứng giữ riêng |
+| D2-10 | Admin PATCH ID không tồn tại | 404, không audit | Test missing post MySQL PASS | PASS — Kiên xác nhận runtime; bằng chứng giữ riêng |
+| D2-11 | Audit cho mỗi create/PATCH thành công | Đúng actor/action/entity/time; không body/email/dữ liệu hộ | Test private audit MySQL PASS | PASS — Kiên xác nhận runtime; bằng chứng giữ riêng |
 | D2-12 | Ghi audit thất bại sau insert/update | Bài và audit cùng rollback | Hai test fault injection MySQL PASS | Local đủ; không phá DB dev |
-| D2-13 | Tác giả thiếu display_name | author=null; không fallback email ở POST/GET/PATCH | Test author privacy MySQL PASS | Chờ |
-| D2-14 | POST route mock trên backend | 404, không nâng quyền | Test mock endpoint PASS | Chờ |
-| D2-15 | Script nghiệm thu với API và MySQL thật local | 16 checks pass; bài test kết thúc HIDDEN | Test evidence runner MySQL PASS | Chờ |
-| D2-16 | UI member/admin, refresh token, sửa localStorage | UI đúng quyền; backend vẫn chặn truy cập trái quyền | Lint; cần kiểm tra trình duyệt | Chờ Thức |
+| D2-13 | Tác giả thiếu display_name | author=null; không fallback email ở POST/GET/PATCH | Test author privacy MySQL PASS | PASS — Kiên xác nhận runtime; bằng chứng giữ riêng |
+| D2-14 | POST route mock trên backend | 404, không nâng quyền | Test mock endpoint PASS | PASS — Kiên xác nhận runtime; bằng chứng giữ riêng |
+| D2-15 | Script nghiệm thu với API và MySQL thật local | 16 checks pass; bài test kết thúc HIDDEN | Test evidence runner MySQL PASS | PASS — Kiên xác nhận runtime; bằng chứng giữ riêng |
+| D2-16 | UI member/admin, refresh token, sửa localStorage | UI đúng quyền; backend vẫn chặn truy cập trái quyền | Lint; runtime acceptance | PASS — Kiên xác nhận UI; bằng chứng giữ riêng |
 
 Các test authorization mô phỏng role owner trong user profile để kiểm tra role đó
 không thay thế group. Nghiệm thu dev vẫn cần tài khoản household owner thực tế.
@@ -193,8 +198,9 @@ Lưu các mục sau trong PR/báo cáo nhóm:
 | Frontend lint | PASS | Không phải UI acceptance |
 | Frontend tests / production build | 72 passed / PASS, exit 0 | Không thay thế UI acceptance trên dev |
 | CI remote | PASS ngày 2026-11-10 trên commit `ab0eb19` | Không thay thế signed-token dev/UI/audit acceptance |
-| AWS dev signed-token / UI / DB audit | Chưa hoàn tất | Không đánh dấu D2 Done |
+| AWS dev signed-token / UI / DB audit | PASS theo xác nhận của Kiên ngày 2026-11-10 | Bằng chứng chi tiết được Kiên lưu riêng; không commit dữ liệu nhạy cảm |
 
-Kiên đã chốt contract. Đóng D2 sau khi xác nhận đúng admin/member test identities,
-backend image và migration dev, signed-token matrix, UI member/admin, và 5 dòng
-audit của bài synthetic; CI đã xanh nhưng không thay cho các kiểm tra runtime này.
+Kiên đã chốt contract và xác nhận runtime acceptance hoàn tất: đúng admin/member,
+deployment/migration, signed-token matrix, UI member/admin và audit DB của bài
+synthetic. D2 / #29 được đóng PASS theo xác nhận của Kiên; bằng chứng gốc được giữ
+riêng, không coi route-preflight/CI artifacts trong repo là bộ runtime evidence.

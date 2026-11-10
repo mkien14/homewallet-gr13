@@ -153,12 +153,17 @@ middleware auth là transaction riêng, không nằm trong cam kết rollback b�
 
 Lỗi cấu hình/JWKS/profile vẫn theo middleware auth chung (500/503/502).
 
-## Xác nhận cần có trước khi đóng D2
+## Trạng thái chốt nghiệm thu D2 / #29
+
+**Đã đóng PASS ngày 2026-11-10 theo xác nhận trực tiếp của Kiên.** Kiên xác nhận
+đã hoàn thành nghiệm thu runtime cho admin/member identities, deployment và migration,
+signed-token matrix, UI hai vai trò và audit DB của bài synthetic. Bằng chứng chi tiết
+được Kiên lưu riêng, không commit vào repo. Biên bản trạng thái: [29-final-acceptance-20261110.md](acceptance/29-final-acceptance-20261110.md).
 
 | Người | Nội dung | Trạng thái |
 | --- | --- | --- |
-| Kiên | Baseline mục 2 và các lựa chọn contract mở | Đã chốt trong chỉ đạo ngày 2026-11-10; nội dung được ghi ở bảng đối chiếu |
-| Thức | Review schema/UI theo contract và nghiệm thu UI với token mới/API thật | Chưa có xác nhận cá nhân; kiểm tra runtime UI vẫn là bước nghiệm thu riêng |
-| Chi | Resource group và plan Terraform | Hạ tầng group đã triển khai; đối chiếu kết quả trong hồ sơ #29 trước khi kết luận review plan |
+| Kiên | Baseline mục 2, contract mở và runtime acceptance | Đã chốt; nghiệm thu toàn bộ theo xác nhận ngày 2026-11-10 |
+| Thức | Review schema/UI | Runtime UI đã được Kiên xác nhận nghiệm thu; không ghi nhận chữ ký cá nhân riêng của Thức trong repo |
+| Chi | Resource group và plan Terraform | Hạ tầng group đã triển khai; runtime/deployment được Kiên xác nhận đã đối chiếu; chi tiết giữ trong bằng chứng riêng |
 
 Ma trận và cách chạy: [test-cases-community.md](test-cases-community.md).
