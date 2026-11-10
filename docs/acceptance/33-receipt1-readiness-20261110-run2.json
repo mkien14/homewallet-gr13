@@ -1,0 +1,51 @@
+{
+  "status": "INSPECTED",
+  "mode": "READ_ONLY_INSPECTION",
+  "provider_metadata_check": true,
+  "receipt_id": 1,
+  "household_id": 1,
+  "started_at": "2026-11-10T13:57:40.567799+00:00",
+  "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-worker:3",
+  "runtime_source_sha256": "20ca073d296b97e498cca5718481381c3ad8b1c556669247e441eae560ef677f",
+  "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/27871867df7e445383b12fc2ba87650e",
+  "exit_code": 0,
+  "image_digest": "sha256:28e13fd5bcf16e1663be2e9b03ebe8ac21cbc52469f91d6211096a71700ff264",
+  "events": [
+    {
+      "event": "RECEIPT_RECOVERY_INSPECTION",
+      "at_utc": "2026-11-10T13:58:03.257479+00:00",
+      "receipt_id": 1,
+      "household_id": 1,
+      "status": "FAILED",
+      "error_code": "WORKER_MAX_ATTEMPTS",
+      "created_at": "2026-10-25 08:25:44",
+      "processed_at": "2026-10-25 08:31:46",
+      "key_sha256": "f357480856bd41f4bacd130426e4a6a006c7a5e97124d89212e9cb78878bab99",
+      "key_has_upload_prefix": true,
+      "stored_content_sha256_present": false,
+      "transaction_count": 0,
+      "transaction_statuses": [],
+      "uploader_is_current_member": true,
+      "uncategorized_exists": true,
+      "source_object": {
+        "exists": true,
+        "bytes": 97503,
+        "content_type": "image/jpeg",
+        "last_modified": "2026-10-25T08:25:45+00:00",
+        "etag_sha256": "a0866a009e13b46fff0ba534437255b894e7e49fd39962c7ac55805f02e9b106",
+        "version_id_sha256": "81ffd58a9eb18daa85110b384db60505d29f73d15f44f7b81b43b3a4d8b507a6"
+      },
+      "gemini_key_configured": true,
+      "gemini_model": "gemini-3.6-flash",
+      "normal_gemini_max_tries": 6,
+      "pipeline_sha256": "86ec3f1da7dba152e76f34d3d2a28e3366e4874322d75d10bb2815f316144cab",
+      "llm_sha256": "eb2767ec33cd031670aae7c0bd7d66bbe12157505bda756329f79963d02eac04",
+      "provider_metadata_probe": {
+        "performed": true,
+        "available": true
+      },
+      "inspection_sha256": "482d105fecfbf482015c00b9b5809b71ea19adf1e4d54a02afc85caec107e977"
+    }
+  ],
+  "completed_at": "2026-11-10T13:58:28.005574+00:00"
+}

@@ -2,9 +2,12 @@
 
 Decision date: 2026-11-10 (Asia/Bangkok). Operator: Kiên.
 
-Status: **RETAINED / RECOVERY PENDING PROVIDER**. One controlled attempt failed
-with provider `ServerError`; read-only postchecks verified the original persistent
-state and zero linked transactions. This is not a successful OCR recovery.
+Status: **RECOVERED TO DRAFT / MANUAL REVIEW PENDING**. The first controlled
+attempt failed with provider `ServerError`. A fresh readiness check later passed,
+and one additional guarded generation succeeded. A read-only postcheck confirmed
+receipt `1` is `NEEDS_REVIEW` with exactly one `DRAFT` transaction (`39`), while
+the original S3 object remains unchanged. The draft has not been approved or
+confirmed as a transaction.
 
 Kiên selected retaining the original receipt and recovering it through a controlled
 workflow. The scope is receipt `1`, household `1`; this does not reopen the D3 pilot
@@ -84,10 +87,29 @@ The execute mode rejects a changed receipt or an existing transaction.
 - [Combined verification](33-receipt1-recovery-verification-20261110.json): all four
   temporary ECS tasks stopped. The follow-up inspection sent no invoice to a provider.
 
-The retain-and-recover disposition is now recorded. Recovery remains pending a
-successful provider response. A later controlled attempt must start with a fresh
-readiness inspection and the same duplicate/transaction guards; it is not scheduled
-or automatically retried by this work.
+The retain-and-recover disposition is now recorded. Recovery succeeded on the
+second guarded attempt. Any further action requires a fresh inspection and the same
+duplicate/transaction guards; no recovery is scheduled or automatically retried.
+
+## Successful controlled recovery — run 2
+
+- Fresh [readiness inspection](33-receipt1-readiness-20261110-run2.json) completed
+  at `2026-11-10T13:58:28Z`. Receipt state, membership, S3 fingerprints and Gemini
+  model metadata matched the guarded preconditions; no invoice was sent during this
+  check.
+- [Recovery result](33-receipt1-recovery-run2-20261110.json): exactly one Gemini
+  generation call, no SDK retry, no Textract fallback. At `2026-11-10T13:59:08Z`,
+  receipt `1` changed to `NEEDS_REVIEW` and transaction `39` was created as `DRAFT`.
+  The original object and DLQ message were retained.
+- Read-only [postcheck](33-receipt1-postcheck-run2-20261110.json) completed at
+  `2026-11-10T14:00:41Z`: one linked transaction, status `DRAFT`; receipt remains
+  `NEEDS_REVIEW`; original S3 size, ETag fingerprint and version fingerprint match.
+- All three ECS tasks stopped successfully. No second recovery was attempted.
+
+The owner must compare draft `39` with the original receipt in HomeWallet and
+correct or reject it as appropriate. Do not confirm it until the amount, merchant,
+date and category have been checked. The old DLQ message remains retained under
+the prior decision; this recovery did not receive, delete, redrive or purge it.
 
 The DLQ alarm remains a separate operational follow-up until the stale message is
 handled under a subsequent decision. A restored draft does not prove the original
