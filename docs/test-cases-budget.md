@@ -2,9 +2,11 @@
 
 **Cập nhật 10/11/2026:** BUD-01–10 và các ca bổ sung đã PASS trên API dev với
 token Cognito thật. Gợi ý LLM/fallback, lịch sử và ngưỡng/chống trùng của #37
-đã PASS trên schema MySQL test riêng. Xem [biên bản và artifact](acceptance/25-37-budget-20261110.md).
-Ca đọc email budget alert thật của #37 còn chờ xác nhận hộp thư; có
-[hướng dẫn một lệnh](acceptance/25-37-mailbox-guide.md).
+đã PASS trên schema MySQL test riêng. Ca email thật của #37 cũng PASS: Kiên đã
+xác nhận nội dung thư thử nghiệm, lần chạy lặp được bỏ qua và cleanup hoàn tất.
+Xem [biên bản và artifact](acceptance/25-37-budget-20261110.md), cùng
+[artifact email](acceptance/37-mailbox-20261110.json). Lịch EventBridge định kỳ
+vẫn DISABLED; bằng chứng này nghiệm thu CLI job trong ECS jobs, không phải lịch.
 
 Các ca dưới đây là dữ liệu và kỳ vọng dùng cho phần 0,25 của #25. Đơn vị tiền là
 VND; `period` dùng định dạng `YYYY-MM`. Tên danh mục phải được ánh xạ sang

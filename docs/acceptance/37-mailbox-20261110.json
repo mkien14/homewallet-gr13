@@ -1,0 +1,175 @@
+{
+  "run_id": "fb3bb44a6726",
+  "started_utc": "2026-11-10T13:35:45+00:00",
+  "status": "PASS",
+  "api": [],
+  "runtime_tasks": [
+    {
+      "mode": "prepare",
+      "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/005d6757cbb6460a8bd61a37e9eefb77",
+      "task_definition": "hw-db-runtime-bootstrap:2",
+      "credential_role": "bootstrap_admin",
+      "log_group": "/ecs/hw-db-runtime-bootstrap",
+      "log_stream": "bootstrap/bootstrap/005d6757cbb6460a8bd61a37e9eefb77",
+      "exit_code": 0,
+      "image": "179923444714.dkr.ecr.ap-southeast-1.amazonaws.com/homewallet-backend:sha-95658d3b2bdfaad9b1930416f4b265e5861da16e",
+      "image_digest": "sha256:28e13fd5bcf16e1663be2e9b03ebe8ac21cbc52469f91d6211096a71700ff264",
+      "events": [
+        {
+          "event": "D1MAIL_PREPARED",
+          "schema": "hw_d1_mail_fb3bb44a6726_test",
+          "recipient_count": 1,
+          "period_key": "2026-11-10",
+          "title_marker": "D1 Acceptance fb3bb4"
+        }
+      ]
+    },
+    {
+      "mode": "exercise",
+      "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/b69ca6d2b98c4196aebdb73d05c36df2",
+      "task_definition": "hw-jobs:3",
+      "credential_role": "runtime",
+      "log_group": "/ecs/hw-jobs",
+      "log_stream": "scheduled/jobs/b69ca6d2b98c4196aebdb73d05c36df2",
+      "exit_code": 0,
+      "image": "179923444714.dkr.ecr.ap-southeast-1.amazonaws.com/homewallet-backend:dev",
+      "image_digest": "sha256:28e13fd5bcf16e1663be2e9b03ebe8ac21cbc52469f91d6211096a71700ff264",
+      "events": [
+        {
+          "event": "D1MAIL_CLI_STARTED",
+          "invocation": 1,
+          "period_key": "2026-11-10",
+          "delivery_attempt": true
+        },
+        {
+          "event": "D1MAIL_CLI_STARTED",
+          "invocation": 2,
+          "period_key": "2026-11-10",
+          "delivery_attempt": false
+        },
+        {
+          "event": "D1MAIL_SEND_PASS",
+          "real_email_sends_accepted": 1,
+          "duplicate_cli_skipped": true,
+          "period_key": "2026-11-10",
+          "cli_results": [
+            {
+              "command": [
+                "python",
+                "-m",
+                "jobs.recurring_alerts",
+                "budget-alerts",
+                "--period-key",
+                "2026-11-10"
+              ],
+              "exit_code": 0,
+              "result": {
+                "event": "scheduled_job_finished",
+                "job": "budget-alerts",
+                "period_key": "2026-11-10",
+                "sent": 1,
+                "skipped": 0,
+                "failed": 0
+              }
+            },
+            {
+              "command": [
+                "python",
+                "-m",
+                "jobs.recurring_alerts",
+                "budget-alerts",
+                "--period-key",
+                "2026-11-10"
+              ],
+              "exit_code": 0,
+              "result": {
+                "event": "scheduled_job_skipped",
+                "job": "budget-alerts",
+                "period_key": "2026-11-10",
+                "skipped": true
+              }
+            }
+          ],
+          "push_sends": 0,
+          "schema": "hw_d1_mail_fb3bb44a6726_test"
+        }
+      ]
+    },
+    {
+      "mode": "cleanup",
+      "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/dfa1b37b9ee74064a69b7fad52064171",
+      "task_definition": "hw-db-runtime-bootstrap:2",
+      "credential_role": "bootstrap_admin",
+      "log_group": "/ecs/hw-db-runtime-bootstrap",
+      "log_stream": "bootstrap/bootstrap/dfa1b37b9ee74064a69b7fad52064171",
+      "exit_code": 0,
+      "image": "179923444714.dkr.ecr.ap-southeast-1.amazonaws.com/homewallet-backend:sha-95658d3b2bdfaad9b1930416f4b265e5861da16e",
+      "image_digest": "sha256:28e13fd5bcf16e1663be2e9b03ebe8ac21cbc52469f91d6211096a71700ff264",
+      "events": [
+        {
+          "event": "D1MAIL_CLEANUP_PASS",
+          "schema_removed": true,
+          "grants_removed": true
+        }
+      ]
+    }
+  ],
+  "mailbox_confirmed": true,
+  "email_send_limit": 1,
+  "push_send_limit": 0,
+  "scheduler_changes": 0,
+  "recipient_sha256": "5c05c7679aaa1efd76d4cc451b5e89f036197987f45f47ebe5db434d9d636c46",
+  "account": "179923444714",
+  "runtime_source_sha256": "d04c3508b090a1be63813593eecf615cf16a6248b55ea8cc605033d9bfa2a71d",
+  "runtime_payload_sha256": "9c9e28d47c528f9423df712ef923140bc7fc59138f5188d45b4d5397b1b92564",
+  "delivery": {
+    "event": "D1MAIL_SEND_PASS",
+    "real_email_sends_accepted": 1,
+    "duplicate_cli_skipped": true,
+    "period_key": "2026-11-10",
+    "cli_results": [
+      {
+        "command": [
+          "python",
+          "-m",
+          "jobs.recurring_alerts",
+          "budget-alerts",
+          "--period-key",
+          "2026-11-10"
+        ],
+        "exit_code": 0,
+        "result": {
+          "event": "scheduled_job_finished",
+          "job": "budget-alerts",
+          "period_key": "2026-11-10",
+          "sent": 1,
+          "skipped": 0,
+          "failed": 0
+        }
+      },
+      {
+        "command": [
+          "python",
+          "-m",
+          "jobs.recurring_alerts",
+          "budget-alerts",
+          "--period-key",
+          "2026-11-10"
+        ],
+        "exit_code": 0,
+        "result": {
+          "event": "scheduled_job_skipped",
+          "job": "budget-alerts",
+          "period_key": "2026-11-10",
+          "skipped": true
+        }
+      }
+    ],
+    "push_sends": 0,
+    "schema": "hw_d1_mail_fb3bb44a6726_test"
+  },
+  "expected_subject_marker": "D1 Acceptance fb3bb4",
+  "mailbox_confirmed_utc": "2026-11-10T13:38:31+00:00",
+  "cleanup": "PASS",
+  "finished_utc": "2026-11-10T13:39:22+00:00"
+}
