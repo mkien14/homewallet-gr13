@@ -1,0 +1,34 @@
+{
+  "run_id": "cd30dcb2132a",
+  "started_at_utc": "2026-11-10T07:00:39.819446+00:00",
+  "account": "179923444714",
+  "region": "ap-southeast-1",
+  "admin_tasks": [],
+  "one_time_schedules": [],
+  "scheduled_tasks": [],
+  "recipient_type": "ses_mailbox_simulator",
+  "recipient_sha256": "f9a9cc07f76e5c0f01623eb15e2fb1361374806e3b699ff9364c10cd81e14e46",
+  "inbox_receipt": "NOT_PROVEN",
+  "device_receipt": "PENDING_USER_CONFIRMATION",
+  "fixture_source_sha256": "45c12eaef1c40da6da9356bb63a1dd621127c73ffbd8265e9c4ac1ba5a5bc025",
+  "fixture_payload_sha256": "2310c7fe7ce3e9eeb8b5e33d5e76df8c09d5d016ead2cec5572f160291835bcc",
+  "recurring_schedules_before": {
+    "hw-weekly-report": "DISABLED",
+    "hw-recurring-reminders": "DISABLED",
+    "hw-budget-alerts": "DISABLED"
+  },
+  "jobs_image": "179923444714.dkr.ecr.ap-southeast-1.amazonaws.com/homewallet-backend:dev",
+  "task_role": "arn:aws:iam::179923444714:role/hw-weekly-report-task-role",
+  "execution_role": "arn:aws:iam::179923444714:role/homewallet-dev-task-execution-role",
+  "status": "FAILED",
+  "error_type": "ParamValidationError",
+  "recurring_schedules_after": {
+    "hw-weekly-report": "DISABLED",
+    "hw-recurring-reminders": "DISABLED",
+    "hw-budget-alerts": "DISABLED"
+  },
+  "cleanup": "FAILED",
+  "cleanup_error_type": "ParamValidationError",
+  "finished_at_utc": "2026-11-10T07:00:41.963704+00:00",
+  "resource_scope_note": "Network SDK parameter validation failed before launching any ECS task or creating any schedule/schema. No resources from this attempt required cleanup; the cleanup helper encountered the same pre-launch parameter error."
+}

@@ -1,0 +1,444 @@
+{
+  "run_id": "da4a31953572",
+  "started_utc": "2026-11-10T06:26:25+00:00",
+  "api": [
+    {
+      "case": "fixture_profile_vi",
+      "method": "GET",
+      "path": "/api/me",
+      "status": 200,
+      "expected": 200,
+      "request_id": "491ccf60-dabd-4a0e-9905-210767c62300",
+      "pass": true
+    },
+    {
+      "case": "fixture_locale_vi",
+      "method": "PATCH",
+      "path": "/api/me",
+      "status": 200,
+      "expected": 200,
+      "request_id": "b6189831-46fe-4612-892a-bbc8d0afccf4",
+      "pass": true
+    },
+    {
+      "case": "fixture_profile_en",
+      "method": "GET",
+      "path": "/api/me",
+      "status": 200,
+      "expected": 200,
+      "request_id": "92754522-e20f-468b-afa9-1a21aad815f8",
+      "pass": true
+    },
+    {
+      "case": "fixture_locale_en",
+      "method": "PATCH",
+      "path": "/api/me",
+      "status": 200,
+      "expected": 200,
+      "request_id": "655f936a-0c06-4cda-b3b2-d691b4a10391",
+      "pass": true
+    },
+    {
+      "case": "fixture_household_create",
+      "method": "POST",
+      "path": "/api/households",
+      "status": 201,
+      "expected": 201,
+      "request_id": "181f02b9-8c7e-4a8a-9fda-5411c40285b6",
+      "pass": true
+    },
+    {
+      "case": "fixture_member_join",
+      "method": "POST",
+      "path": "/api/households/join",
+      "status": 200,
+      "expected": 200,
+      "request_id": "a57a23c6-3f92-4611-83e5-21aa41ae5d88",
+      "pass": true
+    },
+    {
+      "case": "notifications_anonymous",
+      "method": "GET",
+      "path": "/api/notifications?limit=50",
+      "status": 401,
+      "expected": 401,
+      "request_id": "0de24559-aff1-42aa-af59-0e748d861e9d",
+      "pass": true
+    },
+    {
+      "case": "notifications_invalid_limit",
+      "method": "GET",
+      "path": "/api/notifications?limit=0",
+      "status": 422,
+      "expected": 422,
+      "request_id": "53c87d36-80f2-491c-a1db-1ff7a1f342ea",
+      "pass": true
+    },
+    {
+      "case": "notifications_list_vi",
+      "method": "GET",
+      "path": "/api/notifications?limit=50",
+      "status": 200,
+      "expected": 200,
+      "request_id": "0986d308-e842-4e2f-a29a-cd6afc296f87",
+      "pass": true
+    },
+    {
+      "case": "notification_mark_read_vi",
+      "method": "PATCH",
+      "path": "/api/notifications/42",
+      "status": 200,
+      "expected": 200,
+      "request_id": "04a2687c-d06a-4740-bb99-236768920b3b",
+      "pass": true
+    },
+    {
+      "case": "notification_repeat_read_vi",
+      "method": "PATCH",
+      "path": "/api/notifications/42",
+      "status": 200,
+      "expected": 200,
+      "request_id": "587d1411-9ad7-413e-9f13-813d6e9c07e2",
+      "pass": true
+    },
+    {
+      "case": "notification_bad_read_value_vi",
+      "method": "PATCH",
+      "path": "/api/notifications/42",
+      "status": 422,
+      "expected": 422,
+      "request_id": "494482fa-a17e-450a-a43b-1bd62e18002a",
+      "pass": true
+    },
+    {
+      "case": "notification_other_user_denied_vi",
+      "method": "PATCH",
+      "path": "/api/notifications/42",
+      "status": 404,
+      "expected": 404,
+      "request_id": "bbad643c-2c77-47f6-bdf7-603c82b2cdc9",
+      "pass": true
+    },
+    {
+      "case": "notification_read_persisted_vi",
+      "method": "GET",
+      "path": "/api/notifications?limit=50",
+      "status": 200,
+      "expected": 200,
+      "request_id": "0c01d03e-53a1-440b-a401-b2a379795472",
+      "pass": true
+    },
+    {
+      "case": "notifications_list_en",
+      "method": "GET",
+      "path": "/api/notifications?limit=50",
+      "status": 200,
+      "expected": 200,
+      "request_id": "50c6d39e-17d7-4e8d-af04-ed973e03a730",
+      "pass": true
+    },
+    {
+      "case": "notification_mark_read_en",
+      "method": "PATCH",
+      "path": "/api/notifications/43",
+      "status": 200,
+      "expected": 200,
+      "request_id": "c584ea3b-994f-477b-88e9-ba6dc07e7d27",
+      "pass": true
+    },
+    {
+      "case": "notification_repeat_read_en",
+      "method": "PATCH",
+      "path": "/api/notifications/43",
+      "status": 200,
+      "expected": 200,
+      "request_id": "e6e25c79-0518-48b1-ba1c-42a4725b90b4",
+      "pass": true
+    },
+    {
+      "case": "notification_bad_read_value_en",
+      "method": "PATCH",
+      "path": "/api/notifications/43",
+      "status": 422,
+      "expected": 422,
+      "request_id": "9deab20f-ffa1-48dd-a7be-5143e74a8c3f",
+      "pass": true
+    },
+    {
+      "case": "notification_other_user_denied_en",
+      "method": "PATCH",
+      "path": "/api/notifications/43",
+      "status": 404,
+      "expected": 404,
+      "request_id": "5c0329f8-eeaa-46f2-8fd1-c3804fbd357c",
+      "pass": true
+    },
+    {
+      "case": "notification_read_persisted_en",
+      "method": "GET",
+      "path": "/api/notifications?limit=50",
+      "status": 200,
+      "expected": 200,
+      "request_id": "c76a72ac-51dd-4bda-9013-54897e95dc4e",
+      "pass": true
+    }
+  ],
+  "runtime_tasks": [
+    {
+      "mode": "prepare",
+      "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/0a2a64a3900b4593aeba88b8437a9ac4",
+      "task_definition": "hw-db-runtime-bootstrap:2",
+      "credential_role": "bootstrap_admin",
+      "log_group": "/ecs/hw-db-runtime-bootstrap",
+      "log_stream": "bootstrap/bootstrap/0a2a64a3900b4593aeba88b8437a9ac4",
+      "exit_code": 0,
+      "events": [
+        {
+          "event": "CHI43_RUNTIME_PHASE",
+          "at_utc": "2026-11-10T06:26:55.963502+00:00",
+          "phase": "connect"
+        },
+        {
+          "event": "CHI43_RUNTIME_PHASE",
+          "at_utc": "2026-11-10T06:26:56.141302+00:00",
+          "phase": "connected"
+        },
+        {
+          "event": "CHI43_RUNTIME_PHASE",
+          "at_utc": "2026-11-10T06:26:56.141604+00:00",
+          "phase": "scope_household"
+        },
+        {
+          "event": "CHI43_RUNTIME_PHASE",
+          "at_utc": "2026-11-10T06:26:56.142498+00:00",
+          "phase": "scope_members"
+        },
+        {
+          "event": "CHI43_RUNTIME_PHASE",
+          "at_utc": "2026-11-10T06:26:56.143716+00:00",
+          "phase": "scope_push"
+        },
+        {
+          "event": "CHI43_PUSH_GRANTS_RECONCILED",
+          "at_utc": "2026-11-10T06:26:56.169146+00:00",
+          "table": "homewallet.push_subscriptions",
+          "account": "hw_runtime",
+          "missing_privileges_before": [],
+          "runtime_select_verified": true,
+          "contract": "backend/db/bootstrap/runtime-grants.sql"
+        },
+        {
+          "event": "CHI43_FIXTURE_PREPARED",
+          "at_utc": "2026-11-10T06:26:56.200527+00:00",
+          "run_id": "da4a31953572",
+          "household_id": 17,
+          "category_id": 11,
+          "bill_id": 2,
+          "transaction_count": 5,
+          "browser_notification": {
+            "user_id": 16,
+            "notification_id": 41,
+            "unread": true,
+            "event_key": "chi43:controlled-ui-read:20261110:user:16"
+          }
+        }
+      ],
+      "image": "179923444714.dkr.ecr.ap-southeast-1.amazonaws.com/homewallet-backend:sha-95658d3b2bdfaad9b1930416f4b265e5861da16e",
+      "image_digest": "sha256:28e13fd5bcf16e1663be2e9b03ebe8ac21cbc52469f91d6211096a71700ff264"
+    },
+    {
+      "mode": "exercise",
+      "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/add9879f403044d8a0a6f8ca7c3c98b0",
+      "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-api:21",
+      "credential_role": "runtime",
+      "log_group": "/ecs/hw-api",
+      "log_stream": "api/api/add9879f403044d8a0a6f8ca7c3c98b0",
+      "exit_code": 0,
+      "events": [
+        {
+          "event": "CHI43_RUNTIME_PHASE",
+          "at_utc": "2026-11-10T06:27:43.294843+00:00",
+          "phase": "connect"
+        },
+        {
+          "event": "CHI43_RUNTIME_PHASE",
+          "at_utc": "2026-11-10T06:27:43.377724+00:00",
+          "phase": "connected"
+        },
+        {
+          "event": "CHI43_RUNTIME_PHASE",
+          "at_utc": "2026-11-10T06:27:43.769659+00:00",
+          "phase": "scope_household"
+        },
+        {
+          "event": "CHI43_RUNTIME_PHASE",
+          "at_utc": "2026-11-10T06:27:43.771077+00:00",
+          "phase": "scope_members"
+        },
+        {
+          "event": "CHI43_RUNTIME_PHASE",
+          "at_utc": "2026-11-10T06:27:43.772368+00:00",
+          "phase": "scope_push"
+        },
+        {
+          "event": "CHI43_RUNTIME_EXERCISE_PASS",
+          "at_utc": "2026-11-10T06:27:44.232669+00:00",
+          "run_id": "da4a31953572",
+          "household_id": 17,
+          "fixture_user_ids": [
+            23,
+            24
+          ],
+          "checks": [
+            "report_confirmed_only_week_bounds_category_member_totals",
+            "weekly_report_vi_en_render_and_same_key_skip",
+            "recurring_reminder_vi_en_due_date_and_same_key_skip",
+            "budget_80_100_vi_en_thresholds_duplicate_suppression",
+            "six_localized_in_app_notifications_no_duplicates",
+            "four_namespaced_job_runs_succeeded"
+          ],
+          "fixture_notification_ids": {
+            "23": [
+              42,
+              44,
+              46
+            ],
+            "24": [
+              43,
+              45,
+              47
+            ]
+          },
+          "email_transport": "INTERCEPTED_NOT_SENT",
+          "email_capture_calls": 8,
+          "email_locales": {
+            "vi": 4,
+            "en": 4
+          },
+          "real_ses_calls": 0,
+          "real_push_sends": 0,
+          "scheduler_invocations": 0,
+          "browser_notification": {
+            "user_id": 16,
+            "notification_id": 41,
+            "unread": true,
+            "event_key": "chi43:controlled-ui-read:20261110:user:16"
+          }
+        }
+      ],
+      "image": "179923444714.dkr.ecr.ap-southeast-1.amazonaws.com/homewallet-backend:sha-95658d3b2bdfaad9b1930416f4b265e5861da16e",
+      "image_digest": "sha256:28e13fd5bcf16e1663be2e9b03ebe8ac21cbc52469f91d6211096a71700ff264"
+    },
+    {
+      "mode": "cleanup",
+      "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/449ef1ca7cb9478b8c2153dbd4be547d",
+      "task_definition": "hw-db-runtime-bootstrap:2",
+      "credential_role": "bootstrap_admin",
+      "log_group": "/ecs/hw-db-runtime-bootstrap",
+      "log_stream": "bootstrap/bootstrap/449ef1ca7cb9478b8c2153dbd4be547d",
+      "exit_code": 0,
+      "events": [
+        {
+          "event": "CHI43_RUNTIME_PHASE",
+          "at_utc": "2026-11-10T06:28:42.350910+00:00",
+          "phase": "connect"
+        },
+        {
+          "event": "CHI43_RUNTIME_PHASE",
+          "at_utc": "2026-11-10T06:28:42.464662+00:00",
+          "phase": "connected"
+        },
+        {
+          "event": "CHI43_RUNTIME_PHASE",
+          "at_utc": "2026-11-10T06:28:42.464966+00:00",
+          "phase": "scope_household"
+        },
+        {
+          "event": "CHI43_RUNTIME_PHASE",
+          "at_utc": "2026-11-10T06:28:42.465716+00:00",
+          "phase": "scope_members"
+        },
+        {
+          "event": "CHI43_RUNTIME_PHASE",
+          "at_utc": "2026-11-10T06:28:42.466497+00:00",
+          "phase": "scope_push"
+        },
+        {
+          "event": "CHI43_RUNTIME_CLEANUP_PASS",
+          "at_utc": "2026-11-10T06:28:42.480807+00:00",
+          "run_id": "da4a31953572",
+          "household_id": 17,
+          "fixture_users_removed": 2,
+          "controlled_browser_notification_retained": true
+        }
+      ],
+      "image": "179923444714.dkr.ecr.ap-southeast-1.amazonaws.com/homewallet-backend:sha-95658d3b2bdfaad9b1930416f4b265e5861da16e",
+      "image_digest": "sha256:28e13fd5bcf16e1663be2e9b03ebe8ac21cbc52469f91d6211096a71700ff264"
+    }
+  ],
+  "email_transport": "INTERCEPTED_NOT_SENT",
+  "scope": "API and bounded deployed-function integration",
+  "account": "179923444714",
+  "runtime_source_sha256": "055046366abcd20de4b2a19f3702141d584ec87aa4b635903727368e4d355944",
+  "runtime_payload_sha256": "457eb3990e543f7a6e74abd7cb987990dc270a999aebac2bb61c5fb046d30cdf",
+  "fixture": {
+    "run_id": "da4a31953572",
+    "vi_user_id": 23,
+    "en_user_id": 24,
+    "household_id": 17
+  },
+  "runtime_checks": {
+    "event": "CHI43_RUNTIME_EXERCISE_PASS",
+    "at_utc": "2026-11-10T06:27:44.232669+00:00",
+    "run_id": "da4a31953572",
+    "household_id": 17,
+    "fixture_user_ids": [
+      23,
+      24
+    ],
+    "checks": [
+      "report_confirmed_only_week_bounds_category_member_totals",
+      "weekly_report_vi_en_render_and_same_key_skip",
+      "recurring_reminder_vi_en_due_date_and_same_key_skip",
+      "budget_80_100_vi_en_thresholds_duplicate_suppression",
+      "six_localized_in_app_notifications_no_duplicates",
+      "four_namespaced_job_runs_succeeded"
+    ],
+    "fixture_notification_ids": {
+      "23": [
+        42,
+        44,
+        46
+      ],
+      "24": [
+        43,
+        45,
+        47
+      ]
+    },
+    "email_transport": "INTERCEPTED_NOT_SENT",
+    "email_capture_calls": 8,
+    "email_locales": {
+      "vi": 4,
+      "en": 4
+    },
+    "real_ses_calls": 0,
+    "real_push_sends": 0,
+    "scheduler_invocations": 0,
+    "browser_notification": {
+      "user_id": 16,
+      "notification_id": 41,
+      "unread": true,
+      "event_key": "chi43:controlled-ui-read:20261110:user:16"
+    }
+  },
+  "checks_passed": true,
+  "fixture_cleanup": "PASS",
+  "cognito_cleanup": {
+    "created": 2,
+    "deleted": 2,
+    "pass": true
+  },
+  "status": "PASS",
+  "finished_utc": "2026-11-10T06:29:08+00:00"
+}

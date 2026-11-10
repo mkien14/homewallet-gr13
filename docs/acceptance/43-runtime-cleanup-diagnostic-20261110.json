@@ -1,0 +1,51 @@
+{
+  "api": [],
+  "runtime_tasks": [
+    {
+      "mode": "cleanup",
+      "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/bf3735a953ac4491857f740796ce90bb",
+      "log_group": "/ecs/hw-api",
+      "log_stream": "api/api/bf3735a953ac4491857f740796ce90bb",
+      "exit_code": 1,
+      "events": [
+        {
+          "event": "CHI43_RUNTIME_PHASE",
+          "at_utc": "2026-11-10T06:17:44.965792+00:00",
+          "phase": "connect"
+        },
+        {
+          "event": "CHI43_RUNTIME_PHASE",
+          "at_utc": "2026-11-10T06:17:44.995627+00:00",
+          "phase": "connected"
+        },
+        {
+          "event": "CHI43_RUNTIME_PHASE",
+          "at_utc": "2026-11-10T06:17:44.995799+00:00",
+          "phase": "scope_household"
+        },
+        {
+          "event": "CHI43_RUNTIME_PHASE",
+          "at_utc": "2026-11-10T06:17:44.997151+00:00",
+          "phase": "scope_members"
+        },
+        {
+          "event": "CHI43_RUNTIME_PHASE",
+          "at_utc": "2026-11-10T06:17:44.998503+00:00",
+          "phase": "scope_push"
+        },
+        {
+          "event": "CHI43_RUNTIME_FAILED",
+          "at_utc": "2026-11-10T06:17:45.011865+00:00",
+          "mode": "cleanup",
+          "error_type": "OperationalError",
+          "reason": null,
+          "database_error_code": 1142
+        }
+      ]
+    }
+  ],
+  "account": "179923444714",
+  "runtime_source_sha256": "507fc6a4855c1fe701fd6ba9766111e0b7d0bfe566f93e63dece5caa5d707b03",
+  "status": "FAILED",
+  "error_type": "RuntimeError"
+}

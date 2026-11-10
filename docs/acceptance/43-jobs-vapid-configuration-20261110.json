@@ -1,0 +1,43 @@
+{
+  "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:3",
+  "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/27ccf68b2fa34a7e98bf91d71c7eb9da",
+  "log_group": "/ecs/hw-jobs",
+  "log_stream": "scheduled/jobs/27ccf68b2fa34a7e98bf91d71c7eb9da",
+  "source_sha256": "f56ae5b69f7720d655c932e6f3d61082e212fe6a46bca4c8c4aca31243e9a90f",
+  "schedule_state": "DISABLED",
+  "exit_code": 0,
+  "events": [
+    {
+      "event": "CHI43_JOB_CONFIGURATION_PASS",
+      "at_utc": "2026-11-10T06:35:02.946731+00:00",
+      "vapid_key_loaded_and_parsed": true,
+      "vapid_subject_configured": true,
+      "runtime_db_read_verified": true,
+      "push_sends": 0,
+      "ses_sends": 0
+    }
+  ],
+  "schedules": {
+    "hw-budget-alerts": {
+      "state": "DISABLED",
+      "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:3"
+    },
+    "hw-recurring-reminders": {
+      "state": "DISABLED",
+      "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:3"
+    },
+    "hw-weekly-report": {
+      "state": "DISABLED",
+      "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:3"
+    }
+  },
+  "reviewed_plan_summary": {
+    "add": 1,
+    "update": 4,
+    "destroy": 1,
+    "scope": "jobs task-definition VAPID reference, three disabled schedule target ARNs, scoped scheduler RunTask policy"
+  },
+  "status": "PASS",
+  "image": "179923444714.dkr.ecr.ap-southeast-1.amazonaws.com/homewallet-backend:dev",
+  "image_digest": "sha256:28e13fd5bcf16e1663be2e9b03ebe8ac21cbc52469f91d6211096a71700ff264"
+}

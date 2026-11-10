@@ -112,7 +112,11 @@ module "compute" {
   # service execution role only after hw_runtime has been bootstrapped.
   secret_arns = concat(
     var.use_db_runtime_credentials ? [] : [module.data.secret_arn],
-    [aws_secretsmanager_secret.gemini.arn, module.cache.auth_token_secret_arn],
+    [
+      aws_secretsmanager_secret.gemini.arn,
+      data.aws_secretsmanager_secret.vapid_private_key.arn,
+      module.cache.auth_token_secret_arn,
+    ],
     var.use_db_runtime_credentials ? [local.runtime_db_secret_arn] : []
   )
 
@@ -150,8 +154,9 @@ module "compute" {
   }
 
   jobs_secrets = {
-    DB_USER     = "${local.service_db_secret_arn}:username::"
-    DB_PASSWORD = "${local.service_db_secret_arn}:password::"
+    DB_USER           = "${local.service_db_secret_arn}:username::"
+    DB_PASSWORD       = "${local.service_db_secret_arn}:password::"
+    VAPID_PRIVATE_KEY = data.aws_secretsmanager_secret.vapid_private_key.arn
   }
 
   api_environment = {
@@ -172,10 +177,11 @@ module "compute" {
   }
 
   api_secrets = {
-    DB_USER          = "${local.service_db_secret_arn}:username::"
-    DB_PASSWORD      = "${local.service_db_secret_arn}:password::"
-    GEMINI_API_KEY   = aws_secretsmanager_secret.gemini.arn
-    REDIS_AUTH_TOKEN = module.cache.auth_token_secret_arn
+    DB_USER           = "${local.service_db_secret_arn}:username::"
+    DB_PASSWORD       = "${local.service_db_secret_arn}:password::"
+    GEMINI_API_KEY    = aws_secretsmanager_secret.gemini.arn
+    REDIS_AUTH_TOKEN  = module.cache.auth_token_secret_arn
+    VAPID_PRIVATE_KEY = data.aws_secretsmanager_secret.vapid_private_key.arn
   }
 }
 
@@ -251,6 +257,10 @@ resource "aws_secretsmanager_secret" "gemini" {
   lifecycle {
     prevent_destroy = true
   }
+}
+
+data "aws_secretsmanager_secret" "vapid_private_key" {
+  name = "hw/dev/vapid-private-key"
 }
 
 module "team_access" {

@@ -72,7 +72,7 @@ It must not contain an amount, member email, receipt text, or other household da
 
 ## VAPID deployment configuration
 
-- `VAPID_PRIVATE_KEY`: server-side VAPID private key as PEM or base64-encoded DER, injected only into the scheduled `hw-jobs` ECS task from Secrets Manager. Do not commit it or put it in any `VITE_*` variable.
+- `VAPID_PRIVATE_KEY`: server-side VAPID private key as base64url-encoded DER, injected into the scheduled `hw-jobs` ECS task from Secrets Manager. Convert PEM text to DER before storing this environment-variable value: `pywebpush` interprets an inline string as an encoded key, not as PEM contents. Do not commit it or put it in any `VITE_*` variable.
 - `VAPID_CLAIMS_SUB`: VAPID subject such as `mailto:homewallet26@gmail.com`. If omitted, backend config derives it from `SES_FROM_ADDRESS`.
 - `VITE_VAPID_PUBLIC_KEY`: public key for the React app, configured separately by the UI branch. It is public and must match the private key above.
 

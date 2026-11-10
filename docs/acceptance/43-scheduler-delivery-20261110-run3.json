@@ -1,0 +1,458 @@
+{
+  "run_id": "afd40c749140",
+  "started_at_utc": "2026-11-10T07:03:07.411381+00:00",
+  "account": "179923444714",
+  "region": "ap-southeast-1",
+  "admin_tasks": [
+    {
+      "mode": "prepare",
+      "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/bb13c5844b9b486a8b2c6820050b2059",
+      "status": "STARTED",
+      "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-db-runtime-bootstrap:2",
+      "group": "family:hw-db-runtime-bootstrap",
+      "exit_code": 0,
+      "image_digest": "sha256:28e13fd5bcf16e1663be2e9b03ebe8ac21cbc52469f91d6211096a71700ff264",
+      "log_group": "/ecs/hw-db-runtime-bootstrap",
+      "log_stream": "bootstrap/bootstrap/bb13c5844b9b486a8b2c6820050b2059",
+      "events": [
+        {
+          "event": "CHI43_SEND_FIXTURE_READY",
+          "at_utc": "2026-11-10T07:03:36.060045+00:00",
+          "schema": "chi43_send_afd40c749140_vi",
+          "locale": "vi",
+          "period_key": "2026-11-10",
+          "report_week": "2026-11-02",
+          "recipient_sha256": "f9a9cc07f76e5c0f01623eb15e2fb1361374806e3b699ff9364c10cd81e14e46",
+          "source_subscription_id": 6,
+          "source_user_id": 16
+        },
+        {
+          "event": "CHI43_SEND_FIXTURE_READY",
+          "at_utc": "2026-11-10T07:03:36.677742+00:00",
+          "schema": "chi43_send_afd40c749140_en",
+          "locale": "en",
+          "period_key": "2026-11-10",
+          "report_week": "2026-11-02",
+          "recipient_sha256": "f9a9cc07f76e5c0f01623eb15e2fb1361374806e3b699ff9364c10cd81e14e46",
+          "source_subscription_id": 6,
+          "source_user_id": 16
+        }
+      ]
+    },
+    {
+      "mode": "inspect",
+      "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/7783f886338640d890ef3e030ad799d0",
+      "status": "STARTED",
+      "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-db-runtime-bootstrap:2",
+      "group": "family:hw-db-runtime-bootstrap",
+      "exit_code": 0,
+      "image_digest": "sha256:28e13fd5bcf16e1663be2e9b03ebe8ac21cbc52469f91d6211096a71700ff264",
+      "log_group": "/ecs/hw-db-runtime-bootstrap",
+      "log_stream": "bootstrap/bootstrap/7783f886338640d890ef3e030ad799d0",
+      "events": [
+        {
+          "event": "CHI43_SEND_FIXTURE_STATE",
+          "at_utc": "2026-11-10T07:09:46.858948+00:00",
+          "schema": "chi43_send_afd40c749140_vi",
+          "locale": "vi",
+          "job_runs": [
+            {
+              "job_name": "BUDGET_ALERTS",
+              "period_key": "2026-11-10",
+              "status": "SUCCEEDED"
+            },
+            {
+              "job_name": "RECURRING_BILL_REMINDER",
+              "period_key": "2026-11-10:bill:1",
+              "status": "SUCCEEDED"
+            },
+            {
+              "job_name": "WEEKLY_REPORT_HH_1",
+              "period_key": "2026-11-02",
+              "status": "SUCCEEDED"
+            }
+          ],
+          "notifications": [
+            {
+              "id": 1,
+              "user_id": 16,
+              "type": "recurring_bill_reminder",
+              "event_key": "recurring-bill:1:2026-11-12:user:16",
+              "read_at": null
+            },
+            {
+              "id": 2,
+              "user_id": 16,
+              "type": "budget_alert",
+              "event_key": "budget-alert:1:2026-11:1:80:user:16",
+              "read_at": null
+            }
+          ],
+          "alerts": [
+            {
+              "threshold": 80,
+              "sent_at": "2026-11-10 07:08:33"
+            }
+          ]
+        },
+        {
+          "event": "CHI43_SEND_FIXTURE_STATE",
+          "at_utc": "2026-11-10T07:09:46.863223+00:00",
+          "schema": "chi43_send_afd40c749140_en",
+          "locale": "en",
+          "job_runs": [
+            {
+              "job_name": "BUDGET_ALERTS",
+              "period_key": "2026-11-10",
+              "status": "SUCCEEDED"
+            },
+            {
+              "job_name": "RECURRING_BILL_REMINDER",
+              "period_key": "2026-11-10:bill:1",
+              "status": "SUCCEEDED"
+            },
+            {
+              "job_name": "WEEKLY_REPORT_HH_1",
+              "period_key": "2026-11-02",
+              "status": "SUCCEEDED"
+            }
+          ],
+          "notifications": [
+            {
+              "id": 1,
+              "user_id": 16,
+              "type": "recurring_bill_reminder",
+              "event_key": "recurring-bill:1:2026-11-12:user:16",
+              "read_at": null
+            },
+            {
+              "id": 2,
+              "user_id": 16,
+              "type": "budget_alert",
+              "event_key": "budget-alert:1:2026-11:1:80:user:16",
+              "read_at": null
+            }
+          ],
+          "alerts": [
+            {
+              "threshold": 80,
+              "sent_at": "2026-11-10 07:08:48"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "cleanup",
+      "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/3be7283af13e42198892526cbdd7af1d",
+      "status": "STARTED",
+      "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-db-runtime-bootstrap:2",
+      "group": "family:hw-db-runtime-bootstrap",
+      "exit_code": 0,
+      "image_digest": "sha256:28e13fd5bcf16e1663be2e9b03ebe8ac21cbc52469f91d6211096a71700ff264",
+      "log_group": "/ecs/hw-db-runtime-bootstrap",
+      "log_stream": "bootstrap/bootstrap/3be7283af13e42198892526cbdd7af1d",
+      "events": [
+        {
+          "event": "CHI43_SEND_SCHEMA_REMOVED",
+          "at_utc": "2026-11-10T07:10:36.684383+00:00",
+          "schema": "chi43_send_afd40c749140_vi",
+          "runtime_grants_removed": true
+        },
+        {
+          "event": "CHI43_SEND_SCHEMA_REMOVED",
+          "at_utc": "2026-11-10T07:10:36.875868+00:00",
+          "schema": "chi43_send_afd40c749140_en",
+          "runtime_grants_removed": true
+        }
+      ]
+    }
+  ],
+  "one_time_schedules": [
+    {
+      "name": "chi43-afd40c749140-weekly",
+      "arn": "arn:aws:scheduler:ap-southeast-1:179923444714:schedule/homewallet-dev-jobs/chi43-afd40c749140-weekly",
+      "ecs_group": "chi43-afd40c749140-weekly",
+      "expression": "at(2026-11-10T07:05:46)",
+      "commands": [
+        "DB_NAME=chi43_send_afd40c749140_vi python -m jobs.weekly_report",
+        "sleep 2",
+        "DB_NAME=chi43_send_afd40c749140_vi python -m jobs.weekly_report",
+        "sleep 2",
+        "DB_NAME=chi43_send_afd40c749140_en python -m jobs.weekly_report",
+        "sleep 2",
+        "DB_NAME=chi43_send_afd40c749140_en python -m jobs.weekly_report",
+        "sleep 2"
+      ],
+      "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:3",
+      "kind": "weekly",
+      "deleted": true
+    },
+    {
+      "name": "chi43-afd40c749140-reminder",
+      "arn": "arn:aws:scheduler:ap-southeast-1:179923444714:schedule/homewallet-dev-jobs/chi43-afd40c749140-reminder",
+      "ecs_group": "chi43-afd40c749140-reminder",
+      "expression": "at(2026-11-10T07:06:52)",
+      "commands": [
+        "DB_NAME=chi43_send_afd40c749140_vi python -m jobs.recurring_alerts reminders",
+        "sleep 2",
+        "DB_NAME=chi43_send_afd40c749140_vi python -m jobs.recurring_alerts reminders",
+        "sleep 2",
+        "DB_NAME=chi43_send_afd40c749140_en python -m jobs.recurring_alerts reminders",
+        "sleep 2",
+        "DB_NAME=chi43_send_afd40c749140_en python -m jobs.recurring_alerts reminders",
+        "sleep 2"
+      ],
+      "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:3",
+      "kind": "reminder",
+      "deleted": true
+    },
+    {
+      "name": "chi43-afd40c749140-budget",
+      "arn": "arn:aws:scheduler:ap-southeast-1:179923444714:schedule/homewallet-dev-jobs/chi43-afd40c749140-budget",
+      "ecs_group": "chi43-afd40c749140-budget",
+      "expression": "at(2026-11-10T07:07:57)",
+      "commands": [
+        "DB_NAME=chi43_send_afd40c749140_vi python -m jobs.recurring_alerts budget-alerts",
+        "sleep 2",
+        "DB_NAME=chi43_send_afd40c749140_vi python -m jobs.recurring_alerts budget-alerts",
+        "sleep 2",
+        "DB_NAME=chi43_send_afd40c749140_en python -m jobs.recurring_alerts budget-alerts",
+        "sleep 2",
+        "DB_NAME=chi43_send_afd40c749140_en python -m jobs.recurring_alerts budget-alerts",
+        "sleep 2"
+      ],
+      "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:3",
+      "kind": "budget",
+      "deleted": true
+    }
+  ],
+  "scheduled_tasks": [
+    {
+      "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/d24427e10d334f0ca47fcc39e1d9dd3c",
+      "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:3",
+      "group": "chi43-afd40c749140-weekly",
+      "exit_code": 0,
+      "image_digest": "sha256:28e13fd5bcf16e1663be2e9b03ebe8ac21cbc52469f91d6211096a71700ff264",
+      "log_group": "/ecs/hw-jobs",
+      "log_stream": "scheduled/jobs/d24427e10d334f0ca47fcc39e1d9dd3c",
+      "events": [
+        {
+          "event": "weekly_report_sent",
+          "household_id": 1,
+          "period_key": "2026-11-02",
+          "transaction_count": 2
+        },
+        {
+          "event": "scheduled_job_finished",
+          "job": "weekly-report",
+          "period_key": "2026-11-02",
+          "period_end_exclusive": "2026-11-09",
+          "timezone": "Asia/Ho_Chi_Minh",
+          "sent": 1,
+          "skipped": 0,
+          "failed": 0
+        },
+        {
+          "event": "weekly_report_skipped",
+          "household_id": 1,
+          "period_key": "2026-11-02",
+          "reason": "already_claimed_or_succeeded"
+        },
+        {
+          "event": "scheduled_job_finished",
+          "job": "weekly-report",
+          "period_key": "2026-11-02",
+          "period_end_exclusive": "2026-11-09",
+          "timezone": "Asia/Ho_Chi_Minh",
+          "sent": 0,
+          "skipped": 1,
+          "failed": 0
+        },
+        {
+          "event": "weekly_report_sent",
+          "household_id": 1,
+          "period_key": "2026-11-02",
+          "transaction_count": 2
+        },
+        {
+          "event": "scheduled_job_finished",
+          "job": "weekly-report",
+          "period_key": "2026-11-02",
+          "period_end_exclusive": "2026-11-09",
+          "timezone": "Asia/Ho_Chi_Minh",
+          "sent": 1,
+          "skipped": 0,
+          "failed": 0
+        },
+        {
+          "event": "weekly_report_skipped",
+          "household_id": 1,
+          "period_key": "2026-11-02",
+          "reason": "already_claimed_or_succeeded"
+        },
+        {
+          "event": "scheduled_job_finished",
+          "job": "weekly-report",
+          "period_key": "2026-11-02",
+          "period_end_exclusive": "2026-11-09",
+          "timezone": "Asia/Ho_Chi_Minh",
+          "sent": 0,
+          "skipped": 1,
+          "failed": 0
+        }
+      ],
+      "kind": "weekly"
+    },
+    {
+      "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/3daae18498f845519c9f056884e0bfda",
+      "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:3",
+      "group": "chi43-afd40c749140-reminder",
+      "exit_code": 0,
+      "image_digest": "sha256:28e13fd5bcf16e1663be2e9b03ebe8ac21cbc52469f91d6211096a71700ff264",
+      "log_group": "/ecs/hw-jobs",
+      "log_stream": "scheduled/jobs/3daae18498f845519c9f056884e0bfda",
+      "events": [
+        {
+          "event": "push_delivery_summary",
+          "event_type": "recurring_bill_reminder",
+          "notification_count": 1,
+          "configured": true,
+          "sent": 1,
+          "failed": 0,
+          "expired": 0
+        },
+        {
+          "event": "scheduled_job_finished",
+          "job": "recurring-reminders",
+          "period_key": "2026-11-10",
+          "timezone": "Asia/Ho_Chi_Minh",
+          "sent": 1,
+          "skipped": 0,
+          "failed": 0
+        },
+        {
+          "event": "scheduled_job_finished",
+          "job": "recurring-reminders",
+          "period_key": "2026-11-10",
+          "timezone": "Asia/Ho_Chi_Minh",
+          "sent": 0,
+          "skipped": 1,
+          "failed": 0
+        },
+        {
+          "event": "push_delivery_summary",
+          "event_type": "recurring_bill_reminder",
+          "notification_count": 1,
+          "configured": true,
+          "sent": 1,
+          "failed": 0,
+          "expired": 0
+        },
+        {
+          "event": "scheduled_job_finished",
+          "job": "recurring-reminders",
+          "period_key": "2026-11-10",
+          "timezone": "Asia/Ho_Chi_Minh",
+          "sent": 1,
+          "skipped": 0,
+          "failed": 0
+        },
+        {
+          "event": "scheduled_job_finished",
+          "job": "recurring-reminders",
+          "period_key": "2026-11-10",
+          "timezone": "Asia/Ho_Chi_Minh",
+          "sent": 0,
+          "skipped": 1,
+          "failed": 0
+        }
+      ],
+      "kind": "reminder"
+    },
+    {
+      "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/08ee701c263b47ea94e57c4349734616",
+      "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:3",
+      "group": "chi43-afd40c749140-budget",
+      "exit_code": 0,
+      "image_digest": "sha256:28e13fd5bcf16e1663be2e9b03ebe8ac21cbc52469f91d6211096a71700ff264",
+      "log_group": "/ecs/hw-jobs",
+      "log_stream": "scheduled/jobs/08ee701c263b47ea94e57c4349734616",
+      "events": [
+        {
+          "event": "push_delivery_summary",
+          "event_type": "budget_alert",
+          "notification_count": 1,
+          "configured": true,
+          "sent": 1,
+          "failed": 0,
+          "expired": 0
+        },
+        {
+          "event": "scheduled_job_finished",
+          "job": "budget-alerts",
+          "period_key": "2026-11-10",
+          "timezone": "Asia/Ho_Chi_Minh",
+          "sent": 1,
+          "skipped": 0,
+          "failed": 0
+        },
+        {
+          "event": "scheduled_job_skipped",
+          "job": "budget-alerts",
+          "period_key": "2026-11-10",
+          "skipped": true
+        },
+        {
+          "event": "push_delivery_summary",
+          "event_type": "budget_alert",
+          "notification_count": 1,
+          "configured": true,
+          "sent": 1,
+          "failed": 0,
+          "expired": 0
+        },
+        {
+          "event": "scheduled_job_finished",
+          "job": "budget-alerts",
+          "period_key": "2026-11-10",
+          "timezone": "Asia/Ho_Chi_Minh",
+          "sent": 1,
+          "skipped": 0,
+          "failed": 0
+        },
+        {
+          "event": "scheduled_job_skipped",
+          "job": "budget-alerts",
+          "period_key": "2026-11-10",
+          "skipped": true
+        }
+      ],
+      "kind": "budget"
+    }
+  ],
+  "recipient_type": "ses_mailbox_simulator",
+  "recipient_sha256": "f9a9cc07f76e5c0f01623eb15e2fb1361374806e3b699ff9364c10cd81e14e46",
+  "inbox_receipt": "NOT_PROVEN",
+  "device_receipt": "PENDING_USER_CONFIRMATION",
+  "fixture_source_sha256": "97732099c481c98f1eb5b4446d144d339c49f08eed11a0c00cec4aba496f5d81",
+  "fixture_payload_sha256": "f649cd8bfa9767d43768f36bae42e8d74342a6931b1e63033c224e59659e4a4d",
+  "recurring_schedules_before": {
+    "hw-weekly-report": "DISABLED",
+    "hw-recurring-reminders": "DISABLED",
+    "hw-budget-alerts": "DISABLED"
+  },
+  "jobs_image": "179923444714.dkr.ecr.ap-southeast-1.amazonaws.com/homewallet-backend:dev",
+  "task_role": "arn:aws:iam::179923444714:role/hw-weekly-report-task-role",
+  "execution_role": "arn:aws:iam::179923444714:role/homewallet-dev-task-execution-role",
+  "status": "PASS_SCHEDULER_CLI_SES_ACCEPTANCE_AND_PUSH_PROVIDER",
+  "expected_ses_messages": 6,
+  "push_provider_accepted": 4,
+  "recurring_schedules_after": {
+    "hw-weekly-report": "DISABLED",
+    "hw-recurring-reminders": "DISABLED",
+    "hw-budget-alerts": "DISABLED"
+  },
+  "cleanup": "PASS",
+  "finished_at_utc": "2026-11-10T07:11:03.054430+00:00"
+}

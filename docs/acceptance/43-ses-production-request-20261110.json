@@ -1,0 +1,23 @@
+{
+  "at_utc": "2026-11-10T06:57:31.101087+00:00",
+  "account": "179923444714",
+  "region": "ap-southeast-1",
+  "authorized_by": "User explicitly approved submission in conversation on 2026-11-10",
+  "request": {
+    "MailType": "TRANSACTIONAL",
+    "WebsiteURL": "https://daoedidcrnf1f.cloudfront.net",
+    "ContactLanguage": "EN",
+    "ProductionAccessEnabled": true,
+    "UseCaseDescription": "HomeWallet is a family expense-tracking application developed as a university cloud-computing project. We request production access to validate Amazon Cognito custom transactional emails (signup verification, resend verification, password reset) in Vietnamese and English using a separate test user pool. Initial testing is limited to a small number of group-controlled test mailboxes. We do not send marketing email and do not use purchased or scraped recipient lists. The existing verified sender is homewallet26@gmail.com. We will review SES delivery, bounce and complaint handling before any wider use. This request is for controlled acceptance testing, not an existing high-volume production mailing service."
+  },
+  "submission_http_status": 200,
+  "aws_request_id": "c4fac977-7cfb-4791-a799-4e68ab479280",
+  "production_access_enabled": true,
+  "sending_enabled": true,
+  "review_details": {
+    "Status": "GRANTED",
+    "CaseId": "179429386000476"
+  },
+  "status": "GRANTED",
+  "verified_at_utc": "2026-11-10T07:03:54.180079+00:00"
+}

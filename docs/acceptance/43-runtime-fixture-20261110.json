@@ -1,0 +1,133 @@
+{
+  "run_id": "199c34f31675",
+  "started_utc": "2026-11-10T06:14:38+00:00",
+  "api": [
+    {
+      "case": "fixture_profile_vi",
+      "method": "GET",
+      "path": "/api/me",
+      "status": 200,
+      "expected": 200,
+      "request_id": "be8916a2-e23d-47d1-8d50-9915a7bd20d5",
+      "pass": true
+    },
+    {
+      "case": "fixture_locale_vi",
+      "method": "PATCH",
+      "path": "/api/me",
+      "status": 200,
+      "expected": 200,
+      "request_id": "ff9f483d-8766-4952-a2a4-2427ce30ae7f",
+      "pass": true
+    },
+    {
+      "case": "fixture_profile_en",
+      "method": "GET",
+      "path": "/api/me",
+      "status": 200,
+      "expected": 200,
+      "request_id": "8b62a5ac-4e2a-472f-82a9-73ca8e24cf0e",
+      "pass": true
+    },
+    {
+      "case": "fixture_locale_en",
+      "method": "PATCH",
+      "path": "/api/me",
+      "status": 200,
+      "expected": 200,
+      "request_id": "3f22d373-05ff-48c0-8340-b87ac5edfb5a",
+      "pass": true
+    },
+    {
+      "case": "fixture_household_create",
+      "method": "POST",
+      "path": "/api/households",
+      "status": 201,
+      "expected": 201,
+      "request_id": "4c5f3706-4f94-425a-b58c-e40524259d4a",
+      "pass": true
+    },
+    {
+      "case": "fixture_member_join",
+      "method": "POST",
+      "path": "/api/households/join",
+      "status": 200,
+      "expected": 200,
+      "request_id": "6dfa810c-b027-47f4-bf2e-049b13d1db9d",
+      "pass": true
+    },
+    {
+      "case": "notifications_anonymous",
+      "method": "GET",
+      "path": "/api/notifications?limit=50",
+      "status": 401,
+      "expected": 401,
+      "request_id": "f2152f79-db0e-4d66-a59c-eddf013e5f71",
+      "pass": true
+    },
+    {
+      "case": "notifications_invalid_limit",
+      "method": "GET",
+      "path": "/api/notifications?limit=0",
+      "status": 422,
+      "expected": 422,
+      "request_id": "dbd83f5c-9e12-4536-bcfb-80abf7ee97bb",
+      "pass": true
+    }
+  ],
+  "runtime_tasks": [
+    {
+      "mode": "exercise",
+      "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/d9b0ac5aabef4db6a6b371c04078bc51",
+      "log_group": "/ecs/hw-api",
+      "log_stream": "api/api/d9b0ac5aabef4db6a6b371c04078bc51",
+      "exit_code": 1,
+      "events": [
+        {
+          "event": "CHI43_RUNTIME_FAILED",
+          "at_utc": "2026-11-10T06:15:08.798457+00:00",
+          "mode": "exercise",
+          "error_type": "OperationalError",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "mode": "cleanup",
+      "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/c33d561517234ebdb2a85daeb3543981",
+      "log_group": "/ecs/hw-api",
+      "log_stream": "api/api/c33d561517234ebdb2a85daeb3543981",
+      "exit_code": 1,
+      "events": [
+        {
+          "event": "CHI43_RUNTIME_FAILED",
+          "at_utc": "2026-11-10T06:15:52.695130+00:00",
+          "mode": "cleanup",
+          "error_type": "OperationalError",
+          "reason": null
+        }
+      ]
+    }
+  ],
+  "email_transport": "INTERCEPTED_NOT_SENT",
+  "scope": "API and bounded deployed-function integration",
+  "account": "179923444714",
+  "runtime_source_sha256": "d784aa2829961374112d695bcfe42da539138be701efdebd62064f5f9393379b",
+  "fixture": {
+    "run_id": "199c34f31675",
+    "vi_user_id": 21,
+    "en_user_id": 22,
+    "household_id": 16
+  },
+  "fixture_cleanup": "FAILED",
+  "cleanup_error_type": "RuntimeError",
+  "cognito_cleanup": {
+    "created": 2,
+    "deleted": 2,
+    "pass": true
+  },
+  "status": "FAILED",
+  "error_type": "RuntimeError",
+  "reason": "runtime_task_failed_exercise",
+  "finished_utc": "2026-11-10T06:16:25+00:00"
+}

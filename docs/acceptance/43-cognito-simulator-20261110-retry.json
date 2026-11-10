@@ -1,0 +1,32 @@
+{
+  "run_id": "39998646ff76",
+  "started_at_utc": "2026-11-10T07:07:46.863131+00:00",
+  "user_pool_id": "ap-southeast-1_Hm6fFrq0M",
+  "recipient_type": "ses_mailbox_simulator",
+  "api": [],
+  "cases": {
+    "CM14": "PARTIAL_LOG_REVIEW"
+  },
+  "status": "FAILED_OR_INTERRUPTED",
+  "recipient_sha256": "f9a9cc07f76e5c0f01623eb15e2fb1361374806e3b699ff9364c10cd81e14e46",
+  "lambda_code_sha256": "6/eTPUWQsrxpGMzUzA875R4H9iXeSdO+fFpvhsmsFdM=",
+  "error_type": "LimitExceededException",
+  "aws_error_code": "LimitExceededException",
+  "aws_error_message": "Attempt limit exceeded, please try after some time.",
+  "temporary_users_created_or_attempted": 1,
+  "temporary_users_deleted": 1,
+  "cleanup": "PASS",
+  "lambda_log_review": {
+    "log_group": "/aws/lambda/homewallet-dev-cognito-custom-message",
+    "start_ms": 1794294468905,
+    "end_ms": 1794294477712,
+    "counts": {
+      "total": 0,
+      "start": 0,
+      "application_lines": 0
+    },
+    "invocation_request_ids": [],
+    "scope": "Controlled email-request window; shared stateless Lambda, no per-trigger payload logging"
+  },
+  "finished_at_utc": "2026-11-10T07:07:58.207109+00:00"
+}

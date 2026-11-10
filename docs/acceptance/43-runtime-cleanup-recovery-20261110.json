@@ -1,0 +1,55 @@
+{
+  "api": [],
+  "runtime_tasks": [
+    {
+      "mode": "cleanup",
+      "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/c63752bfda914488b2fd76e651942580",
+      "task_definition": "hw-db-runtime-bootstrap:2",
+      "credential_role": "bootstrap_admin",
+      "log_group": "/ecs/hw-db-runtime-bootstrap",
+      "log_stream": "bootstrap/bootstrap/c63752bfda914488b2fd76e651942580",
+      "exit_code": 0,
+      "events": [
+        {
+          "event": "CHI43_RUNTIME_PHASE",
+          "at_utc": "2026-11-10T06:25:06.681944+00:00",
+          "phase": "connect"
+        },
+        {
+          "event": "CHI43_RUNTIME_PHASE",
+          "at_utc": "2026-11-10T06:25:06.801156+00:00",
+          "phase": "connected"
+        },
+        {
+          "event": "CHI43_RUNTIME_PHASE",
+          "at_utc": "2026-11-10T06:25:06.801490+00:00",
+          "phase": "scope_household"
+        },
+        {
+          "event": "CHI43_RUNTIME_PHASE",
+          "at_utc": "2026-11-10T06:25:06.802360+00:00",
+          "phase": "scope_members"
+        },
+        {
+          "event": "CHI43_RUNTIME_PHASE",
+          "at_utc": "2026-11-10T06:25:06.803214+00:00",
+          "phase": "scope_push"
+        },
+        {
+          "event": "CHI43_RUNTIME_CLEANUP_PASS",
+          "at_utc": "2026-11-10T06:25:06.923660+00:00",
+          "run_id": "199c34f31675",
+          "household_id": 16,
+          "fixture_users_removed": 2,
+          "controlled_browser_notification_retained": true
+        }
+      ],
+      "image": "179923444714.dkr.ecr.ap-southeast-1.amazonaws.com/homewallet-backend:sha-95658d3b2bdfaad9b1930416f4b265e5861da16e",
+      "image_digest": "sha256:28e13fd5bcf16e1663be2e9b03ebe8ac21cbc52469f91d6211096a71700ff264"
+    }
+  ],
+  "account": "179923444714",
+  "runtime_source_sha256": "51789fc99b0515fed750fd9b57943310908f193c88cf77b2b9a0f6ea98a2015a",
+  "runtime_payload_sha256": "c5fd910b4e8d31c3824fa47f236b1943c15be062544eb705a022d438fce7cfa3",
+  "status": "PASS"
+}

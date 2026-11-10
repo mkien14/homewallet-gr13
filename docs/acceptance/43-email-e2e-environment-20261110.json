@@ -1,0 +1,18 @@
+{
+  "at_utc": "2026-11-10T07:03:56.759771+00:00",
+  "run_id": "5fc232b06155",
+  "account": "179923444714",
+  "region": "ap-southeast-1",
+  "user_pool_id": "ap-southeast-1_Hm6fFrq0M",
+  "user_pool_arn": "arn:aws:cognito-idp:ap-southeast-1:179923444714:userpool/ap-southeast-1_Hm6fFrq0M",
+  "client_id": "6buuqqnno12u8p53oah935nr7v",
+  "custom_message_lambda": "arn:aws:lambda:ap-southeast-1:179923444714:function:homewallet-dev-cognito-custom-message",
+  "lambda_permission_sid": "chi43-email-e2e-5fc232b06155",
+  "production_access_enabled": true,
+  "existing_live_pool_changed": false,
+  "status": "READY_AWAITING_CONTROLLED_MAILBOX",
+  "cleanup": "RETAINED_FOR_EMAIL_ACCEPTANCE",
+  "simulator_email_requests_accepted": 12,
+  "simulator_users_deleted": 6,
+  "updated_at_utc": "2026-11-10T07:16:13.228366+00:00"
+}

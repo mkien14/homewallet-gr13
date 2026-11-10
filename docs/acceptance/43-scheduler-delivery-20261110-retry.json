@@ -1,0 +1,79 @@
+{
+  "run_id": "38aac48a731c",
+  "started_at_utc": "2026-11-10T07:00:58.894214+00:00",
+  "account": "179923444714",
+  "region": "ap-southeast-1",
+  "admin_tasks": [
+    {
+      "mode": "prepare",
+      "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/e0bdc1b74cb74b2cbd0ff30240c7d13f",
+      "status": "STARTED",
+      "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-db-runtime-bootstrap:2",
+      "group": "family:hw-db-runtime-bootstrap",
+      "exit_code": 1,
+      "image_digest": "sha256:28e13fd5bcf16e1663be2e9b03ebe8ac21cbc52469f91d6211096a71700ff264",
+      "log_group": "/ecs/hw-db-runtime-bootstrap",
+      "log_stream": "bootstrap/bootstrap/e0bdc1b74cb74b2cbd0ff30240c7d13f",
+      "events": [
+        {
+          "event": "CHI43_SEND_FIXTURE_FAILED",
+          "at_utc": "2026-11-10T07:01:22.127643+00:00",
+          "mode": "prepare",
+          "error_type": "ProgrammingError",
+          "reason": null,
+          "database_error_code": null
+        }
+      ]
+    },
+    {
+      "mode": "cleanup",
+      "task_arn": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/8ea8d950ca8e4abe9fddc5d19f723535",
+      "status": "STARTED",
+      "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-db-runtime-bootstrap:2",
+      "group": "family:hw-db-runtime-bootstrap",
+      "exit_code": 0,
+      "image_digest": "sha256:28e13fd5bcf16e1663be2e9b03ebe8ac21cbc52469f91d6211096a71700ff264",
+      "log_group": "/ecs/hw-db-runtime-bootstrap",
+      "log_stream": "bootstrap/bootstrap/8ea8d950ca8e4abe9fddc5d19f723535",
+      "events": [
+        {
+          "event": "CHI43_SEND_SCHEMA_REMOVED",
+          "at_utc": "2026-11-10T07:02:13.633403+00:00",
+          "schema": "chi43_send_38aac48a731c_vi",
+          "runtime_grants_removed": true
+        },
+        {
+          "event": "CHI43_SEND_SCHEMA_ABSENT",
+          "at_utc": "2026-11-10T07:02:13.634352+00:00",
+          "schema": "chi43_send_38aac48a731c_en"
+        }
+      ]
+    }
+  ],
+  "one_time_schedules": [],
+  "scheduled_tasks": [],
+  "recipient_type": "ses_mailbox_simulator",
+  "recipient_sha256": "f9a9cc07f76e5c0f01623eb15e2fb1361374806e3b699ff9364c10cd81e14e46",
+  "inbox_receipt": "NOT_PROVEN",
+  "device_receipt": "PENDING_USER_CONFIRMATION",
+  "fixture_source_sha256": "45c12eaef1c40da6da9356bb63a1dd621127c73ffbd8265e9c4ac1ba5a5bc025",
+  "fixture_payload_sha256": "2310c7fe7ce3e9eeb8b5e33d5e76df8c09d5d016ead2cec5572f160291835bcc",
+  "recurring_schedules_before": {
+    "hw-weekly-report": "DISABLED",
+    "hw-recurring-reminders": "DISABLED",
+    "hw-budget-alerts": "DISABLED"
+  },
+  "jobs_image": "179923444714.dkr.ecr.ap-southeast-1.amazonaws.com/homewallet-backend:dev",
+  "task_role": "arn:aws:iam::179923444714:role/hw-weekly-report-task-role",
+  "execution_role": "arn:aws:iam::179923444714:role/homewallet-dev-task-execution-role",
+  "status": "FAILED",
+  "error_type": "RuntimeError",
+  "reason": "bootstrap_prepare_failed",
+  "recurring_schedules_after": {
+    "hw-weekly-report": "DISABLED",
+    "hw-recurring-reminders": "DISABLED",
+    "hw-budget-alerts": "DISABLED"
+  },
+  "cleanup": "PASS",
+  "finished_at_utc": "2026-11-10T07:02:40.971033+00:00"
+}
