@@ -66,7 +66,7 @@ Quyền `bedrock:InvokeModel` cũng chi phối `Converse`, theo
 | Model Nova Lite ở Singapore | Availability/entitlement AVAILABLE, authorization AUTHORIZED |
 | Gọi thật từ Kiên, một prompt văn bản tổng hợp | HTTP `200`, 9 input / 2 output token, 0,717 giây; đáp án đúng |
 | Smoke thật từ Hoàng sau sửa | Kiên xác nhận đã nhận kết quả đúng mong đợi ngày 11/11; artifact chưa có trong checkout |
-| Ảnh pilot gửi trong lần rà soát này | **0** |
+| Ảnh pilot gửi trong lần rà soát này | **0**; 10 ảnh chuẩn bị offline, hash trong manifest |
 
 Phép gọi bằng Kiên chỉ chứng minh kết nối/model hoạt động với quyền của Kiên;
 không thay thế phép gọi bằng Hoàng hoặc benchmark OCR. Token sử dụng được ghi
@@ -115,9 +115,11 @@ lưu raw text; chưa đủ dữ kiện kết luận vì sao JSON sai.
 3. Kiên chốt một run identity mới và hạn mức riêng cho lần chạy mới, vì quyết
    định cũ cấm rerun. Không dùng lại `--run` của hai runner lịch sử. Giữ cùng
    10 ảnh `021–030`, nguồn và quyền chia sẻ đã duyệt; không mở rộng thành 42.
-4. Chuẩn bị cùng bytes ảnh cho cả hai provider, ghi hash/kích thước; ảnh gốc có
-   ở `ocr-lab/data`, còn `data_small` không có trong checkout này. Tạo bản chuẩn
-   bị ảnh offline trước khi gửi. Không lấy dữ liệu receipt của người dùng.
+4. **Đã chuẩn bị offline ngày 11/11:** tạo `ocr-lab/data_small/021–030` từ bộ
+   Roboflow test hiện có, ghi hash/kích thước vào
+   [manifest chuẩn bị ảnh](34-bedrock-images-prepared-20261111.json). Cùng bytes
+   này sẽ được dùng cho cả hai provider. Chưa tải ảnh lên provider. Không lấy
+   dữ liệu receipt của người dùng.
 5. Runner mới cần ghi finish/stop reason, số output token và lỗi schema để phân
    biệt output bị cắt với JSON sai; kiểm tra parser bằng dữ liệu tổng hợp trước.
    Giữ prompt/schema và cách chấm chung, mỗi ảnh/provider một request, không
