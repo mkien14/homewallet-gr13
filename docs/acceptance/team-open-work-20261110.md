@@ -1,4 +1,4 @@
-# Rà soát phần việc nhóm còn lại — 10/11/2026
+# Rà soát phần việc nhóm còn lại — 10/11/2026 (cập nhật #34 ngày 11/11)
 
 Phạm vi: checkout `homewallet-gr13/main`, tài liệu giao việc tuần 10 lưu local,
 biên bản đã merge, AWS read-only và phép thử Bedrock tổng hợp có giới hạn.
@@ -9,7 +9,7 @@ riêng được Kiên xác nhận. File Word hướng dẫn tuần tiếp tục 
 
 | Ưu tiên | Việc | Kết luận | Hướng hoàn tất / người phụ trách |
 | --- | --- | --- | --- |
-| 1 | **#34 — benchmark Bedrock/Gemini** | **PARTIAL / NO-GO:** phiên AWS chỉ có Kiên, không có runtime Hoàng; quota Gemini mới chưa được xác nhận; pilot cũ đã khóa. | Không gửi ảnh hoặc gỡ guard. Chỉ mở lại khi Hoàng chạy smoke không ảnh, Kiên xác nhận quota/chi phí và nhóm duyệt run ID mới. Xem [quyết định và điều kiện](34-bedrock-remediation-20261110.md). |
+| 1 | **#34 — benchmark Bedrock/Gemini** | **PARTIAL / NO-GO cho ảnh:** Kiên xác nhận Hoàng đã chạy smoke bằng identity riêng, kết quả đúng mong đợi; artifact chưa có trong checkout. Quota Gemini mới chưa được xác nhận; pilot ảnh cũ đã khóa. | Không gửi ảnh hoặc gỡ guard. Nếu cần, thêm artifact smoke đã gửi; chỉ cân nhắc run ID mới sau khi Kiên xác nhận quota/chi phí và nhóm duyệt. Xem [quyết định và điều kiện](34-bedrock-remediation-20261110.md). |
 | 2 | **#39 / sự cố DLQ thuộc theo dõi #33** | **SCOPE MISMATCH:** household `1` thuộc người ngoài nhóm; lần phục hồi đã gửi ảnh tới Gemini một lần và tạo transaction `39` ở `DRAFT`, chưa xác nhận. | Quyết định hiện tại: giữ draft, ảnh gốc và DLQ; không review, confirm, xóa, nhận hay redrive. Chờ chủ dữ liệu/người quản lý dữ liệu được chỉ định quyết định giữ hoặc xóa qua quy trình kiểm soát. Xem [biên bản và disposition](33-receipt1-recovery-20261110.md). |
 | 3 | **#38 — README và bàn giao** | README đã được bổ sung hướng dẫn cài đặt, mock/dev/local, checks, deploy, bảo mật, kiến trúc và nguồn giá tham khảo ngày 11/11. Chưa có tổng dự toán tháng; phải đối chiếu Cost Explorer/Calculator cho kỳ và cấu hình cụ thể trước khi công bố con số. | Hoàng/nhóm rà lại các lệnh trên máy clone sạch và bổ sung dự toán nếu deliverable yêu cầu số tiền tháng. Xem [README](../../README.md). |
 | 4 | **#25 / #37 — nghiệm thu ngân sách** | PASS trong phạm vi đã định: API dev 57/57; Gemini thật, fallback, lịch sử, ngưỡng 80/100, chống gửi trùng trên schema riêng; một email thật D1 đã được Kiên xác nhận; cleanup PASS. CLI job chạy trong ECS jobs. Lịch EventBridge định kỳ vẫn DISABLED. | Xem [biên bản](25-37-budget-20261110.md) và [artifact email](37-mailbox-20261110.json). Không chạy lại trên household thật; việc bật lịch định kỳ cần quyết định rollout riêng. |

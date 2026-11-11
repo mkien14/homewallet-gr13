@@ -5,19 +5,23 @@ nhánh `main`. Người vận hành AWS: Kiên.
 
 **Kết luận:** đã xác định nguyên nhân lần Bedrock bị từ chối, xác nhận policy
 hiện hành đã có bản sửa, sửa lỗi preflight và gọi thử Bedrock thành công bằng
-Kiên. **#34 vẫn PARTIAL:** chưa có runtime bằng chính Hoàng sau sửa và chưa có
-benchmark OCR hợp lệ theo cặp Gemini/Bedrock.
+Kiên. Ngày 11/11, Kiên xác nhận Hoàng đã chạy smoke test bằng identity của mình
+và kết quả đúng các điều kiện mong đợi. **#34 vẫn PARTIAL:** chưa có benchmark
+OCR hợp lệ theo cặp Gemini/Bedrock.
 
-### Quyết định tiếp tục ngày 10/11/2026
+### Quyết định tiếp tục ngày 11/11/2026
 
-Phiên AWS hiện có chỉ liệt kê profile `default`, và STS xác nhận đó là IAM user
-`kien`; không có phiên Hoàng để tạo bằng chứng runtime theo danh tính Hoàng.
+Kết quả smoke test của Hoàng được Kiên xác nhận đạt: AWS identity là Hoàng và
+smoke không ảnh trả về các trường mong đợi. Artifact chi tiết chưa được đưa vào
+checkout này. Lần kiểm tra môi trường của Kiên chỉ có profile `default`; điều đó
+không ảnh hưởng kết quả Hoàng tự chạy bằng profile của mình.
+
 Không có bằng chứng quota generate Gemini mới trong hồ sơ hiện có. Hai lượt
-pilot lịch sử đã tiêu thụ guard và không được chạy lại. Vì vậy quyết định tốt
-nhất hiện tại là **PARTIAL / NO-GO cho OCR benchmark mới**: không gửi ảnh
-`021–030`, không dùng receipt của người ngoài nhóm, không xóa guard/ledger, và
-không chạy model chỉ để đổi nhãn nghiệm thu. Đây là giới hạn do thiếu điều kiện,
-không phải lỗi Bedrock còn mở.
+pilot lịch sử đã tiêu thụ guard và không được chạy lại. Vì vậy quyết định hiện
+tại là **PARTIAL / NO-GO cho OCR benchmark mới**: chưa gửi ảnh `021–030`, không
+dùng receipt của người ngoài nhóm, không xóa guard/ledger, và không chạy model
+chỉ để đổi nhãn nghiệm thu. Smoke Hoàng đóng bước xác thực identity/Bedrock,
+nhưng không thay thế benchmark OCR theo cặp.
 
 Đã hoàn tất phần có thể làm an toàn từ phiên hiện tại: chẩn đoán IAM, sửa
 preflight, mô phỏng quyền đúng vùng, và một lần gọi văn bản tổng hợp bằng Kiên
@@ -61,7 +65,7 @@ Quyền `bedrock:InvokeModel` cũng chi phối `Converse`, theo
 | Dùng profile khác hoặc model Nova Pro ngoài phạm vi | `implicitDeny` trong mô phỏng |
 | Model Nova Lite ở Singapore | Availability/entitlement AVAILABLE, authorization AUTHORIZED |
 | Gọi thật từ Kiên, một prompt văn bản tổng hợp | HTTP `200`, 9 input / 2 output token, 0,717 giây; đáp án đúng |
-| Gọi thật từ Hoàng sau sửa | Chưa chạy: máy chỉ có profile `default` của Kiên |
+| Smoke thật từ Hoàng sau sửa | Kiên xác nhận đã nhận kết quả đúng mong đợi ngày 11/11; artifact chưa có trong checkout |
 | Ảnh pilot gửi trong lần rà soát này | **0** |
 
 Phép gọi bằng Kiên chỉ chứng minh kết nối/model hoạt động với quyền của Kiên;
@@ -86,33 +90,14 @@ artifact và chặn pilot cũ trước khi gọi provider. Các unittest dùng m
 CI đã bổ sung job `OCR pilot offline checks` chạy cùng bộ kiểm tra; job này
 không cần AWS/Gemini credentials và không gọi model.
 
-## 3. Việc Hoàng làm tiếp — chỉ kiểm tra truy cập, chưa gửi ảnh
+## 3. Smoke test của Hoàng — hoàn tất theo xác nhận của Kiên
 
-Chạy trên máy đã có phiên AWS của Hoàng. Không gửi access key/secret/token vào
-chat hoặc repository. Nếu profile có tên khác, thay tên profile trong cả hai
-lệnh; `--expected-user hoang` phải giữ nguyên.
-
-```powershell
-aws sts get-caller-identity --profile homewallet-d3-pilot --query Arn --output text
-```
-
-Kết quả phải là `arn:aws:iam::179923444714:user/hoang`. Nếu chưa có profile,
-dùng cách đăng nhập AWS hiện có của nhóm để cấu hình phiên Hoàng; không tạo
-access key mới chỉ để vượt qua bước này.
-
-Từ thư mục gốc repo, với OCR virtualenv đã cài `ocr-lab/requirements.txt`:
-
-```powershell
-.\ocr-lab\.venv\Scripts\python.exe .\ocr-lab\bedrock_access_check.py `
-  --profile homewallet-d3-pilot --expected-user hoang --invoke-synthetic `
-  --output .\docs\acceptance\34-bedrock-hoang-smoke-20261110.json
-```
-
-Chạy **một lần**. Kỳ vọng `status=LIVE_CALL_PASS`,
-`invocation_scope=hoang_live_identity`, `runtime.http_status=200` và
-`pilot_images_sent=0`. Artifact đã tồn tại sẽ chặn chạy; đọc kết quả đã lưu,
-không xóa file để thử liên tục. Nếu chỉ muốn kiểm tra IAM, bỏ
-`--invoke-synthetic` và dùng tên artifact riêng.
+Ngày 11/11, Kiên báo Hoàng xác nhận `aws sts get-caller-identity` trả identity
+Hoàng và smoke test trả các giá trị đúng như mong đợi. Lần chạy đầu ở checkout
+`D:\Nam 3\...` không chạy được vì thiếu `ocr-lab/bedrock_access_check.py`; kết quả
+đạt được sau đó được Hoàng gửi riêng cho Kiên. Không có artifact JSON trong
+checkout này để lưu các trường và request ID. Chưa gửi ảnh (`pilot_images_sent=0`
+theo phạm vi lệnh smoke); không tạo benchmark OCR từ lần chạy này.
 
 ## 4. Phần cần đủ trước một benchmark mới
 
@@ -121,9 +106,9 @@ hai Gemini response JSON không hợp lệ, một 503, một Bedrock AccessDenie
 có dự đoán hợp lệ để so sánh. Không thể phục hồi nội dung response cũ vì không
 lưu raw text; chưa đủ dữ kiện kết luận vì sao JSON sai.
 
-1. Hoàng bàn giao artifact truy cập thật ở mục 3. Tìm bản report/lock gốc trên
-   máy đã chạy; các file đó không có trong checkout `main` hiện tại. Giữ số
-   liệu lịch sử trong `bedrock-benchmark.md`, không tạo lại như bằng chứng mới.
+1. Nếu nhóm muốn giữ bằng chứng trong repo, thêm artifact smoke Hoàng đã gửi,
+   sau khi loại bỏ credentials và xác nhận không có dữ liệu nhạy cảm. Không chạy
+   lại chỉ để tạo artifact khác. Giữ số liệu lịch sử trong `bedrock-benchmark.md`.
 2. Xác nhận quota Gemini **mới** theo đúng project/key/model trong AI Studio.
    Timestamp 08/11 trong preflight cũ đã hết hạn; model-list không chứng minh
    còn quota generate. Cần đủ RPM/TPM/RPD cho n=10 và chi phí được đối chiếu.
