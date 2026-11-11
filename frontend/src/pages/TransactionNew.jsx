@@ -112,7 +112,7 @@ export default function TransactionNew() {
           </label>
           <label className="field" htmlFor="transaction-category">{translate("Danh mục")}<select id="transaction-category" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} disabled={locked}>
               <option value="">{translate("Chưa phân loại")}</option>
-              {setup.categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+              {setup.categories.map((category) => <option key={category.id} value={category.id}>{t(category.name)}</option>)}
             </select>
           </label>
         </div>

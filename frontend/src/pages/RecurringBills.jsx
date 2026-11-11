@@ -135,14 +135,14 @@ export default function RecurringBills() {
   const unknownAmountCount = activeBills.length - pricedBills.length;
   const shown = setup.items.filter((item) => filter === "all" || item.active === (filter === "active"))
     .sort((a, b) => a.due_day - b.due_day || a.id - b.id);
-  const categoryName = (id) => id === null ? t("Chưa phân loại") : setup.categories.find((category) => category.id === id)?.name || t("Danh mục đã ngừng sử dụng");
+  const categoryName = (id) => id === null ? t("Chưa phân loại") : t(setup.categories.find((category) => category.id === id)?.name || "Danh mục đã ngừng sử dụng");
 
   return <>
     {heading}
     {!canEdit && <p className="notice">{translate("Bạn đang ở chế độ chỉ xem. Chủ hộ có thể quản lý các hóa đơn định kỳ.")}</p>}
     <div className="metrics-grid recurring-metrics">
       <section className="card metric"><h2>{translate("Đang hoạt động")}</h2><strong>{activeBills.length}<span className="recurring-metric-unit">{translate(" hóa đơn")}</span></strong><p>{setup.items.length - activeBills.length}{translate(" hóa đơn đang tạm dừng")}</p></section>
-      <section className="card metric"><h2>{translate("Dự kiến mỗi tháng")}</h2><strong>{activeBills.length > 0 && pricedBills.length === 0 ? translate("Chưa có số tiền") : formatVnd(pricedBills.reduce((sum, bill) => sum + bill.expected_amount, 0))}</strong><p>{unknownAmountCount ? `Chưa gồm ${unknownAmountCount} hóa đơn chưa nhập số tiền` : translate("Chỉ tính các hóa đơn đang hoạt động")}</p></section>
+      <section className="card metric"><h2>{translate("Dự kiến mỗi tháng")}</h2><strong>{activeBills.length > 0 && pricedBills.length === 0 ? translate("Chưa có số tiền") : formatVnd(pricedBills.reduce((sum, bill) => sum + bill.expected_amount, 0))}</strong><p>{unknownAmountCount ? `${t("Chưa gồm")} ${unknownAmountCount} ${t("hóa đơn chưa nhập số tiền")}` : translate("Chỉ tính các hóa đơn đang hoạt động")}</p></section>
     </div>
     <p className="muted recurring-job-note">{translate("Chưa có xác nhận gửi lời nhắc. Danh sách này giúp bạn lập kế hoạch; khoản dự kiến chưa được tính vào chi tiêu.")}</p>
     {success && <p className="success" role="status">{t(success)}</p>}
@@ -153,7 +153,7 @@ export default function RecurringBills() {
         <form onSubmit={save}>
           <fieldset disabled={busy || !canEdit || Boolean(uncertainCreate)} className="recurring-fields">
             <label className="field" htmlFor="bill-name">{translate("Tên hóa đơn")}<input id="bill-name" value={editor.fields.name} onChange={(e) => updateField("name", e.target.value)} maxLength={100} required placeholder={translate("Ví dụ: Tiền điện")} /></label>
-            <label className="field" htmlFor="bill-category">{translate("Danh mục (không bắt buộc)")}<select id="bill-category" value={editor.fields.categoryId} onChange={(e) => updateField("categoryId", e.target.value)}><option value="">{translate("Chưa phân loại")}</option>{setup.categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
+            <label className="field" htmlFor="bill-category">{translate("Danh mục (không bắt buộc)")}<select id="bill-category" value={editor.fields.categoryId} onChange={(e) => updateField("categoryId", e.target.value)}><option value="">{translate("Chưa phân loại")}</option>{setup.categories.map((category) => <option key={category.id} value={category.id}>{t(category.name)}</option>)}</select></label>
             <label className="field" htmlFor="bill-amount">{translate("Số tiền dự kiến (đồng, không bắt buộc)")}<input id="bill-amount" type="text" inputMode="numeric" value={editor.fields.amount} onChange={(e) => updateField("amount", e.target.value)} placeholder={translate("Để trống nếu chưa biết")} aria-describedby="bill-amount-preview" /><small id="bill-amount-preview">{!editor.fields.amount.trim() ? t("Chưa có số tiền dự kiến.") : parseVnd(editor.fields.amount) === null ? t("Nhập số nguyên đồng từ 0 trở lên hoặc để trống.") : formatVnd(parseVnd(editor.fields.amount))}</small></label>
             <div className="form-grid">
               <label className="field" htmlFor="bill-due-day">{translate("Ngày đến hạn")}<input id="bill-due-day" type="number" inputMode="numeric" min="1" max="31" step="1" value={editor.fields.dueDay} onChange={(e) => updateField("dueDay", e.target.value)} required /><small>{translate("Ngày trong tháng, từ 1 đến 31.")}</small></label>
