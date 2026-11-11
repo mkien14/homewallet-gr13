@@ -1,4 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { t as translate } from "./preferences";
 import { BrowserRouter, Link, NavLink, Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { isLoggedIn, login, logout } from "./auth/auth";
 import { isReactAuthSession, reactSignOut } from "./auth/cognito";
@@ -146,7 +147,7 @@ function AppContent() {
         <Link className="brand" to="/">HomeWallet</Link>
         <span className="workspace-tab">⌂ &nbsp;{t("Cả hộ")}</span>
         <div className="header-preferences">
-          <label><span>{t("Ngôn ngữ")}</span><select aria-label={t("Ngôn ngữ")} value={locale} disabled={authenticated && !USE_MOCK && ["loading", "saving", "cognito-unavailable", "profile-unavailable"].includes(localeSyncStatus)} onChange={(event) => changeLocale(event.target.value)}><option value="vi">Tiếng Việt</option><option value="en">English</option></select></label>
+          <label><span>{t("Ngôn ngữ")}</span><select aria-label={t("Ngôn ngữ")} value={locale} disabled={authenticated && !USE_MOCK && ["loading", "saving", "cognito-unavailable", "profile-unavailable"].includes(localeSyncStatus)} onChange={(event) => changeLocale(event.target.value)}><option value="vi">{translate("Tiếng Việt")}</option><option value="en">English</option></select></label>
           <label><span>{t("Giao diện")}</span><select aria-label={t("Giao diện")} value={theme} onChange={(event) => setTheme(event.target.value)}><option value="light">{t("Sáng")}</option><option value="dark">{t("Tối")}</option></select></label>
         </div>
         {!USE_MOCK && (authenticated
@@ -206,7 +207,7 @@ function AppContent() {
         </aside>
       )}
       <main id="main-content">
-        <Suspense fallback={<p role="status">Đang tải trang…</p>}>
+        <Suspense fallback={<p role="status">{translate("Đang tải trang…")}</p>}>
         <Routes>
           <Route path="/auth/callback" element={<Callback />} />
           <Route path="/auth/react" element={<ReactAuth />} />

@@ -506,6 +506,57 @@ const messages = {
     "Xử lý thất bại": "Processing failed",
     "Hóa đơn đã được xác nhận. Hãy quay về danh sách để xem trạng thái mới nhất.": "This receipt is already confirmed. Return to the list to see its latest status.",
     "Bản nháp không còn ở trạng thái có thể xác nhận. Hãy tải lại thông tin hóa đơn.": "This draft can no longer be confirmed. Reload the receipt details.",
+    "Ví dụ: 12.000.000": "Example: 12,000,000",
+    "Ví dụ: 150.000": "Example: 150,000",
+    "Ví dụ: Mua thực phẩm cho bữa tối": "Example: Groceries for dinner",
+    "Bản nháp gợi ý": "Suggested draft",
+    "Kế hoạch gia đình": "Household plan",
+    "để xem ngân sách.": "to view the budget.",
+    "Đang chờ danh mục. Nếu không tải được, hãy bấm Thử tải lại ở phía trên.": "Waiting for categories. If they do not load, select Retry above.",
+    "Thành tiền là tổng của từng dòng, đã gồm số lượng. Có thể để trống tên hoặc số lượng khi ảnh không cung cấp; chỉ tổng tiền là bắt buộc nếu không có dòng hàng.": "Each line total includes its quantity. Leave the name or quantity blank if it is not visible in the image. An overall total is required only when there are no line items.",
+    "Món hàng": "Item",
+    "Tổng dòng hàng đang lệch tổng hóa đơn": "Line item totals do not match the receipt total",
+    ". Hãy đối chiếu trước khi xác nhận.": ". Compare the amounts before confirming.",
+    "Hóa đơn #": "Receipt #",
+    "Bạn có thể nhập thông tin giao dịch thủ công.": "You can enter the transaction details manually.",
+    "Ảnh hóa đơn gốc": "Original receipt image",
+    "· Số lượng:": "· Quantity:",
+    "để xem hóa đơn.": "to view receipts.",
+    "Lọc trạng thái hóa đơn": "Filter receipts by status",
+    "để quản lý hóa đơn định kỳ.": "to manage recurring bills.",
+    "hóa đơn đang tạm dừng": "bills paused",
+    "Ví dụ: Tiền điện": "Example: Electricity",
+    "Để trống nếu chưa biết": "Leave blank if unknown",
+    "Với ngày 29–31, lịch nhắc trong tháng ngắn hơn cần được xác nhận khi dịch vụ nhắc được triển khai.": "For days 29–31, confirm how reminders work in shorter months when the reminder service is deployed.",
+    "Đang tạm dừng": "Paused",
+    "trước khi tải hóa đơn.": "before uploading a receipt.",
+    "Giao dịch / Hóa đơn": "Transactions / Receipts",
+    "Xem và xác nhận hóa đơn": "Review and confirm receipts",
+    "Tối đa": "Up to",
+    "tệp · Dưới 5 MB mỗi tệp · Ảnh được nén trên máy": "files · Under 5 MB each · Images are compressed on your device",
+    "☷ Quy trình": "☷ Process",
+    "✓ Đặt hóa đơn trên nền phẳng, đủ sáng": "✓ Place the receipt on a flat, well-lit surface",
+    "✓ Chụp thẳng, thấy rõ dòng tổng cộng": "✓ Take a straight-on photo with the total clearly visible",
+    "✓ Mỗi ảnh chỉ một hóa đơn": "✓ Include one receipt per image",
+    "Tiếng Việt": "Vietnamese",
+    "Đã đưa gợi ý vào form. Bạn có thể chỉnh sửa rồi bấm Lưu ngân sách.": "Suggestion added to the form. Edit it, then select Save budget.",
+    "Đang lưu…": "Saving…",
+    "Chi tiêu thủ công": "Manual expense",
+    "Chọn ngày trên ảnh gốc": "Choose the date shown on the original image",
+    "Nhập số tiền nguyên đồng": "Enter the amount in whole đồng",
+    "Đang xác nhận…": "Confirming…",
+    "Ảnh không tải được. Liên kết có thể đã hết hạn; hãy làm mới ảnh.": "The image could not be loaded. The link may have expired; refresh the image.",
+    "Mặt hàng": "Item",
+    "Chưa có thông tin cửa hàng": "Merchant details are unavailable",
+    "Chưa xác định ngày": "Date not identified",
+    "Chưa có số tiền": "No amount entered",
+    "Chỉ tính các hóa đơn đang hoạt động": "Only active bills are included",
+    "Không có hóa đơn trong bộ lọc này": "No bills match this filter",
+    "Chưa có hóa đơn định kỳ": "No recurring bills yet",
+    "Chọn bộ lọc khác để xem các hóa đơn còn lại.": "Choose another filter to see the remaining bills.",
+    "Thêm tiền nhà, điện nước hoặc các khoản thanh toán hằng tháng của gia đình.": "Add rent, utilities, or other monthly household payments.",
+    "Đến hạn ngày": "Due on day",
+    "hằng tháng": "of each month",
   },
 };
 
@@ -527,6 +578,19 @@ export function usePreferences() {
 export function PreferenceProvider({ children }) {
   const [locale, setLocaleState] = useState(() => localStorage.getItem(LOCALE_KEY) || "vi");
   const [theme, setThemeState] = useState(() => localStorage.getItem(THEME_KEY) || "light");
+
+  useEffect(() => {
+    const syncPreferences = (event) => {
+      if (event.key === LOCALE_KEY) {
+        setLocaleState(event.newValue === "en" ? "en" : "vi");
+      }
+      if (event.key === THEME_KEY) {
+        setThemeState(event.newValue === "dark" ? "dark" : "light");
+      }
+    };
+    window.addEventListener("storage", syncPreferences);
+    return () => window.removeEventListener("storage", syncPreferences);
+  }, []);
 
   const setLocale = useCallback((value, { selected = true } = {}) => {
     const next = value === "en" ? "en" : "vi";

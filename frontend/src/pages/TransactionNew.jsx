@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { t as translate } from "../preferences";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { formatVnd, parseVnd } from "../format";
@@ -85,7 +86,7 @@ export default function TransactionNew() {
     <section className="card">
       <h1>{t("Nhập giao dịch")}</h1>
       <p className="error" role="alert">{t(loadError)}</p>
-      <button type="button" onClick={() => { setLoadError(""); setReloadVersion((v) => v + 1); }}>Thử lại</button>
+      <button type="button" onClick={() => { setLoadError(""); setReloadVersion((v) => v + 1); }}>{translate("Thử lại")}</button>
     </section>
   );
   if (!setup) return <p role="status">{t("Đang tải danh mục...")}</p>;
@@ -97,38 +98,34 @@ export default function TransactionNew() {
   return (
     <>
       <div className="page-heading">
-        <div><p className="eyebrow">Giao dịch</p><h1>Nhập chi tiêu thủ công</h1></div>
-        <Link className="button button-secondary" to="/dashboard">Xem tổng quan</Link>
+        <div><p className="eyebrow">{translate("Giao dịch")}</p><h1>{translate("Nhập chi tiêu thủ công")}</h1></div>
+        <Link className="button button-secondary" to="/dashboard">{translate("Xem tổng quan")}</Link>
       </div>
       <div className="workspace-columns"><form className="card transaction-form" onSubmit={submit}>
-        <p>Ghi lại khoản chi không có hóa đơn hoặc hóa đơn chưa đọc được.</p>
+        <p>{translate("Ghi lại khoản chi không có hóa đơn hoặc hóa đơn chưa đọc được.")}</p>
         {retryBody && <p className="notice" role="status">{t("Chưa xác nhận được kết quả gửi. Dữ liệu được giữ nguyên; bấm “Gửi lại giao dịch” để kiểm tra và gửi lại cùng mã, tránh tạo trùng.")}</p>}
         <div className="form-grid">
-          <label className="field" htmlFor="transaction-date">Ngày chi tiêu
-            <input id="transaction-date" type="date" min="0001-01-01" max={transactionDateLimit()} value={occurredOn} onChange={(e) => setOccurredOn(e.target.value)} required disabled={locked} />
+          <label className="field" htmlFor="transaction-date">{translate("Ngày chi tiêu")}<input id="transaction-date" type="date" min="0001-01-01" max={transactionDateLimit()} value={occurredOn} onChange={(e) => setOccurredOn(e.target.value)} required disabled={locked} />
           </label>
-          <label className="field" htmlFor="transaction-amount">Số tiền (đồng)
-            <input id="transaction-amount" type="text" inputMode="numeric" placeholder="Ví dụ: 150.000" value={amount} onChange={(e) => setAmount(e.target.value)} required disabled={locked} aria-describedby="amount-preview" />
+          <label className="field" htmlFor="transaction-amount">{translate("Số tiền (đồng)")}<input id="transaction-amount" type="text" inputMode="numeric" placeholder={translate("Ví dụ: 150.000")} value={amount} onChange={(e) => setAmount(e.target.value)} required disabled={locked} aria-describedby="amount-preview" />
             <small id="amount-preview">{formattedAmount !== null ? formatVnd(formattedAmount) : t("Nhập số nguyên đồng, không có phần thập phân.")}</small>
           </label>
-          <label className="field" htmlFor="transaction-category">Danh mục
-            <select id="transaction-category" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} disabled={locked}>
-              <option value="">Chưa phân loại</option>
+          <label className="field" htmlFor="transaction-category">{translate("Danh mục")}<select id="transaction-category" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} disabled={locked}>
+              <option value="">{translate("Chưa phân loại")}</option>
               {setup.categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
             </select>
           </label>
         </div>
-        <label className="field" htmlFor="transaction-note">Ghi chú (không bắt buộc)
-          <textarea id="transaction-note" rows={3} maxLength={500} placeholder="Ví dụ: Mua thực phẩm cho bữa tối" value={note} onChange={(e) => setNote(e.target.value)} disabled={locked} />
+        <label className="field" htmlFor="transaction-note">{translate("Ghi chú (không bắt buộc)")}<textarea id="transaction-note" rows={3} maxLength={500} placeholder={translate("Ví dụ: Mua thực phẩm cho bữa tối")} value={note} onChange={(e) => setNote(e.target.value)} disabled={locked} />
         </label>
-        {!setup.categories.length && <p className="notice">Hộ chưa có danh mục. Bạn vẫn có thể lưu giao dịch ở trạng thái Chưa phân loại.</p>}
+        {!setup.categories.length && <p className="notice">{translate("Hộ chưa có danh mục. Bạn vẫn có thể lưu giao dịch ở trạng thái Chưa phân loại.")}</p>}
         {error && <p className="error" role="alert">{t(error)}</p>}
         <div className="actions">
           <button type="submit" disabled={busy}>{busy ? t("Đang lưu...") : retryBody ? t("Gửi lại giao dịch") : t("Lưu giao dịch")}</button>
-          {!retryBody && <Link to="/dashboard" className="text-link">Hủy</Link>}
+          {!retryBody && <Link to="/dashboard" className="text-link">{translate("Hủy")}</Link>}
         </div>
-        <p className="muted">Bấm gửi lại sau lỗi mạng vẫn sử dụng cùng một mã giao dịch.</p>
-      </form><aside className="workspace-stack"><section className="card"><h2>Thông tin giao dịch</h2><div className="dashboard-note">Giao dịch được tính vào thống kê sau khi lưu thành công.</div><p>Chọn ngày, số tiền và danh mục để gia đình dễ theo dõi.</p></section><section className="card"><h2>Có hóa đơn?</h2><p>Tải ảnh để đọc thông tin và kiểm tra trước khi xác nhận.</p><Link className="button button-secondary" to="/upload">Tải ảnh hóa đơn</Link></section></aside></div>
+        <p className="muted">{translate("Bấm gửi lại sau lỗi mạng vẫn sử dụng cùng một mã giao dịch.")}</p>
+      </form><aside className="workspace-stack"><section className="card"><h2>{translate("Thông tin giao dịch")}</h2><div className="dashboard-note">{translate("Giao dịch được tính vào thống kê sau khi lưu thành công.")}</div><p>{translate("Chọn ngày, số tiền và danh mục để gia đình dễ theo dõi.")}</p></section><section className="card"><h2>{translate("Có hóa đơn?")}</h2><p>{translate("Tải ảnh để đọc thông tin và kiểm tra trước khi xác nhận.")}</p><Link className="button button-secondary" to="/upload">{translate("Tải ảnh hóa đơn")}</Link></section></aside></div>
     </>
   );
 }
