@@ -159,7 +159,7 @@ export default function Receipts() {
       {!membership ? <p role="status">{translate("Đang kiểm tra hộ gia đình…")}</p> : membership.error ? (
         <div className="notice" role="alert"><p className="error">{membership.error}</p><button type="button" onClick={() => { setMembership(null); setReloadVersion((version) => version + 1); }}>{translate("Thử lại")}</button></div>
       ) : !membership.household ? <p>{translate("Bạn cần ")}<Link to="/">{translate("tạo hoặc tham gia một hộ")}</Link>{translate(" để xem hóa đơn.")}</p> : <>
-      <div className="filter-pills receipt-filters" aria-label={translate("Lọc trạng thái hóa đơn")}>{[["", translate("Tất cả")], ...Object.entries(STATUS_LABEL).filter(([key]) => key !== "TIMEOUT")].map(([value, label]) => <button type="button" key={value} className={status === value ? "selected" : ""} aria-pressed={status === value} onClick={() => setStatus(value)}>{label}</button>)}</div>
+      <div className="filter-pills receipt-filters" aria-label={translate("Lọc trạng thái hóa đơn")}>{[["", translate("Tất cả")], ...Object.entries(STATUS_LABEL).filter(([key]) => key !== "TIMEOUT")].map(([value, label]) => <button type="button" key={value} className={status === value ? "selected" : ""} aria-pressed={status === value} onClick={() => setStatus(value)}>{t(label)}</button>)}</div>
       <ReceiptList key={status} status={status} />
       </>}
     </>

@@ -6,6 +6,7 @@ import { localPeriod } from "../dashboardData";
 import { formatVnd, parseVnd } from "../format";
 import { t } from "../preferences";
 import { budgetToForm, buildBudgetBody, checkBudget } from "../budgetForm";
+import MonthPicker from "../components/MonthPicker";
 import "../budgets.css";
 
 function failureMessage(error) {
@@ -101,9 +102,9 @@ function BudgetWorkspace({ period, data, onReload, onBusyChange, onDirtyChange }
           const spent = summary.by_category?.find((line) => line.category_id === category.id)?.amount ?? 0;
           const over = spent > amount;
           return <div className={`allocation-item${over ? " allocation-over" : ""}`} key={category.id}>
-            <div className="allocation-top"><h3>{category.name}</h3><span>{amount ? `${Math.round(spent / amount * 100)}%` : spent ? t("Chưa phân bổ") : "0%"}</span></div>
+            <div className="allocation-top"><h3>{t(category.name)}</h3><span>{amount ? `${Math.round(spent / amount * 100)}%` : spent ? t("Chưa phân bổ") : "0%"}</span></div>
             <p><b>{formatVnd(spent)}</b><span className="muted"> / {formatVnd(amount)}</span></p>
-            <progress aria-label={`Mức sử dụng ngân sách ${category.name}`} max={Math.max(amount, 1)} value={Math.min(spent, Math.max(amount, 1))} />
+            <progress aria-label={`${t("Mức sử dụng ngân sách")} ${t(category.name)}`} max={Math.max(amount, 1)} value={Math.min(spent, Math.max(amount, 1))} />
             <small>{over ? `${t("Vượt")} ${formatVnd(spent - amount)}` : `${t("Còn")} ${formatVnd(amount - spent)}`}</small>
           </div>;
         })}</div>
@@ -121,12 +122,12 @@ function BudgetWorkspace({ period, data, onReload, onBusyChange, onDirtyChange }
           <div className="budget-section-heading"><h3>{translate("Gợi ý để bạn cân nhắc")}</h3><span className="status-badge">{suggestion.source === "LLM" ? t("Gợi ý AI") : t("Theo quy tắc / dự phòng")}</span></div>
           <p>{suggestion.source === "RULE" ? t("Gợi ý dựa trên chi tiêu đã xác nhận của ba tháng trước. Phương án theo quy tắc cũng được dùng khi AI không trả được gợi ý hợp lệ.") : t("Gợi ý AI đã được máy chủ kiểm tra theo quy tắc ngân sách.")} {t("Bạn có thể điều chỉnh mọi khoản trước khi lưu.")}</p>
           {!suggestion.allocations.length && <p className="muted">{translate("Chưa có khoản phân bổ được gợi ý. Bạn có thể tự nhập ngân sách theo danh mục bên dưới.")}</p>}
-          <ul className="suggestion-lines">{suggestion.allocations.map((line) => <li key={line.category_id}><span>{line.name}</span><b>{formatVnd(line.amount)}</b></li>)}</ul>
+          <ul className="suggestion-lines">{suggestion.allocations.map((line) => <li key={line.category_id}><span>{t(line.name)}</span><b>{formatVnd(line.amount)}</b></li>)}</ul>
           <button type="button" className="button-secondary" onClick={() => { setForm(budgetToForm(suggestion, categories)); setDraftSource(translate("Đã đưa gợi ý vào form. Bạn có thể chỉnh sửa rồi bấm Lưu ngân sách.")); setSuccess(""); }}>{translate("Dùng gợi ý trong bản nháp")}</button>
           <p className="muted">{translate("Gợi ý chưa được lưu vào ngân sách.")}</p>
         </section>}
         <h3>{translate("Phân bổ theo danh mục")}</h3>
-        <div className="form-grid">{categories.map((category) => <label className="field" key={category.id} htmlFor={`budget-category-${category.id}`}>{category.name} ({t("đồng")})<input id={`budget-category-${category.id}`} inputMode="numeric" value={form.allocations[category.id]} onChange={(e) => update({ allocations: { ...form.allocations, [category.id]: e.target.value } })} required /><small>{formatVnd(parseVnd(form.allocations[category.id]) ?? 0)}</small></label>)}</div>
+        <div className="form-grid">{categories.map((category) => <label className="field" key={category.id} htmlFor={`budget-category-${category.id}`}>{t(category.name)} ({t("đồng")})<input id={`budget-category-${category.id}`} inputMode="numeric" value={form.allocations[category.id]} onChange={(e) => update({ allocations: { ...form.allocations, [category.id]: e.target.value } })} required /><small>{formatVnd(parseVnd(form.allocations[category.id]) ?? 0)}</small></label>)}</div>
         {!categories.length && <p className="notice">{translate("Hộ chưa có danh mục. Bạn vẫn có thể đặt mục tiêu tiết kiệm.")}</p>}
         <div className={`budget-balance${remaining < 0 ? " budget-balance-over" : ""}`} aria-live="polite"><span>{remaining < 0 ? t("Đang vượt thu nhập") : t("Còn có thể phân bổ")}</span><strong>{formatVnd(Math.abs(remaining))}</strong></div>
         {draftSource && <p className="notice" role="status">{t(draftSource)}</p>}
@@ -166,7 +167,7 @@ export default function Budgets() {
   const loading = result?.key !== key;
   return <>
     <div className="page-heading"><div><p className="eyebrow">{translate("Kế hoạch gia đình")}</p><h1>{translate("Ngân sách theo tháng")}</h1><p>{translate("Chủ động chia khoản chi, dành chỗ cho những mục tiêu.")}</p></div><Link className="button button-secondary" to="/dashboard">{translate("Xem thống kê")}</Link></div>
-      <div className="card dashboard-filters"><label className="field" htmlFor="budget-period">{translate("Tháng ngân sách")}<input id="budget-period" type="month" min="0001-01" max="9998-12" value={period} disabled={workspaceBusy} onChange={(e) => { if (/^(?!0000)\d{4}-(0[1-9]|1[0-2])$/.test(e.target.value) && (!workspaceDirty || window.confirm(t("Chuyển tháng sẽ đóng bản nháp đang mở. Tiếp tục?")))) setPeriod(e.target.value); }} /></label><button type="button" className="button-secondary" disabled={loading || workspaceBusy} onClick={() => { if (!workspaceDirty || window.confirm(t("Tải lại dữ liệu sẽ đóng bản nháp đang mở. Tiếp tục?"))) setReload((value) => value + 1); }}>{translate("Tải lại dữ liệu")}</button></div>
-    {loading ? <p role="status">{translate("Đang tải ngân sách…")}</p> : result.error ? <section className="card"><p className="error" role="alert">{failureMessage(result.error)}</p>{result.error.requestId && <p>{translate("Mã yêu cầu: ")}<code>{result.error.requestId}</code></p>}<button type="button" onClick={() => setReload((value) => value + 1)}>{translate("Thử lại")}</button></section> : !result.data.household ? <section className="card"><p>{translate("Bạn cần ")}<Link to="/">{translate("tạo hoặc tham gia một hộ")}</Link>{translate(" để xem ngân sách.")}</p></section> : <BudgetWorkspace key={key} period={period} data={result.data} onReload={() => setReload((value) => value + 1)} onBusyChange={setWorkspaceBusy} onDirtyChange={setWorkspaceDirty} />}
+      <div className="card dashboard-filters"><label className="field month-field" htmlFor="budget-period">{translate("Tháng ngân sách")}<MonthPicker key={period} id="budget-period" value={period} disabled={workspaceBusy} onChange={(nextPeriod) => { if (nextPeriod === period) return true; if (!/^(?!0000)\d{4}-(0[1-9]|1[0-2])$/.test(nextPeriod) || (workspaceDirty && !window.confirm(t("Chuyển tháng sẽ đóng bản nháp đang mở. Tiếp tục?")))) return false; setPeriod(nextPeriod); return true; }} /></label><button type="button" className="button-secondary" disabled={loading || workspaceBusy} onClick={() => { if (!workspaceDirty || window.confirm(t("Tải lại dữ liệu sẽ đóng bản nháp đang mở. Tiếp tục?"))) setReload((value) => value + 1); }}>{translate("Tải lại dữ liệu")}</button></div>
+    {loading ? <p role="status">{translate("Đang tải ngân sách…")}</p> : result.error ? <section className="card"><p className="error" role="alert">{t(failureMessage(result.error))}</p>{result.error.requestId && <p>{translate("Mã yêu cầu: ")}<code>{result.error.requestId}</code></p>}<button type="button" onClick={() => setReload((value) => value + 1)}>{translate("Thử lại")}</button></section> : !result.data.household ? <section className="card"><p>{translate("Bạn cần ")}<Link to="/">{translate("tạo hoặc tham gia một hộ")}</Link>{translate(" để xem ngân sách.")}</p></section> : <BudgetWorkspace key={key} period={period} data={result.data} onReload={() => setReload((value) => value + 1)} onBusyChange={setWorkspaceBusy} onDirtyChange={setWorkspaceDirty} />}
   </>;
 }
