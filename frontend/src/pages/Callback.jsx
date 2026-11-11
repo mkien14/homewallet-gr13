@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { t as translate } from "../preferences";
 import { useNavigate } from "react-router-dom";
 import { handleCallback, login } from "../auth/auth";
 
@@ -18,9 +19,9 @@ export default function Callback() {
     return (
       <div className="card">
         <p className="error">{error}</p>
-        <button onClick={login}>Đăng nhập lại</button>
+        <button onClick={login}>{translate("Đăng nhập lại")}</button>
       </div>
     );
   }
-  return <p>Đang đăng nhập...</p>;
+  return <p>{translate("Đang đăng nhập...")}</p>;
 }
