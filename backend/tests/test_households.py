@@ -1,3 +1,6 @@
+from datetime import date
+
+
 def H(make_token, sub):
     return {"Authorization": f"Bearer {make_token(sub=sub)}"}
 
@@ -56,6 +59,29 @@ def test_member_cannot_remove_but_owner_can(db_app, make_token):
     assert c.delete(f"/api/households/{hid['id']}/members/{uid_a}", headers=H(make_token, "sub-b")).status_code == 403
     assert c.delete(f"/api/households/{hid['id']}/members/{uid_a}", headers=H(make_token, "sub-a")).status_code == 422
     assert c.delete(f"/api/households/{hid['id']}/members/{uid_b}", headers=H(make_token, "sub-a")).status_code == 204
+
+
+def test_member_can_leave_and_join_another_household(db_app, make_token):
+    c = db_app.test_client()
+    owner = H(make_token, "sub-a")
+    member = H(make_token, "sub-b")
+    household = c.post("/api/households", json={"name": "Nhà A"}, headers=owner).get_json()
+    other = c.post("/api/households", json={"name": "Nhà B"}, headers=H(make_token, "sub-c")).get_json()
+    assert c.post("/api/households/join", json={"invite_code": household["invite_code"]}, headers=member).status_code == 200
+    transaction = c.post(
+        "/api/transactions",
+        headers={**member, "Idempotency-Key": "leave-household-test"},
+        json={"occurred_on": date.today().isoformat(), "total_amount": 50000, "category_id": None, "note": "Test"},
+    )
+    assert transaction.status_code == 201
+    transaction_id = transaction.get_json()["transaction"]["id"]
+    assert c.delete(f"/api/households/{household['id']}/members/me", headers=owner).status_code == 403
+    assert c.delete(f"/api/households/{other['id']}/members/me", headers=member).status_code == 404
+    assert c.delete(f"/api/households/{household['id']}/members/me", headers=member).status_code == 204
+    assert c.get("/api/me", headers=member).get_json()["household"] is None
+    assert c.get(f"/api/households/{household['id']}/members", headers=member).status_code == 404
+    assert transaction_id in [item["id"] for item in c.get("/api/transactions", headers=owner).get_json()["items"]]
+    assert c.post("/api/households/join", json={"invite_code": other["invite_code"]}, headers=member).status_code == 200
 
 
 def test_rotate_invite_code(db_app, make_token):

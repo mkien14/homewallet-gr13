@@ -286,6 +286,32 @@ def remove_member(hid, uid):
     return "", 204
 
 
+@bp.delete("/households/<int:hid>/members/me")
+@require_auth
+def leave_household(hid):
+    """A non-owner may remove only their own current membership."""
+    db = get_db()
+    current = require_household(db, hid)
+    if current["role"] != "member":
+        raise ApiError(403, "FORBIDDEN", "Chủ hộ không thể tự rời hộ")
+    try:
+        with db.cursor() as cur:
+            # Restrict the mutation itself as well as the preceding check, so a
+            # concurrent role or membership change cannot remove an owner.
+            cur.execute(
+                "DELETE FROM household_members "
+                "WHERE household_id = %s AND user_id = %s AND role = 'member'",
+                (hid, g.user["id"]),
+            )
+            if cur.rowcount != 1:
+                raise ApiError(409, "MEMBERSHIP_CHANGED", "Quyền trong hộ đã thay đổi. Hãy tải lại trang")
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    return "", 204
+
+
 @bp.post("/households/<int:hid>/invite-code")
 @require_auth
 def rotate_invite_code(hid):

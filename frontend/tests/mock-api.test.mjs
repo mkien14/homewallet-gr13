@@ -1,9 +1,41 @@
 import test, { beforeEach, mock } from "node:test";
 import assert from "node:assert/strict";
-import { completeMockUpload, mockApi, resetMockData } from "../src/mocks/index.js";
+import { completeMockUpload, mockApi, resetMockData, setMockRole } from "../src/mocks/index.js";
 import { todayIso } from "../src/format.js";
 
 beforeEach(() => resetMockData());
+
+test("only a member can leave their own mock household", async () => {
+  await assert.rejects(mockApi("/api/households/1/members/me", { method: "DELETE" }), { status: 403 });
+  setMockRole("member");
+  await assert.rejects(mockApi("/api/households/1/members/1", { method: "DELETE" }), { status: 403 });
+  await mockApi("/api/households/1/members/me", { method: "DELETE" });
+  assert.equal((await mockApi("/api/me")).household, null);
+  await assert.rejects(mockApi("/api/households/1/members", { method: "GET" }), { status: 404 });
+  await assert.rejects(mockApi("/api/households/1/members/me", { method: "DELETE" }), { status: 404 });
+  setMockRole("owner");
+  assert.equal((await mockApi("/api/me")).user.display_name, "Thức");
+  assert.deepEqual((await mockApi("/api/households/1/members")).members.map(({ display_name, role }) => [display_name, role]), [["Thức", "owner"]]);
+  assert.throws(() => setMockRole("member"), /đặt lại dữ liệu mẫu/);
+});
+
+test("switching the mock user preserves owner and member roles", async () => {
+  const initial = await mockApi("/api/me");
+  assert.equal(initial.user.display_name, "Thức");
+  assert.equal(initial.household.role, "owner");
+  assert.equal(initial.household.invite_code, "DEMO2026");
+  setMockRole("member");
+  const member = await mockApi("/api/me");
+  assert.equal(member.user.display_name, "Chi");
+  assert.equal(member.household.role, "member");
+  assert.equal(member.household.invite_code, undefined);
+  assert.deepEqual((await mockApi("/api/households/1/members")).members.map(({ display_name, role }) => [display_name, role]), [["Thức", "owner"], ["Chi", "member"]]);
+  const transaction = await createManual(manual(), "member-transaction");
+  assert.equal(transaction.transaction.member_id, member.user.id);
+  setMockRole("owner");
+  assert.equal((await mockApi("/api/me")).user.display_name, "Thức");
+  assert.deepEqual((await mockApi("/api/households/1/members")).members.map(({ display_name, role }) => [display_name, role]), [["Thức", "owner"], ["Chi", "member"]]);
+});
 
 test("dashboard mock requires a valid period just like the new Flask endpoint", async () => {
   for (const path of ["/api/dashboard", "/api/dashboard?period=2026-13", "/api/dashboard?period=0000-01", "/api/dashboard?period=9999-12"]) {

@@ -1,6 +1,13 @@
 Community/admin (#29, D2): xem [contract community](community-api.md) và
 [ma trận nghiệm thu](test-cases-community.md). Contract đang chờ Kiên/Thức xác nhận.
 
+DELETE /api/households/{id}/members/me
+  Thành viên đăng nhập tự rời hộ hiện tại. Trả 204 khi thành công; GET /api/me
+  sau đó trả household=null. Chủ hộ trả 403; hộ khác hoặc không còn là thành viên
+  trả 404; chưa đăng nhập trả 401; membership thay đổi đồng thời trả 409. Các giao
+  dịch, hóa đơn và dữ liệu hộ được giữ lại; chỉ xóa liên kết thành viên. Quyền xóa
+  thành viên khác qua DELETE /api/households/{id}/members/{uid} vẫn dành cho Chủ hộ.
+
 Trạng thái hóa đơn: UPLOADING, UPLOADED, PROCESSING, DRAFT_READY, NEEDS_REVIEW, CONFIRMED, FAILED
 Mã cảnh báo (warnings): DUPLICATE_FILE, POSSIBLE_DUPLICATE, TOTAL_MISMATCH, DATE_MISSING, NOT_A_RECEIPT
 
