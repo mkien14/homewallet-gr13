@@ -4,6 +4,7 @@ import { useMe } from "../useMe";
 import { usePreferences } from "../preferences";
 import Icon from "../components/Icon";
 import { userDisplayName } from "../displayName";
+import HouseholdHistory from "../components/HouseholdHistory";
 
 function Setup({ onDone }) {
   const { t } = usePreferences();
@@ -65,7 +66,34 @@ function LeaveHouseholdDialog({ leaving, error, onCancel, onConfirm, onRefresh }
   );
 }
 
-function HouseholdView({ household, onChange, onLeave }) {
+function DissolveHouseholdDialog({ household, deleting, error, needsReview, onCancel, onConfirm, onRefresh }) {
+  const { t } = usePreferences();
+  const dialogRef = useRef(null);
+  const [name, setName] = useState("");
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    dialog.showModal();
+    return () => { if (dialog.open) dialog.close(); };
+  }, []);
+
+  return (
+    <dialog ref={dialogRef} className="confirm-dialog" aria-labelledby="dissolve-household-title" aria-describedby="dissolve-household-description" onCancel={(event) => { event.preventDefault(); if (!deleting) onCancel(); }}>
+      <div className="confirm-dialog-icon" aria-hidden="true">!</div>
+      <h2 id="dissolve-household-title">{t("Giải tán hộ gia đình?")}</h2>
+      <p id="dissolve-household-description">{t("Tất cả thành viên sẽ rời hộ. Giao dịch, ngân sách, hóa đơn định kỳ và ảnh hóa đơn của hộ sẽ bị xóa vĩnh viễn và không thể khôi phục.")}</p>
+      <p>{t("Nhập chính xác tên hộ để xác nhận:")} <strong>{household.name}</strong></p>
+      <label className="field" htmlFor="dissolve-household-name">{t("Tên hộ")}<input id="dissolve-household-name" autoComplete="off" value={name} onChange={(event) => setName(event.target.value)} disabled={deleting || needsReview} /></label>
+      {error && <div role="alert"><p className="error">{t(error)}</p>{needsReview && <button type="button" className="button-secondary" onClick={onRefresh} disabled={deleting}>{t("Tải lại trạng thái")}</button>}</div>}
+      <div className="confirm-dialog-actions">
+        <button type="button" className="button-secondary" onClick={onCancel} disabled={deleting} autoFocus>{t("Hủy")}</button>
+        <button type="button" className="confirm-delete" onClick={onConfirm} disabled={deleting || needsReview || name !== household.name}>{t(deleting ? "Đang giải tán…" : "Giải tán hộ")}</button>
+      </div>
+    </dialog>
+  );
+}
+
+function HouseholdView({ household, onChange, onLeave, onDissolve }) {
   const { t } = usePreferences();
   const [members, setMembers] = useState([]);
   const [error, setError] = useState(null);
@@ -75,6 +103,11 @@ function HouseholdView({ household, onChange, onLeave }) {
   const leavingRef = useRef(false);
   const [leaveError, setLeaveError] = useState(null);
   const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
+  const [dissolveDialogOpen, setDissolveDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const deletingRef = useRef(false);
+  const [deleteError, setDeleteError] = useState(null);
+  const [deleteNeedsReview, setDeleteNeedsReview] = useState(false);
   const isOwner = household.role === "owner";
 
   const load = useCallback(
@@ -133,6 +166,29 @@ function HouseholdView({ household, onChange, onLeave }) {
     }
   }
 
+  async function dissolveHousehold() {
+    if (!isOwner || deletingRef.current || deleteNeedsReview) return;
+    deletingRef.current = true;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      const result = await api(`/api/households/${household.id}/delete`, { method: "POST", body: { confirm: true, household_id: household.id } });
+      if (result?.deleted !== true || result.household_id !== household.id) {
+        throw Object.assign(new Error("Không xác nhận được kết quả giải tán. Hãy tải lại trạng thái và liên hệ quản trị viên trước khi thử lại."), { needsReview: true });
+      }
+      onDissolve();
+    } catch (e) {
+      const needsReview = e.needsReview || !e.status || e.status >= 500;
+      setDeleteNeedsReview(Boolean(needsReview));
+      setDeleteError(needsReview
+        ? "Không xác nhận được kết quả giải tán; một số ảnh có thể đã bị xóa. Hãy tải lại trạng thái và liên hệ quản trị viên trước khi thử lại."
+        : e.message);
+    } finally {
+      deletingRef.current = false;
+      setDeleting(false);
+    }
+  }
+
   const currentCopyFeedback = copyFeedback?.code === household.invite_code ? copyFeedback : null;
 
   return (
@@ -169,6 +225,7 @@ function HouseholdView({ household, onChange, onLeave }) {
             <p className={currentCopyFeedback?.success === false ? "error" : "muted"} role="status" aria-live="polite">
               {currentCopyFeedback && t(currentCopyFeedback.success ? "Đã sao chép mã mời." : "Không thể sao chép. Hãy chọn mã mời và sao chép thủ công.")}
             </p>
+            <button type="button" className="button-danger" onClick={() => { if (!deleteNeedsReview) setDeleteError(null); setDissolveDialogOpen(true); }}>{t("Giải tán hộ")}</button>
           </>}
           {household.role === "member" && <button type="button" className="button-danger" onClick={() => { setLeaveError(null); setLeaveDialogOpen(true); }}>{t("Rời hộ")}</button>}
         </section>
@@ -180,6 +237,7 @@ function HouseholdView({ household, onChange, onLeave }) {
         </section>
       </aside>
       {leaveDialogOpen && <LeaveHouseholdDialog leaving={leaving} error={leaveError} onCancel={() => setLeaveDialogOpen(false)} onConfirm={leaveHousehold} onRefresh={onChange} />}
+      {dissolveDialogOpen && <DissolveHouseholdDialog household={household} deleting={deleting} error={deleteError} needsReview={deleteNeedsReview} onCancel={() => setDissolveDialogOpen(false)} onConfirm={dissolveHousehold} onRefresh={onChange} />}
     </div>
   );
 
@@ -188,18 +246,19 @@ function HouseholdView({ household, onChange, onLeave }) {
 export default function Home() {
   const { t } = usePreferences();
   const { me, error, reload, clearHousehold } = useMe();
-  const [leftHousehold, setLeftHousehold] = useState(false);
+  const [householdExit, setHouseholdExit] = useState(null);
   if (error) return <p className="error">{t(error)}</p>;
   if (!me) return <p>{t("Đang tải…")}</p>;
   return (
     <>
       <div className="page-heading"><div><p className="eyebrow">{t("Xin chào")}, {userDisplayName(me.user, t("bạn"))}</p><h1>{me.household?.name || t("Hộ gia đình")}</h1></div></div>
-      {leftHousehold && !me.household && <p className="notice success" role="status">{t("Bạn đã rời hộ. Bạn có thể tạo hộ mới hoặc tham gia hộ khác.")}</p>}
+      {householdExit && !me.household && <p className="notice success" role="status">{t(householdExit === "left" ? "Bạn đã rời hộ. Bạn có thể tạo hộ mới hoặc tham gia hộ khác." : "Đã giải tán hộ. Bạn có thể tạo hộ mới hoặc tham gia hộ khác.")}</p>}
       {me.household ? (
-        <HouseholdView household={me.household} onChange={reload} onLeave={() => { clearHousehold(); setLeftHousehold(true); }} />
+        <HouseholdView household={me.household} onChange={reload} onLeave={() => { clearHousehold(); setHouseholdExit("left"); }} onDissolve={() => { clearHousehold(); setHouseholdExit("dissolved"); }} />
       ) : (
-        <Setup onDone={() => { setLeftHousehold(false); reload(); }} />
+        <Setup onDone={() => { setHouseholdExit(null); reload(); }} />
       )}
+      <HouseholdHistory refreshKey={`${me.user.id}-${me.household?.id || "none"}-${householdExit || "active"}`} />
     </>
   );
 }

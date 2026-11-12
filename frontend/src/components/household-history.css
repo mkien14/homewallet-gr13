@@ -1,0 +1,7 @@
+.household-history { margin-top: 20px; }
+.household-history-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 12px; list-style: none; padding: 0; margin: 16px 0 0; }
+.household-history-item { min-width: 0; padding: 16px; border: 1px solid #e5e6e9; border-radius: 14px; background: #f8f9fb; overflow-wrap: anywhere; }
+.household-history-heading { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+.household-history-heading .status-badge { white-space: normal; }
+.household-history-item p { margin: 5px 0 0; font-size: .875rem; }
+html[data-theme="dark"] .household-history-item { background: #252e3b; border-color: #3a4657; }

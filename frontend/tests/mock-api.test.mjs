@@ -5,18 +5,59 @@ import { todayIso } from "../src/format.js";
 
 beforeEach(() => resetMockData());
 
+test("mock household deletion requires an owner and explicit confirmation", async () => {
+  const path = "/api/households/1/delete";
+  const original = await mockApi("/api/receipts");
+  await assert.rejects(mockApi(path, { method: "POST", body: {} }), { status: 400 });
+  await assert.rejects(mockApi(path, { method: "POST", body: { confirm: true, household_id: 2 } }), { status: 422 });
+  setMockRole("member");
+  await assert.rejects(mockApi(path, { method: "POST", body: { confirm: true, household_id: 1 } }), { status: 403 });
+  assert.equal((await mockApi("/api/receipts")).items.length, original.items.length);
+  setMockRole("owner");
+  const result = await mockApi(path, { method: "POST", body: { confirm: true, household_id: 1 } });
+  assert.equal(result.deleted, true);
+  assert.equal(result.household_id, 1);
+  assert.equal((await mockApi("/api/me")).household, null);
+  const ownerHistory = (await mockApi("/api/me/household-history")).items;
+  assert.equal(ownerHistory.length, 1);
+  assert.equal(ownerHistory[0].role, "owner");
+  assert.equal(ownerHistory[0].end_reason, "dissolved");
+  await assert.rejects(mockApi("/api/households/1/members"), { status: 404 });
+  await assert.rejects(mockApi(path, { method: "POST", body: { confirm: true, household_id: 1 } }), { status: 404 });
+  setMockRole("member");
+  assert.equal((await mockApi("/api/me")).user.display_name, "Chi");
+  assert.equal((await mockApi("/api/me")).household, null);
+  const memberHistory = (await mockApi("/api/me/household-history")).items;
+  assert.equal(memberHistory.length, 1);
+  assert.equal(memberHistory[0].role, "member");
+  assert.equal(memberHistory[0].end_reason, "dissolved");
+  setMockRole("owner");
+  assert.equal((await mockApi("/api/me")).household, null);
+  assert.equal((await mockApi("/api/me/household-history")).items[0].role, "owner");
+});
+
 test("only a member can leave their own mock household", async () => {
   await assert.rejects(mockApi("/api/households/1/members/me", { method: "DELETE" }), { status: 403 });
   setMockRole("member");
+  assert.equal((await mockApi("/api/me/household-history")).items[0].end_reason, null);
   await assert.rejects(mockApi("/api/households/1/members/1", { method: "DELETE" }), { status: 403 });
   await mockApi("/api/households/1/members/me", { method: "DELETE" });
   assert.equal((await mockApi("/api/me")).household, null);
+  const memberHistory = (await mockApi("/api/me/household-history")).items;
+  assert.equal(memberHistory.length, 1);
+  assert.equal(memberHistory[0].role, "member");
+  assert.equal(memberHistory[0].end_reason, "left");
   await assert.rejects(mockApi("/api/households/1/members", { method: "GET" }), { status: 404 });
   await assert.rejects(mockApi("/api/households/1/members/me", { method: "DELETE" }), { status: 404 });
   setMockRole("owner");
   assert.equal((await mockApi("/api/me")).user.display_name, "Thức");
+  assert.equal((await mockApi("/api/me/household-history")).items[0].end_reason, null);
   assert.deepEqual((await mockApi("/api/households/1/members")).members.map(({ display_name, role }) => [display_name, role]), [["Thức", "owner"]]);
-  assert.throws(() => setMockRole("member"), /đặt lại dữ liệu mẫu/);
+  setMockRole("member");
+  assert.equal((await mockApi("/api/me")).household, null);
+  assert.equal((await mockApi("/api/me/household-history")).items[0].end_reason, "left");
+  setMockRole("owner");
+  assert.equal((await mockApi("/api/me")).household.role, "owner");
 });
 
 test("switching the mock user preserves owner and member roles", async () => {
@@ -35,6 +76,19 @@ test("switching the mock user preserves owner and member roles", async () => {
   setMockRole("owner");
   assert.equal((await mockApi("/api/me")).user.display_name, "Thức");
   assert.deepEqual((await mockApi("/api/households/1/members")).members.map(({ display_name, role }) => [display_name, role]), [["Thức", "owner"], ["Chi", "member"]]);
+});
+
+test("an owner cannot see another member's mock history", async () => {
+  await mockApi("/api/households/1/members/2", { method: "DELETE" });
+  const { items } = await mockApi("/api/me/household-history");
+  assert.equal(items.length, 1);
+  assert.equal(items[0].role, "owner");
+  assert.equal(items[0].end_reason, null);
+  setMockRole("member");
+  assert.equal((await mockApi("/api/me")).household, null);
+  assert.equal((await mockApi("/api/me/household-history")).items[0].end_reason, "removed");
+  setMockRole("owner");
+  assert.equal((await mockApi("/api/me")).household.role, "owner");
 });
 
 test("dashboard mock requires a valid period just like the new Flask endpoint", async () => {
