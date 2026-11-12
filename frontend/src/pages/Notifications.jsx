@@ -5,6 +5,8 @@ import { usePreferences } from "../preferences";
 import { config } from "../config";
 import { getBrowserPushSubscription, pushPermission, pushSupport, subscribeBrowserPush, unsubscribeBrowserPush } from "../push";
 import { USE_MOCK } from "../mode";
+import { notificationDate, notificationText } from "../notificationContent";
+import Icon from "../components/Icon";
 
 function PushSettings() {
   const { locale, t } = usePreferences();
@@ -89,7 +91,7 @@ function PushSettings() {
 }
 
 function NotificationList() {
-  const { t } = usePreferences();
+  const { locale, t } = usePreferences();
   const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -120,15 +122,16 @@ function NotificationList() {
   }
 
   return <section className="card notification-list-card">
-    <div className="community-heading"><div><p className="eyebrow">{t("Hộ gia đình")}</p><h2>{t("Thông báo trong ứng dụng")}</h2></div><button type="button" className="button-secondary" onClick={load} disabled={loading}>{t("Làm mới")}</button></div>
+    <div className="community-heading notification-heading"><div><p className="eyebrow">{t("Hộ gia đình")}</p><h2>{t("Thông báo trong ứng dụng")}</h2></div><button type="button" className="button-secondary" onClick={load} disabled={loading}>{t("Làm mới")}</button></div>
+    {!loading && items.length > 0 && <p className="notification-summary">{t("Chưa đọc")}: <b>{items.filter((item) => !item.read).length}</b> / {items.length}</p>}
     {error && <div className="notice error" role="alert"><p>{t(error)}</p><button className="button-secondary" type="button" onClick={load}>{t("Thử lại")}</button></div>}
     {loading ? <p role="status">{t("Đang tải thông báo…")}</p> : items.length === 0 ? <p className="empty-state">{t("Bạn chưa có thông báo.")}</p> : <ul className="notification-list">{items.map((item) => <li className={item.read ? "notification-item is-read" : "notification-item"} key={item.id}>
-      <span className="notification-dot" aria-hidden="true"></span><div className="notification-copy"><div className="notification-title-row"><strong>{t(item.title || "Thông báo")}</strong>{!item.read && <span className="status-badge">{t("Mới")}</span>}</div><p>{t(item.body || "")}</p><small>{item.created_at ? new Intl.DateTimeFormat(document.documentElement.lang === "en" ? "en-US" : "vi-VN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(`${item.created_at}${item.created_at.endsWith("Z") ? "" : "Z"}`)) : ""}</small></div><button type="button" className="button-secondary notification-open" onClick={() => open(item)} disabled={busyId === item.id}>{busyId === item.id ? t("Đang mở…") : t("Mở")}</button>
+      <span className="notification-dot" aria-hidden="true"></span><div className="notification-copy"><div className="notification-title-row"><strong>{notificationText(item.title, locale, t, "Thông báo")}</strong><span className={`status-badge ${item.read ? "" : "status-confirmed"}`}>{t(item.read ? "Đã đọc" : "Mới")}</span></div><p>{notificationText(item.body, locale, t)}</p><small>{notificationDate(item.created_at, locale)}</small></div><button type="button" className="button-secondary notification-open" onClick={() => open(item)} disabled={busyId !== null}>{busyId === item.id ? t("Đang mở…") : <>{t("Mở")}<Icon name="arrow-right" /></>}</button>
     </li>)}</ul>}
   </section>;
 }
 
 export default function Notifications() {
   const { t } = usePreferences();
-  return <><div className="page-heading"><div><p className="eyebrow">HomeWallet</p><h1>{t("Thông báo")}</h1><p>{t("Thông tin về ngân sách và hóa đơn định kỳ của gia đình.")}</p></div></div><div className="notification-workspace"><PushSettings /><NotificationList /></div></>;
+  return <><div className="page-heading"><div><p className="eyebrow">HomeWallet</p><h1>{t("Thông báo")}</h1><p>{t("Thông tin về ngân sách và hóa đơn định kỳ của gia đình.")}</p></div></div><div className="notification-workspace"><NotificationList /><PushSettings /></div></>;
 }

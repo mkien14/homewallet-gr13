@@ -1,6 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { t as translate } from "./preferences";
-import { BrowserRouter, Link, NavLink, Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { BrowserRouter, Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { isLoggedIn, login, logout } from "./auth/auth";
 import { isReactAuthSession, reactSignOut } from "./auth/cognito";
 import { USE_MOCK } from "./mode";
@@ -11,6 +11,7 @@ import { config } from "./config";
 import Callback from "./pages/Callback";
 import Home from "./pages/Home";
 import Upload from "./pages/Upload";
+import Icon from "./components/Icon";
 
 const Receipts = lazy(() => import("./pages/Receipts"));
 const ReceiptDetail = lazy(() => import("./pages/ReceiptDetail"));
@@ -44,7 +45,7 @@ function Protected({ children }) {
           <div className="guest-actions">{loginAction}<span>{t("Bắt đầu miễn phí với tài khoản của bạn")}</span></div>
         </div>
         <div className="guest-highlights">
-          <div><span className="guest-highlight-icon">↗</span><b>{t("Chi tiêu rõ ràng")}</b><small>{t("Xem khoản nào đang chiếm nhiều nhất.")}</small></div>
+          <div><span className="guest-highlight-icon"><Icon name="arrow-up-right" /></span><b>{t("Chi tiêu rõ ràng")}</b><small>{t("Xem khoản nào đang chiếm nhiều nhất.")}</small></div>
           <div><span className="guest-highlight-icon">▤</span><b>{t("Ngân sách chung")}</b><small>{t("Cả nhà cùng theo dõi kế hoạch tháng.")}</small></div>
           <div><span className="guest-highlight-icon">✓</span><b>{t("Hóa đơn gọn gàng")}</b><small>{t("Lưu và xác nhận hóa đơn tại một nơi.")}</small></div>
         </div>
@@ -68,11 +69,39 @@ function Protected({ children }) {
 
 function AppContent() {
   const [toolsOpen, setToolsOpen] = useState(false);
+  const toolsRef = useRef(null);
+  const toolsTriggerRef = useRef(null);
+  const location = useLocation();
   const navigate = useNavigate();
   const { locale, setLocale, theme, setTheme, t } = usePreferences();
   const authenticated = USE_MOCK || isLoggedIn();
   const localeUserId = useRef(null);
   const [localeSyncStatus, setLocaleSyncStatus] = useState("ready");
+
+  useEffect(() => {
+    if (!toolsOpen) return undefined;
+    const closeOutside = (event) => {
+      if (!toolsRef.current?.contains(event.target)) setToolsOpen(false);
+    };
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") {
+        setToolsOpen(false);
+        toolsTriggerRef.current?.focus();
+      }
+    };
+    document.addEventListener("pointerdown", closeOutside);
+    document.addEventListener("focusin", closeOutside);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOutside);
+      document.removeEventListener("focusin", closeOutside);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [toolsOpen]);
+
+  useEffect(() => {
+    queueMicrotask(() => setToolsOpen(false));
+  }, [location.pathname]);
 
   const persistLocale = useCallback(async (next, userId) => {
     localStorage.setItem(`${LOCALE_PENDING_KEY}.${userId}`, next);
@@ -145,7 +174,8 @@ function AppContent() {
       <a className="skip-link" href="#main-content">{t("Bỏ qua đến nội dung chính")}</a>
       <header className="app-header">
         <Link className="brand" to="/">HomeWallet</Link>
-        <span className="workspace-tab">⌂ &nbsp;{t("Cả hộ")}</span>
+        <span className="workspace-tab"><Icon name="home" />{t("Cả hộ")}</span>
+        <div className="header-actions">
         <div className="header-preferences">
           <label><span>{t("Ngôn ngữ")}</span><select aria-label={t("Ngôn ngữ")} value={locale} disabled={authenticated && !USE_MOCK && ["loading", "saving", "cognito-unavailable", "profile-unavailable"].includes(localeSyncStatus)} onChange={(event) => changeLocale(event.target.value)}><option value="vi">{translate("Tiếng Việt")}</option><option value="en">English</option></select></label>
           <label><span>{t("Giao diện")}</span><select aria-label={t("Giao diện")} value={theme} onChange={(event) => setTheme(event.target.value)}><option value="light">{t("Sáng")}</option><option value="dark">{t("Tối")}</option></select></label>
@@ -155,6 +185,7 @@ function AppContent() {
           : config.reactAuthEnabled
             ? <Link className="button button-secondary header-logout" to="/auth/react">{t("Đăng nhập hoặc đăng ký")}</Link>
             : <button type="button" className="button-secondary header-logout" onClick={login}>{t("Đăng nhập hoặc đăng ký")}</button>)}
+        </div>
       </header>
       {authenticated && !USE_MOCK && ["partial", "failed", "cognito-unavailable", "profile-unavailable"].includes(localeSyncStatus) && (
         <div className="notice" role="alert">
@@ -176,11 +207,11 @@ function AppContent() {
       )}
       {authenticated && (
           <nav className="workspace-nav" aria-label={t("Điều hướng chính")}>
-            <div className="workspace-tools">
-              <button className="workspace-tools-trigger" type="button" aria-expanded={toolsOpen} aria-haspopup="true" onClick={() => setToolsOpen((open) => !open)}>
+            <div className="workspace-tools" ref={toolsRef}>
+              <button ref={toolsTriggerRef} className="workspace-tools-trigger" type="button" aria-expanded={toolsOpen} aria-controls="workspace-menu" onClick={() => setToolsOpen((open) => !open)}>
                 {t("Menu")} <span className="workspace-tools-icon" aria-hidden="true"><i></i><i></i><i></i></span>
               </button>
-              {toolsOpen && <div className="workspace-tools-menu">
+              {toolsOpen && <div id="workspace-menu" className="workspace-tools-menu">
                 <NavLink onClick={() => setToolsOpen(false)} to="/dashboard">{t("Thống kê")}</NavLink>
                 <NavLink onClick={() => setToolsOpen(false)} to="/budgets">{t("Ngân sách")}</NavLink>
                 <NavLink onClick={() => setToolsOpen(false)} to="/recurring-bills">{t("Định kỳ")}</NavLink>
