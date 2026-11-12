@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "../api";
 import { useMe } from "../useMe";
 import { usePreferences } from "../preferences";
@@ -41,12 +41,40 @@ function Setup({ onDone }) {
   );
 }
 
-function HouseholdView({ household, onChange }) {
+function LeaveHouseholdDialog({ leaving, error, onCancel, onConfirm, onRefresh }) {
+  const { t } = usePreferences();
+  const dialogRef = useRef(null);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    dialog.showModal();
+    return () => { if (dialog.open) dialog.close(); };
+  }, []);
+
+  return (
+    <dialog ref={dialogRef} className="confirm-dialog" aria-labelledby="leave-household-title" aria-describedby="leave-household-description" onCancel={(event) => { event.preventDefault(); if (!leaving) onCancel(); }}>
+      <div className="confirm-dialog-icon" aria-hidden="true">!</div>
+      <h2 id="leave-household-title">{t("Rời hộ gia đình?")}</h2>
+      <p id="leave-household-description">{t("Bạn có chắc muốn rời hộ này? Các giao dịch và hóa đơn đã tạo vẫn thuộc hộ.")}</p>
+      {error && <div role="alert"><p className="error">{t(error)}</p><p>{t("Nếu không rõ thao tác đã hoàn tất, hãy tải lại trạng thái trước khi thử lại.")}</p><button type="button" className="button-secondary" onClick={onRefresh} disabled={leaving}>{t("Tải lại trạng thái")}</button></div>}
+      <div className="confirm-dialog-actions">
+        <button type="button" className="button-secondary" onClick={onCancel} disabled={leaving} autoFocus>{t("Hủy")}</button>
+        <button type="button" className="confirm-delete" onClick={onConfirm} disabled={leaving}>{t(leaving ? "Đang rời hộ…" : "Rời hộ")}</button>
+      </div>
+    </dialog>
+  );
+}
+
+function HouseholdView({ household, onChange, onLeave }) {
   const { t } = usePreferences();
   const [members, setMembers] = useState([]);
   const [error, setError] = useState(null);
   const [copying, setCopying] = useState(false);
   const [copyFeedback, setCopyFeedback] = useState(null);
+  const [leaving, setLeaving] = useState(false);
+  const leavingRef = useRef(false);
+  const [leaveError, setLeaveError] = useState(null);
+  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
   const isOwner = household.role === "owner";
 
   const load = useCallback(
@@ -87,6 +115,24 @@ function HouseholdView({ household, onChange }) {
     }
   }
 
+  async function leaveHousehold() {
+    if (household.role !== "member" || leavingRef.current) return;
+    leavingRef.current = true;
+    setLeaving(true);
+    setLeaveError(null);
+    try {
+      await api(`/api/households/${household.id}/members/me`, { method: "DELETE" });
+      onLeave();
+    } catch (e) {
+      setLeaveError(e.status === 404
+        ? "Không tìm thấy thao tác rời hộ hoặc trạng thái thành viên đã thay đổi. Hãy tải lại trạng thái; nếu vẫn là thành viên, kiểm tra backend đã được cập nhật."
+        : e.message);
+    } finally {
+      leavingRef.current = false;
+      setLeaving(false);
+    }
+  }
+
   const currentCopyFeedback = copyFeedback?.code === household.invite_code ? copyFeedback : null;
 
   return (
@@ -124,6 +170,7 @@ function HouseholdView({ household, onChange }) {
               {currentCopyFeedback && t(currentCopyFeedback.success ? "Đã sao chép mã mời." : "Không thể sao chép. Hãy chọn mã mời và sao chép thủ công.")}
             </p>
           </>}
+          {household.role === "member" && <button type="button" className="button-danger" onClick={() => { setLeaveError(null); setLeaveDialogOpen(true); }}>{t("Rời hộ")}</button>}
         </section>
         <section className="card">
           <h2>{t("Quyền trong hộ")}</h2>
@@ -132,6 +179,7 @@ function HouseholdView({ household, onChange }) {
           <p><span className="household-check" aria-hidden="true">✓</span> &nbsp;{t("Xem ngân sách gia đình")}</p>
         </section>
       </aside>
+      {leaveDialogOpen && <LeaveHouseholdDialog leaving={leaving} error={leaveError} onCancel={() => setLeaveDialogOpen(false)} onConfirm={leaveHousehold} onRefresh={onChange} />}
     </div>
   );
 
@@ -139,16 +187,18 @@ function HouseholdView({ household, onChange }) {
 
 export default function Home() {
   const { t } = usePreferences();
-  const { me, error, reload } = useMe();
+  const { me, error, reload, clearHousehold } = useMe();
+  const [leftHousehold, setLeftHousehold] = useState(false);
   if (error) return <p className="error">{t(error)}</p>;
   if (!me) return <p>{t("Đang tải…")}</p>;
   return (
     <>
       <div className="page-heading"><div><p className="eyebrow">{t("Xin chào")}, {userDisplayName(me.user, t("bạn"))}</p><h1>{me.household?.name || t("Hộ gia đình")}</h1></div></div>
+      {leftHousehold && !me.household && <p className="notice success" role="status">{t("Bạn đã rời hộ. Bạn có thể tạo hộ mới hoặc tham gia hộ khác.")}</p>}
       {me.household ? (
-        <HouseholdView household={me.household} onChange={reload} />
+        <HouseholdView household={me.household} onChange={reload} onLeave={() => { clearHousehold(); setLeftHousehold(true); }} />
       ) : (
-        <Setup onDone={reload} />
+        <Setup onDone={() => { setLeftHousehold(false); reload(); }} />
       )}
     </>
   );
