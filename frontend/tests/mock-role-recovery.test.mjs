@@ -31,3 +31,31 @@ test("a saved legacy member session restores the demo owner without losing other
     else globalThis.localStorage = originalStorage;
   }
 });
+
+test("saved dissolved demo can switch accounts without restoring the household or losing history", async () => {
+  const originalStorage = globalThis.localStorage;
+  const entries = new Map();
+  globalThis.localStorage = {
+    getItem: (key) => entries.get(key) ?? null,
+    setItem: (key, value) => entries.set(key, String(value)),
+  };
+  try {
+    const previous = await import("../src/mocks/index.js?dissolved-demo-setup");
+    previous.resetMockData();
+    await previous.mockApi("/api/households/1/delete", { method: "POST", body: { confirm: true, household_id: 1 } });
+    const recovered = await import("../src/mocks/index.js?dissolved-demo-recovery");
+    recovered.setMockRole("member");
+    const afterReload = await import("../src/mocks/index.js?dissolved-demo-after-reload");
+    const { user, household } = await afterReload.mockApi("/api/me");
+    assert.equal(user.display_name, "Chi");
+    assert.equal(household, null);
+    const { items } = await afterReload.mockApi("/api/me/household-history");
+    assert.equal(items.length, 1);
+    assert.equal(items[0].role, "member");
+    assert.equal(items[0].end_reason, "dissolved");
+    await assert.rejects(afterReload.mockApi("/api/households/1/members"), { status: 404 });
+  } finally {
+    if (originalStorage === undefined) delete globalThis.localStorage;
+    else globalThis.localStorage = originalStorage;
+  }
+});

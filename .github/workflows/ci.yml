@@ -127,6 +127,7 @@ jobs:
       AWS_EC2_METADATA_DISABLED: "true"
       AWS_DEFAULT_REGION: ap-southeast-1
       HOMEWALLET_COMMUNITY_MYSQL: "1"
+      HOMEWALLET_HISTORY_MYSQL: "1"
       HOMEWALLET_TEST_DB_HOST: 127.0.0.1
       HOMEWALLET_TEST_DB_PORT: "3307"
       HOMEWALLET_TEST_DB_PASSWORD: d2-local-test-only
@@ -141,7 +142,7 @@ jobs:
             backend/requirements.txt
             backend/requirements-dev.txt
       - run: python -m pip install -r requirements-dev.txt
-      - run: python -m pytest tests/test_auth.py tests/test_community.py tests/test_community_mysql.py -ra
+      - run: python -m pytest tests/test_auth.py tests/test_community.py tests/test_community_mysql.py tests/test_household_history_mysql.py -ra
 
   docker:
     name: Build backend image

@@ -5,6 +5,10 @@ import { dispatchFinance, setFinanceFailure } from "./finance.js";
 export { setFinanceFailure } from "./finance.js";
 
 const STORAGE_KEY = "homewallet.week2.mock.v1";
+const DEMO_ACCOUNTS = {
+  owner: { id: 1, email: "thuc.demo@example.com", display_name: "Thức" },
+  member: { id: 2, email: "chi.demo@example.com", display_name: "Chi" },
+};
 const ACTIVE_STATUSES = ["UPLOADING", "UPLOADED", "PROCESSING"];
 const RECEIPT_STATUSES = [...ACTIVE_STATUSES, "DRAFT_READY", "NEEDS_REVIEW", "CONFIRMED", "FAILED"];
 let memoryState;
@@ -56,7 +60,7 @@ function seed() {
   }));
   return {
     version: 1,
-    user: { id: 1, email: "thuc.demo@example.com", display_name: "Thức" },
+    user: { ...DEMO_ACCOUNTS.owner },
     community_admin: false,
     community_posts: [
       { id: 1, type: "tip", title: "Chia ngân sách theo tuần để dễ theo dõi", body: "Chia khoản chi linh hoạt thành bốn tuần giúp gia đình nhận ra sớm khi một danh mục đang vượt kế hoạch.", status: "APPROVED", author: "Thức", updated_at: now, sample: true },
@@ -87,6 +91,7 @@ function seed() {
       { id: 4, receipt_id: 5, member_id: 1, status: "DRAFT", source: "OCR", ...draft(4, 150000), created_at: now },
     ],
     idempotency: {},
+    membershipHistory: [],
   };
 }
 
@@ -118,6 +123,7 @@ function readState() {
   memoryState.community_posts ??= seed().community_posts;
   memoryState.notifications ??= seed().notifications;
   memoryState.push_subscriptions ??= [];
+  memoryState.membershipHistory ??= [];
   return memoryState;
 }
 
@@ -138,19 +144,34 @@ export function resetMockData() {
 }
 
 export function setMockRole(role) {
-  if (!["owner", "member"].includes(role)) throw new Error("Vai trò thử nghiệm không hợp lệ.");
+  if (!Object.hasOwn(DEMO_ACCOUNTS, role)) throw new Error("Tài khoản thử nghiệm không hợp lệ.");
   const state = readState();
   const household = state.household || state.demo_household;
-  if (!household) throw new Error("Bạn cần một hộ để thử vai trò.");
-  const member = state.members.find((item) => item.role === role);
-  if (!member) throw new Error("Không có tài khoản thử nghiệm cho vai trò này. Hãy đặt lại dữ liệu mẫu.");
-  state.user = { id: member.id, email: member.email, display_name: member.display_name };
-  state.household = { ...household, role: member.role };
+  const account = DEMO_ACCOUNTS[role];
+  const member = state.members.find((item) => item.id === account.id);
+  // Retain the existing household for other demo users even when the chosen
+  // account has left. A dissolved household is removed from both locations.
+  if (state.household) state.demo_household = { ...state.household };
+  state.user = { ...account };
+  state.household = household && member ? { ...household, role: member.role } : null;
   saveState();
 }
 
 function nextId(items) {
   return Math.max(0, ...items.map((item) => item.id)) + 1;
+}
+
+function endMockMembership(state, member, reason) {
+  state.membershipHistory.push({
+    id: nextId(state.membershipHistory),
+    user_id: member.id,
+    household_id: state.household.id,
+    household_name: state.household.name,
+    role: member.role,
+    joined_at: member.joined_at,
+    ended_at: new Date().toISOString(),
+    end_reason: reason,
+  });
 }
 
 function newDraft(state, receipt) {
@@ -360,6 +381,14 @@ function dispatch(path, { method = "GET", body, headers } = {}) {
     if (household && household.role !== "owner") delete household.invite_code;
     return { user: state.user, household };
   }
+  if (route === "/api/me/household-history" && verb === "GET") {
+    const current = state.household && state.members.find((member) => member.id === state.user.id);
+    const items = current ? [{ household_id: state.household.id, household_name: state.household.name, role: current.role, joined_at: current.joined_at, ended_at: null, end_reason: null }] : [];
+    for (const entry of [...state.membershipHistory].reverse()) {
+      if (entry.user_id === state.user.id) items.push({ household_id: entry.household_id, household_name: entry.household_name, role: entry.role, joined_at: entry.joined_at, ended_at: entry.ended_at, end_reason: entry.end_reason });
+    }
+    return { items };
+  }
   if (route === "/api/notifications" && verb === "GET") return { items: state.notifications };
   const notification = /^\/api\/notifications\/(\d+)$/.exec(route);
   if (notification && verb === "PATCH") {
@@ -411,6 +440,25 @@ function dispatch(path, { method = "GET", body, headers } = {}) {
     return { post };
   }
   if (route === "/api/categories" && verb === "GET") return { categories: state.categories };
+  if (route === "/api/households/1/delete" && verb === "POST") {
+    if (state.household?.id !== 1) fail(404, "NOT_FOUND", "Không tìm thấy");
+    if (state.household.role !== "owner") fail(403, "FORBIDDEN", "Chỉ Chủ hộ được thực hiện thao tác này");
+    if (!body || body.confirm !== true) fail(400, "CONFIRMATION_REQUIRED", "Cần xác nhận xóa vĩnh viễn hộ này");
+    if (body.household_id != null && body.household_id !== 1) fail(422, "VALIDATION", "household_id không khớp");
+    const receiptCount = state.receipts.length;
+    for (const member of state.members) endMockMembership(state, member, "dissolved");
+    for (const objectUrl of uploadedImages.values()) URL.revokeObjectURL(objectUrl);
+    uploadedImages.clear();
+    state.members = [];
+    state.receipts = [];
+    state.transactions = [];
+    state.idempotency = {};
+    if (state.financeByHousehold) delete state.financeByHousehold["1"];
+    if (state.recurringByHousehold) delete state.recurringByHousehold["1"];
+    delete state.demo_household;
+    state.household = null;
+    return { deleted: true, household_id: 1, s3_deleted: receiptCount, status: "deleted" };
+  }
   if (route === "/api/households/1/members" && verb === "GET") {
     if (state.household?.id !== 1) fail(404, "NOT_FOUND", "Không tìm thấy");
     return { members: state.members };
@@ -424,6 +472,9 @@ function dispatch(path, { method = "GET", body, headers } = {}) {
   if (route === "/api/households/1/members/me" && verb === "DELETE") {
     if (state.household?.id !== 1) fail(404, "NOT_FOUND", "Không tìm thấy");
     if (state.household.role !== "member") fail(403, "FORBIDDEN", "Chủ hộ không thể tự rời hộ");
+    const member = state.members.find((item) => item.id === state.user.id);
+    if (!member || member.role !== "member") fail(409, "MEMBERSHIP_CHANGED", "Quyền trong hộ đã thay đổi. Hãy tải lại trang");
+    endMockMembership(state, member, "left");
     state.demo_household = { ...state.household };
     state.members = state.members.filter((item) => item.id !== state.user.id);
     state.household = null;
@@ -436,6 +487,7 @@ function dispatch(path, { method = "GET", body, headers } = {}) {
     const member = state.members.find((item) => item.id === Number(removeMember[1]));
     if (!member) fail(404, "NOT_FOUND", "Không tìm thấy thành viên.");
     if (member.role === "owner") fail(422, "VALIDATION", "Không thể xóa Chủ hộ.");
+    endMockMembership(state, member, "removed");
     state.members = state.members.filter((item) => item.id !== member.id);
     return null;
   }

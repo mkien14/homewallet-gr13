@@ -72,7 +72,7 @@ def db_app(app, monkeypatch):
         cur.execute("SET FOREIGN_KEY_CHECKS = 0")
         for t in (
             "transaction_items", "transactions", "receipts",
-            "household_members", "households", "users",
+            "household_membership_history", "household_members", "households", "users",
         ):
             cur.execute(f"TRUNCATE TABLE {t}")
         cur.execute("SET FOREIGN_KEY_CHECKS = 1")

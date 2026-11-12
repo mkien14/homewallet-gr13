@@ -1,6 +1,16 @@
 Community/admin (#29, D2): xem [contract community](community-api.md) và
 [ma trận nghiệm thu](test-cases-community.md). Contract đang chờ Kiên/Thức xác nhận.
 
+GET /api/me/household-history
+  Yêu cầu đăng nhập; chỉ trả lịch sử của tài khoản hiện tại, không nhận user_id
+  để truy vấn người khác. Trả {"items":[{"household_id":12,"household_name":"Nhà A",
+  "role":"member","joined_at":"...","ended_at":"...","end_reason":"left"}]}.
+  Hộ hiện tại được lấy từ membership và có ended_at/end_reason=null; các lần đã
+  kết thúc được lưu riêng, theo từng lần tham gia. end_reason là left, removed
+  hoặc dissolved. Thời gian là DATETIME do database cung cấp, không kèm múi giờ.
+  Các membership đã kết thúc trước khi có chức năng này không thể khôi phục đầy đủ.
+  Kế hoạch migration và rollout: xem [lịch sử hộ](household-history-rollout.md).
+
 DELETE /api/households/{id}/members/me
   Thành viên đăng nhập tự rời hộ hiện tại. Trả 204 khi thành công; GET /api/me
   sau đó trả household=null. Chủ hộ trả 403; hộ khác hoặc không còn là thành viên

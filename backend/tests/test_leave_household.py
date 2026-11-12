@@ -17,15 +17,20 @@ class MemoryDb:
         self.commits = 0
         self.rollbacks = 0
         self.race = False
+        self.history = []
+        self.pending_history = []
 
     def cursor(self):
         return Cursor(self)
 
     def commit(self):
         self.commits += 1
+        self.history.extend(self.pending_history)
+        self.pending_history.clear()
 
     def rollback(self):
         self.rollbacks += 1
+        self.pending_history.clear()
 
 
 class Cursor:
@@ -41,12 +46,21 @@ class Cursor:
         return False
 
     def execute(self, sql, params):
+        self.rowcount = 0
         if sql.startswith("SELECT m.household_id"):
             self.result = self.db.members.get(params[0])
+        elif sql.startswith("SELECT id FROM households"):
+            self.result = {"id": params[0]} if any(m["household_id"] == params[0] for m in self.db.members.values()) else None
         elif sql.startswith("SELECT role FROM household_members"):
             hid, uid = params
             record = self.db.members.get(uid)
             self.result = record if record and record["household_id"] == hid else None
+        elif sql.startswith("INSERT INTO household_membership_history"):
+            reason, hid, uid = params
+            record = self.db.members.get(uid)
+            if record and record["household_id"] == hid:
+                self.db.pending_history.append((uid, hid, reason))
+                self.rowcount = 1
         elif sql.startswith("DELETE FROM household_members"):
             hid, uid = params
             record = self.db.members.get(uid)
@@ -76,6 +90,7 @@ def test_member_leaves_only_self_and_keeps_household_data(scenario):
     client, db, headers = scenario
     assert client.delete("/api/households/12/members/me", headers=headers(2)).status_code == 204
     assert db.commits == 1
+    assert db.history == [(2, 12, "left")]
     assert client.get("/api/me", headers=headers(2)).get_json()["household"] is None
     assert client.get("/api/households/12/members", headers=headers(2)).status_code == 404
     assert {1, 3, 4} == set(db.members)
@@ -100,5 +115,6 @@ def test_membership_race_returns_conflict_without_removing_anyone(scenario):
     db.race = True
     assert client.delete("/api/households/12/members/me", headers=headers(2)).status_code == 409
     assert 2 in db.members
+    assert db.history == []
     assert db.commits == 0
     assert db.rollbacks == 1

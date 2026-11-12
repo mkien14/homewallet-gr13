@@ -11,6 +11,9 @@ ON homewallet.households TO 'hw_runtime'@'%';
 GRANT SELECT, INSERT, DELETE
 ON homewallet.household_members TO 'hw_runtime'@'%';
 
+GRANT SELECT, INSERT
+ON homewallet.household_membership_history TO 'hw_runtime'@'%';
+
 GRANT SELECT, DELETE
 ON homewallet.categories TO 'hw_runtime'@'%';
 

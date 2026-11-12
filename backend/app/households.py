@@ -51,6 +51,39 @@ def require_owner(m):
         raise ApiError(403, "FORBIDDEN", "Chỉ Chủ hộ được thực hiện thao tác này")
 
 
+def lock_household_access(db, hid):
+    """Serialize membership changes and dissolution on the household row."""
+    with db.cursor() as cur:
+        cur.execute("SELECT id FROM households WHERE id = %s FOR UPDATE", (hid,))
+        if not cur.fetchone():
+            raise ApiError(404, "NOT_FOUND", "Không tìm thấy")
+        cur.execute(
+            "SELECT role FROM household_members WHERE household_id = %s AND user_id = %s FOR UPDATE",
+            (hid, g.user["id"]),
+        )
+        member = cur.fetchone()
+        if not member:
+            raise ApiError(404, "NOT_FOUND", "Không tìm thấy")
+        return member
+
+
+def record_membership_end(cur, hid, reason, user_id=None):
+    """Snapshot only members who are ending membership in this transaction."""
+    sql = (
+        "INSERT INTO household_membership_history "
+        "(user_id, household_id, household_name, role, joined_at, ended_at, end_reason) "
+        "SELECT m.user_id, m.household_id, h.name, m.role, m.joined_at, CURRENT_TIMESTAMP, %s "
+        "FROM household_members m JOIN households h ON h.id = m.household_id "
+        "WHERE m.household_id = %s"
+    )
+    params = [reason, hid]
+    if user_id is not None:
+        sql += " AND m.user_id = %s"
+        params.append(user_id)
+    cur.execute(sql, params)
+    return cur.rowcount
+
+
 def new_code():
     return secrets.token_hex(4).upper()
 
@@ -173,6 +206,31 @@ def me():
     return jsonify(user=g.user, household=household_payload(membership(db, g.user["id"])))
 
 
+@bp.get("/me/household-history")
+@require_auth
+def household_history():
+    db = get_db()
+    with db.cursor() as cur:
+        cur.execute(
+            "SELECT h.id AS household_id, h.name AS household_name, m.role, m.joined_at "
+            "FROM household_members m JOIN households h ON h.id = m.household_id "
+            "WHERE m.user_id = %s", (g.user["id"],),
+        )
+        current = cur.fetchone()
+        cur.execute(
+            "SELECT household_id, household_name, role, joined_at, ended_at, end_reason "
+            "FROM household_membership_history WHERE user_id = %s ORDER BY ended_at DESC, id DESC",
+            (g.user["id"],),
+        )
+        rows = cur.fetchall()
+    items = ([{**current, "ended_at": None, "end_reason": None}] if current else []) + list(rows)
+    for item in items:
+        for field in ("joined_at", "ended_at"):
+            if item[field] is not None:
+                item[field] = item[field].isoformat()
+    return jsonify(items=items)
+
+
 @bp.patch("/me")
 @require_auth
 def update_me():
@@ -240,6 +298,11 @@ def join_household():
     with db.cursor() as cur:
         cur.execute("SELECT id FROM households WHERE invite_code = %s", (code,))
         h = cur.fetchone()
+        if h:
+            # Lock by primary key, matching the order used by dissolution.
+            # Recheck the invite code after waiting for any concurrent change.
+            cur.execute("SELECT id FROM households WHERE id = %s AND invite_code = %s FOR UPDATE", (h["id"], code))
+            h = cur.fetchone()
     if not h:
         raise ApiError(404, "INVITE_NOT_FOUND", "Mã mời không đúng")
     try:
@@ -273,16 +336,24 @@ def list_members(hid):
 @require_auth
 def remove_member(hid, uid):
     db = get_db()
-    require_owner(require_household(db, hid))
-    with db.cursor() as cur:
-        cur.execute("SELECT role FROM household_members WHERE household_id = %s AND user_id = %s", (hid, uid))
-        target = cur.fetchone()
-        if not target:
-            raise ApiError(404, "NOT_FOUND", "Không tìm thấy")
-        if target["role"] == "owner":
-            raise ApiError(422, "VALIDATION", "Không thể xóa Chủ hộ")
-        cur.execute("DELETE FROM household_members WHERE household_id = %s AND user_id = %s", (hid, uid))
-    db.commit()
+    try:
+        require_owner(lock_household_access(db, hid))
+        with db.cursor() as cur:
+            cur.execute("SELECT role FROM household_members WHERE household_id = %s AND user_id = %s FOR UPDATE", (hid, uid))
+            target = cur.fetchone()
+            if not target:
+                raise ApiError(404, "NOT_FOUND", "Không tìm thấy")
+            if target["role"] == "owner":
+                raise ApiError(422, "VALIDATION", "Không thể xóa Chủ hộ")
+            if record_membership_end(cur, hid, "removed", uid) != 1:
+                raise ApiError(409, "MEMBERSHIP_CHANGED", "Quyền trong hộ đã thay đổi. Hãy tải lại trang")
+            cur.execute("DELETE FROM household_members WHERE household_id = %s AND user_id = %s AND role = 'member'", (hid, uid))
+            if cur.rowcount != 1:
+                raise ApiError(409, "MEMBERSHIP_CHANGED", "Quyền trong hộ đã thay đổi. Hãy tải lại trang")
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
     return "", 204
 
 
@@ -291,11 +362,13 @@ def remove_member(hid, uid):
 def leave_household(hid):
     """A non-owner may remove only their own current membership."""
     db = get_db()
-    current = require_household(db, hid)
-    if current["role"] != "member":
-        raise ApiError(403, "FORBIDDEN", "Chủ hộ không thể tự rời hộ")
     try:
+        current = lock_household_access(db, hid)
+        if current["role"] != "member":
+            raise ApiError(403, "FORBIDDEN", "Chủ hộ không thể tự rời hộ")
         with db.cursor() as cur:
+            if record_membership_end(cur, hid, "left", g.user["id"]) != 1:
+                raise ApiError(409, "MEMBERSHIP_CHANGED", "Quyền trong hộ đã thay đổi. Hãy tải lại trang")
             # Restrict the mutation itself as well as the preceding check, so a
             # concurrent role or membership change cannot remove an owner.
             cur.execute(
@@ -371,7 +444,7 @@ def export_household_csv(hid):
 @require_auth
 def delete_household(hid):
     db = get_db()
-    require_owner(require_household(db, hid))
+    require_owner(lock_household_access(db, hid))
     data = json_body()
     if data.get("confirm") is not True:
         raise ApiError(400, "CONFIRMATION_REQUIRED", "Cần xác nhận xóa vĩnh viễn hộ này")
@@ -379,6 +452,10 @@ def delete_household(hid):
         raise ApiError(422, "VALIDATION", "household_id không khớp")
 
     with db.cursor() as cur:
+        # Verify the history write before deleting any S3 objects. It is not
+        # committed unless all database deletions complete successfully.
+        if record_membership_end(cur, hid, "dissolved") < 1:
+            raise RuntimeError("Cannot dissolve household without membership history")
         cur.execute(
             "SELECT s3_key FROM receipts WHERE household_id = %s AND s3_key IS NOT NULL ORDER BY id",
             (hid,),
