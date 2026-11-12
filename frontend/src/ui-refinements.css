@@ -71,7 +71,6 @@ html:not([data-theme="dark"]) .localized-date-grid button:disabled { color: #c4c
 .invite-code { user-select: all; overflow-wrap: anywhere; margin: 10px 0 14px; }
 .receipt-table th:first-child { min-width: 130px; }
 .receipt-ordinal { display: block; font-variant-numeric: tabular-nums; font-weight: 600; }
-.receipt-id { display: block; font-size: .8125rem; white-space: nowrap; margin-top: 4px; }
 
 /* A common three-column grid aligns budget metrics with the two lower panels. */
 .budget-workspace { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }

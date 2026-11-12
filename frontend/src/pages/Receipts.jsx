@@ -129,7 +129,7 @@ function ReceiptList({ status }) {
             <thead><tr><th>{t("STT")}</th><th>{translate("Cửa hàng")}</th><th>{translate("Ngày hóa đơn")}</th><th>{translate("Trạng thái")}</th><th className="text-right">{translate("Tổng tiền")}</th><th></th></tr></thead>
             <tbody>{items.map((receipt, index) => (
               <tr key={receipt.id}>
-                <td data-label={t("STT")}><span className="receipt-ordinal">{index + 1}</span><Link className="receipt-id" to={`/receipts/${receipt.id}`}>{t("Mã hóa đơn")} #{receipt.id}</Link></td>
+                <td data-label={t("STT")}><span className="receipt-ordinal">{index + 1}</span></td>
                 <td data-label={t("Cửa hàng")}><Link to={`/receipts/${receipt.id}`}><strong>{receipt.merchant || t("Chưa xác định")}</strong></Link>{receipt.status !== "CONFIRMED" && receipt.warnings?.length > 0 && <small className="receipt-warning">{receipt.warnings.length} {t("cảnh báo cần kiểm tra")}</small>}</td>
                 <td data-label={t("Ngày hóa đơn")}>{receipt.occurred_on ? formatDate(receipt.occurred_on) : "—"}</td>
                 <td data-label={t("Trạng thái")}><span className={`status-badge status-${String(receipt.status).toLowerCase()}`}>{deleting === receipt.id ? t("Đang xóa…") : t(STATUS_LABEL[receipt.status] || receipt.status)}</span></td>
