@@ -257,3 +257,11 @@ Current open work and handoff notes:
 Some acceptance evidence is intentionally retained outside the repository by
 the team. Weekly DOCX work guides are local-only and are not part of the GitHub
 handoff.
+
+The environment templates are [`backend/.env.example`](backend/.env.example)
+and [`frontend/.env.example`](frontend/.env.example); they contain placeholders
+only. For the current D5 working pack, see
+[`d5-final-delivery-20261109.md`](docs/acceptance/d5-final-delivery-20261109.md),
+[`d5-cost-appendix-20261109.md`](docs/acceptance/d5-cost-appendix-20261109.md),
+[`d5-app-comparison-20261109.md`](docs/acceptance/d5-app-comparison-20261109.md),
+and [`d5-slides-outline-20261109.md`](docs/acceptance/d5-slides-outline-20261109.md).
