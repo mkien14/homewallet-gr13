@@ -14,6 +14,8 @@ frontend\.env.local
 # Environment variables & Secrets
 .env
 .env.*
+!.env.example
+!**/.env.example
 *.pem
 *.key
 
