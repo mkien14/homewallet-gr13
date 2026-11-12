@@ -5,6 +5,8 @@ const paths = {
   "arrow-up-right": <path d="M6 18 18 6M6 6h12v12" />,
   "chevron-left": <path d="m15 5-7 7 7 7" />,
   "chevron-right": <path d="m9 5 7 7-7 7" />,
+  "chevron-down": <path d="m6 9 6 6 6-6" />,
+  calendar: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18" /></>,
 };
 
 export default function Icon({ name, className = "" }) {

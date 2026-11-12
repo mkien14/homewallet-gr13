@@ -3,7 +3,8 @@ import { t as translate } from "../preferences";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api";
 import VndAmountInput from "../components/VndAmountInput";
-import { t } from "../preferences";
+import LocalizedDatePicker from "../components/LocalizedDatePicker";
+import { t, usePreferences } from "../preferences";
 import { buildTransactionBody, transactionDateLimit } from "../transactionForm";
 
 function localToday() {
@@ -12,6 +13,7 @@ function localToday() {
 }
 
 export default function TransactionNew() {
+  const { locale } = usePreferences();
   const navigate = useNavigate();
   const [idempotencyKey] = useState(() => crypto.randomUUID());
   const [occurredOn, setOccurredOn] = useState(localToday);
@@ -104,7 +106,7 @@ export default function TransactionNew() {
         <p>{translate("Ghi lại khoản chi không có hóa đơn hoặc hóa đơn chưa đọc được.")}</p>
         {retryBody && <p className="notice" role="status">{t("Chưa xác nhận được kết quả gửi. Dữ liệu được giữ nguyên; bấm “Gửi lại giao dịch” để kiểm tra và gửi lại cùng mã, tránh tạo trùng.")}</p>}
         <div className="form-grid">
-          <label className="field" htmlFor="transaction-date">{translate("Ngày chi tiêu")}<input id="transaction-date" type="date" min="0001-01-01" max={transactionDateLimit()} value={occurredOn} onChange={(e) => setOccurredOn(e.target.value)} required disabled={locked} />
+          <label className="field" htmlFor="transaction-date">{translate("Ngày chi tiêu")}<LocalizedDatePicker id="transaction-date" min="0001-01-01" max={transactionDateLimit()} value={occurredOn} locale={locale} onChange={setOccurredOn} required disabled={locked} />
           </label>
           <label className="field" htmlFor="transaction-amount">{translate("Số tiền (đồng)")}<VndAmountInput id="transaction-amount" placeholder={translate("Ví dụ: 150.000")} value={amount} onValueChange={setAmount} required disabled={locked} />
           </label>

@@ -27,6 +27,29 @@ small, .eyebrow, .dashboard-note, .field, th,
 .preference-select-menu button { display: block; width: 100%; min-height: 30px; padding: 5px 8px; border: 0; border-radius: 0; background: transparent; color: #111214; text-align: center; }
 .preference-select-menu button:hover, .preference-select-menu button.is-selected { background: #9bc5f5; }
 .preference-select-menu button:focus-visible { outline: 2px solid #1d5fe0; outline-offset: -2px; }
+.localized-date-picker { position: relative; width: 100%; }
+.localized-date-trigger { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 42px; padding: 0 12px; border: 1px solid #e5e6e9; border-radius: 12px; background: #fff; color: #111214; text-align: left; }
+.localized-date-trigger > input { min-width: 0; width: 100%; padding: 8px 0; border: 0; outline: 0; background: transparent; color: inherit; }
+.localized-date-icon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 34px; width: 34px; height: 34px; padding: 7px; border: 0; border-radius: 8px; background: #edf3fe; color: #1d5fe0; }
+.localized-date-icon .ui-icon { width: 16px; height: 16px; }
+.localized-date-calendar { position: absolute; z-index: 40; top: calc(100% + 4px); left: 0; width: min(292px, 100vw - 32px); padding: 12px; border: 1px solid #303a49; border-radius: 12px; background: #1b222d; color: #f2f5fa; box-shadow: 0 12px 28px #11121466; }
+.localized-date-calendar-heading, .localized-date-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.localized-date-calendar-heading > div { display: flex; gap: 4px; }
+.localized-date-calendar-heading button, .localized-date-actions button { min-width: 32px; padding: 4px 8px; border: 0; border-radius: 6px; background: transparent; color: #9bc5f5; }
+.localized-date-calendar-heading button:hover, .localized-date-actions button:hover { background: #2b405b; }
+.localized-date-weekdays, .localized-date-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 10px; text-align: center; }
+.localized-date-weekdays { color: #aab5c5; font-size: .75rem; }
+.localized-date-grid button { min-width: 0; aspect-ratio: 1; padding: 0; border: 0; border-radius: 6px; background: transparent; color: #f2f5fa; }
+.localized-date-grid button:hover:not(:disabled), .localized-date-grid button.is-selected { background: #9bc5f5; color: #111820; }
+.localized-date-grid button.is-outside { color: #69788b; }
+.localized-date-grid button:disabled { color: #465466; }
+.localized-date-actions { margin-top: 10px; }
+html:not([data-theme="dark"]) .localized-date-trigger { background: #fff; color: #111214; }
+html:not([data-theme="dark"]) .localized-date-calendar { border-color: #d7e0eb; background: #fff; color: #111214; }
+html:not([data-theme="dark"]) .localized-date-weekdays { color: #626f82; }
+html:not([data-theme="dark"]) .localized-date-grid button { color: #111214; }
+html:not([data-theme="dark"]) .localized-date-grid button.is-outside { color: #aab5c5; }
+html:not([data-theme="dark"]) .localized-date-grid button:disabled { color: #c4ccd6; }
 .app-header .header-logout { margin: 0; align-self: flex-end; min-height: 40px; }
 .workspace-nav { overflow: visible; }
 
@@ -87,6 +110,10 @@ small, .eyebrow, .dashboard-note, .field, th,
 html[data-theme="dark"] .icon-heading .ui-icon { color: #8db5ff; }
 html[data-theme="dark"] .preference-select-trigger, html[data-theme="dark"] .preference-select-menu { border-color: #3a4658; background: #111820; color: #f2f5fa; }
 html[data-theme="dark"] .preference-select-menu button { color: #f2f5fa; }
+html[data-theme="dark"] .localized-date-trigger { border-color: #3a4658; background: #111820; color: #f2f5fa; }
+html[data-theme="dark"] .localized-date-trigger > input { background: transparent; color: #f2f5fa; }
+html[data-theme="dark"] .localized-date-icon { background: #1d5fe0; color: #8db5ff; }
+html[data-theme="dark"] .localized-date-icon:hover { background: #174fbf; }
 html[data-theme="dark"] .notification-summary { color: #aab5c5; }
 html[data-theme="dark"] .notification-list .notification-item { background: #17283f; border-color: #344f71; }
 html[data-theme="dark"] .notification-list .notification-item.is-read { background: #202a38; border-color: #303a49; }
