@@ -79,6 +79,9 @@ jobs:
       - name: Run tests
         run: python -m pytest -ra
 
+      - name: Test production release safety gates
+        run: python -m pytest ../scripts/tests -ra
+
   ocr-pilot-guards:
     name: OCR pilot offline checks
     runs-on: ubuntu-latest
@@ -181,3 +184,10 @@ jobs:
 
       - name: Validate dev configuration
         run: terraform -chdir=infra/envs/dev validate -no-color
+
+      - name: Initialize and validate production without AWS access
+        run: |
+          terraform -chdir=infra/envs/prod init -backend=false -input=false
+          terraform -chdir=infra/envs/prod validate -no-color
+          terraform -chdir=infra/envs/dev test -no-color
+          terraform -chdir=infra/envs/prod test -no-color

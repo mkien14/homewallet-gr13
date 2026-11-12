@@ -1,6 +1,14 @@
 variable "name" {
   type = string
 }
+variable "nat_gateway_per_az" {
+  type    = bool
+  default = false
+}
+variable "origin_https" {
+  type    = bool
+  default = false
+}
 
 variable "cidr" {
   type    = string

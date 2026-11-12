@@ -18,6 +18,7 @@ from . import (
 from .config import load_config
 from .db import close_db
 from .errors import register_error_handlers
+from .readiness import Readiness
 
 
 class UTF8JSONProvider(DefaultJSONProvider):
@@ -30,6 +31,7 @@ def create_app(test_config=None) -> Flask:
     app.config.update(load_config())
     if test_config:
         app.config.update(test_config)
+    readiness = Readiness()
 
     logging.basicConfig(
         level=os.getenv("LOG_LEVEL", "INFO"),
@@ -58,8 +60,17 @@ def create_app(test_config=None) -> Flask:
     app.register_blueprint(dashboard.bp)
     
     @app.get("/health")
+    @app.get("/api/health")
     def health():
         return jsonify(status="ok")
+
+    @app.get("/ready")
+    @app.get("/api/ready")
+    def ready():
+        ok = readiness.check(app.config)
+        response = jsonify(status="ready" if ok else "unavailable")
+        response.headers["Cache-Control"] = "no-store"
+        return response, 200 if ok else 503
 
     @app.get("/api/ping")
     def ping():

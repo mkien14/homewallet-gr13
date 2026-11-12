@@ -15,7 +15,7 @@ resource "aws_lb_target_group" "api" {
   deregistration_delay = 30
 
   health_check {
-    path                = "/health"
+    path                = var.autoscaling_enabled ? "/ready" : "/health"
     matcher             = "200"
     interval            = 15
     timeout             = 5
@@ -40,7 +40,7 @@ resource "aws_lb_listener" "http" {
 }
 
 resource "aws_lb_listener_rule" "cloudfront_only" {
-  listener_arn = aws_lb_listener.http.arn
+  listener_arn = var.origin_certificate_arn == null ? aws_lb_listener.http.arn : aws_lb_listener.https[0].arn
   priority     = 10
 
   action {
@@ -52,6 +52,23 @@ resource "aws_lb_listener_rule" "cloudfront_only" {
     http_header {
       http_header_name = "X-Origin-Verify"
       values           = [var.origin_verify_header]
+    }
+  }
+}
+
+resource "aws_lb_listener" "https" {
+  count             = var.origin_certificate_arn == null ? 0 : 1
+  load_balancer_arn = aws_lb.this.arn
+  port              = 443
+  protocol          = "HTTPS"
+  certificate_arn   = var.origin_certificate_arn
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+  default_action {
+    type = "fixed-response"
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "Forbidden"
+      status_code  = "403"
     }
   }
 }

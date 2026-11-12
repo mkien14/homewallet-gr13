@@ -12,7 +12,7 @@ data "archive_file" "custom_message" {
 
 resource "aws_cloudwatch_log_group" "custom_message" {
   name              = "/aws/lambda/${local.custom_message_name}"
-  retention_in_days = 14
+  retention_in_days = var.log_retention_days
 }
 
 resource "aws_iam_role" "custom_message" {

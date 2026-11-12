@@ -1,11 +1,15 @@
 variable "name" {
   type = string
 }
+variable "production" {
+  type    = bool
+  default = false
+}
 
 resource "aws_ecr_repository" "this" {
   name                 = var.name
-  image_tag_mutability = "MUTABLE"
-  force_delete         = true
+  image_tag_mutability = var.production ? "IMMUTABLE" : "MUTABLE"
+  force_delete         = !var.production
 
   image_scanning_configuration {
     scan_on_push = true
@@ -18,7 +22,7 @@ resource "aws_ecr_repository" "this" {
 
 resource "aws_ecr_lifecycle_policy" "this" {
   repository = aws_ecr_repository.this.name
-  policy = jsonencode({
+  policy = var.production ? jsonencode({ rules = [{ rulePriority = 1, description = "Expire only untagged images; keep releases", selection = { tagStatus = "untagged", countType = "sinceImagePushed", countUnit = "days", countNumber = 30 }, action = { type = "expire" } }] }) : jsonencode({
     rules = [
       {
         rulePriority = 1

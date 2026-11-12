@@ -1,0 +1,179 @@
+name: Reviewed production release
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Exact reviewed 40-character main-branch commit
+        required: true
+      image_digest:
+        description: Reviewed sha256 digest already promoted to homewallet-prod-backend
+        required: true
+      migration_version:
+        description: Observed database migration version (no automatic migrations)
+        required: true
+      compatibility_review:
+        description: Change ticket approving schema compatibility and paused uploads / queue drain
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: production-release
+  cancel-in-progress: false
+env:
+  AWS_REGION: ap-southeast-1
+  AWS_EC2_METADATA_DISABLED: 'true'
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Validate release inputs and source ancestry
+        env:
+          COMMIT: ${{ inputs.commit_sha }}
+          DIGEST: ${{ inputs.image_digest }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/main
+          [[ "$COMMIT" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]
+          git merge-base --is-ancestor "$COMMIT" origin/main
+          git checkout --detach "$COMMIT"
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - name: Tests, lint and builds
+        run: |
+          python -m pip install -r backend/requirements-dev.txt
+          (cd backend && python -m pytest -ra)
+          python -m pytest scripts/tests -ra
+          (cd frontend && npm ci && npm run lint && npm test && npm run build)
+          docker build -t homewallet-production-check backend
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.10.5'
+      - run: |
+          terraform fmt -check -recursive infra
+          terraform -chdir=infra/envs/dev init -backend=false -input=false
+          terraform -chdir=infra/envs/dev validate
+          terraform -chdir=infra/envs/prod init -backend=false -input=false
+          terraform -chdir=infra/envs/prod validate
+          terraform -chdir=infra/envs/dev test
+          terraform -chdir=infra/envs/prod test
+  plan:
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production-plan
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.commit_sha }}
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.10.5'
+      - uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ vars.AWS_PROD_PLAN_ROLE_ARN }}
+          aws-region: ap-southeast-1
+          allowed-account-ids: ${{ vars.AWS_PROD_ACCOUNT_ID }}
+      - name: Verify release source tag and security scan before approval
+        env:
+          COMMIT: ${{ inputs.commit_sha }}
+          DIGEST: ${{ inputs.image_digest }}
+        run: |
+          set -euo pipefail
+          aws ecr describe-images --repository-name homewallet-prod-backend --image-ids imageDigest="$DIGEST" > image-review.json
+          aws ecr describe-image-scan-findings --repository-name homewallet-prod-backend --image-id imageDigest="$DIGEST" > scan-review.json
+          python - <<'PY'
+          import json, os
+          image = json.load(open('image-review.json'))['imageDetails'][0]
+          assert 'sha-' + os.environ['COMMIT'] in image.get('imageTags', []), 'Wrong source commit'
+          scan = json.load(open('scan-review.json'))
+          assert scan['imageScanStatus']['status'] == 'COMPLETE', 'Incomplete image scan'
+          severity = scan.get('imageScanFindings', {}).get('findingSeverityCounts', {})
+          assert not severity.get('HIGH', 0) and not severity.get('CRITICAL', 0), 'Image vulnerability gate failed'
+          PY
+      - name: Read-only production plan, retained as redacted action summary
+        env:
+          TFVARS: ${{ vars.PROD_TFVARS_JSON }}
+          TF_VAR_release_digest: ${{ inputs.image_digest }}
+        run: |
+          set -euo pipefail
+          umask 077
+          printf '%s' "$TFVARS" > infra/envs/prod/review.auto.tfvars.json
+          trap 'rm -f infra/envs/prod/review.auto.tfvars.json infra/envs/prod/release.tfplan' EXIT
+          terraform -chdir=infra/envs/prod init -input=false
+          terraform -chdir=infra/envs/prod plan -input=false -lock=false -out=release.tfplan > /dev/null
+          terraform -chdir=infra/envs/prod show -json release.tfplan | python scripts/production-plan-summary.py > production-plan-actions.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: production-plan-actions
+          path: production-plan-actions.json
+          retention-days: 7
+  deploy:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Configure required reviewers, prevent self-review, main-only deployment rule.
+    environment: production
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.commit_sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: production-plan-actions
+      - name: Require infrastructure changes to be separately applied and reviewed
+        run: |
+          python - <<'PY'
+          import json
+          changes = json.load(open('production-plan-actions.json'))['changes']
+          allowed = {
+              'module.compute.aws_ecs_task_definition.api',
+              'module.compute.aws_ecs_task_definition.worker',
+              'module.compute.aws_ecs_task_definition.jobs',
+              'module.migrate.aws_ecs_task_definition.migrate',
+              'module.migrate.aws_ecs_task_definition.runtime_bootstrap[0]',
+          }
+          assert all(c['address'] in allowed for c in changes), 'Resolve infrastructure plan before release'
+          PY
+      - uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ vars.AWS_PROD_DEPLOY_ROLE_ARN }}
+          aws-region: ap-southeast-1
+          allowed-account-ids: ${{ vars.AWS_PROD_ACCOUNT_ID }}
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: python -m pip install boto3
+      - name: Deploy immutable API, smoke test, then drained worker and disabled schedules
+        env:
+          RELEASE_COMMIT: ${{ inputs.commit_sha }}
+          RELEASE_DIGEST: ${{ inputs.image_digest }}
+          MIGRATION_VERSION: ${{ inputs.migration_version }}
+          COMPATIBILITY_REVIEW: ${{ inputs.compatibility_review }}
+          PROD_ACCOUNT_ID: ${{ vars.AWS_PROD_ACCOUNT_ID }}
+          PROD_URL: ${{ vars.PROD_URL }}
+          PROD_QUEUE_URL: ${{ vars.PROD_QUEUE_URL }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.PROD_CLOUDFRONT_DISTRIBUTION_ID }}
+          SMOKE_TOKEN: ${{ secrets.PROD_SMOKE_TOKEN }}
+        run: python scripts/deploy-production.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: production-release-record
+          path: production-release-record.json
+          if-no-files-found: ignore
+          retention-days: 30

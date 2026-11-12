@@ -1,0 +1,16 @@
+# Examples only: replace every placeholder after review. Contains no credentials.
+expected_account_id = "123456789012"
+release_digest = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+origin_hostname = "origin.wallet.example.com"
+origin_zone_id = "REPLACE_WITH_REVIEWED_ZONE"
+origin_certificate_arn = "arn:aws:acm:ap-southeast-1:123456789012:certificate/REPLACE"
+gemini_model = "REPLACE_WITH_VERIFIED_MODEL"
+ses_sender = "wallet@example.com"
+# Candidates only. Check describe-orderable-db-instance-options before approval.
+db_instance_class = "db.t4g.small"
+db_engine_version = "8.4"
+final_snapshot_identifier = "homewallet-prod-final-change123"
+operations_emails = ["operations@example.com"]
+monthly_budget_usd = 500 # Planning placeholder; replace with approved estimate.
+waf_count_mode = false
+waf_validation_reference = "REPLACE_WITH_FALSE_POSITIVE_REVIEW"

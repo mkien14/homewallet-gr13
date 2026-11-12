@@ -1,4 +1,24 @@
 variable "name" { type = string }
+variable "log_retention_days" {
+  type    = number
+  default = 14
+}
+variable "origin_certificate_arn" {
+  type    = string
+  default = null
+}
+variable "autoscaling_enabled" {
+  type    = bool
+  default = false
+}
+variable "autoscaling_min" {
+  type    = number
+  default = 2
+}
+variable "autoscaling_max" {
+  type    = number
+  default = 4
+}
 variable "vpc_id" { type = string }
 variable "public_subnet_ids" { type = list(string) }
 variable "app_subnet_ids" { type = list(string) }

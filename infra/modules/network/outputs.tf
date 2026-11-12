@@ -1,4 +1,5 @@
 output "vpc_id" { value = aws_vpc.this.id }
+output "nat_gateway_ids" { value = concat([aws_nat_gateway.this.id], aws_nat_gateway.az[*].id) }
 output "public_subnet_ids" { value = aws_subnet.public[*].id }
 output "app_subnet_ids" { value = aws_subnet.app[*].id }
 output "data_subnet_ids" { value = aws_subnet.data[*].id }
