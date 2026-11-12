@@ -25,6 +25,62 @@ const Notifications = lazy(() => import("./pages/Notifications"));
 const Community = lazy(() => import("./pages/Community"));
 const LOCALE_PENDING_KEY = "hw.locale.pending";
 
+function PreferenceSelect({ ariaLabel, value, options, disabled, onChange }) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const close = (event) => {
+      if (!containerRef.current?.contains(event.target)) setOpen(false);
+    };
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("pointerdown", close);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", close);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [open]);
+
+  const selected = options.find((option) => option.value === value) || options[0];
+
+  return (
+    <div className="preference-select" ref={containerRef}>
+      <button
+        type="button"
+        className="preference-select-trigger"
+        aria-label={ariaLabel}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        disabled={disabled}
+        onClick={() => setOpen((current) => !current)}
+      >
+        <span>{selected.label}</span><Icon name="chevron-down" className="preference-select-chevron" />
+      </button>
+      {open && <div className="preference-select-menu" role="listbox" aria-label={ariaLabel}>
+        {options.map((option) => (
+          <button
+            type="button"
+            role="option"
+            aria-selected={option.value === value}
+            className={option.value === value ? "is-selected" : ""}
+            key={option.value}
+            onClick={() => {
+              onChange(option.value);
+              setOpen(false);
+            }}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>}
+    </div>
+  );
+}
+
 function pendingLocaleFor(userId) {
   const pending = localStorage.getItem(`${LOCALE_PENDING_KEY}.${userId}`);
   return pending === "vi" || pending === "en" ? pending : null;
@@ -177,8 +233,8 @@ function AppContent() {
         <span className="workspace-tab"><Icon name="home" />{t("Cả hộ")}</span>
         <div className="header-actions">
         <div className="header-preferences">
-          <label><span>{t("Ngôn ngữ")}</span><select aria-label={t("Ngôn ngữ")} value={locale} disabled={authenticated && !USE_MOCK && ["loading", "saving", "cognito-unavailable", "profile-unavailable"].includes(localeSyncStatus)} onChange={(event) => changeLocale(event.target.value)}><option value="vi">{translate("Tiếng Việt")}</option><option value="en">English</option></select></label>
-          <label><span>{t("Giao diện")}</span><select aria-label={t("Giao diện")} value={theme} onChange={(event) => setTheme(event.target.value)}><option value="light">{t("Sáng")}</option><option value="dark">{t("Tối")}</option></select></label>
+          <label><span>{t("Ngôn ngữ")}</span><PreferenceSelect ariaLabel={t("Ngôn ngữ")} value={locale} disabled={authenticated && !USE_MOCK && ["loading", "saving", "cognito-unavailable", "profile-unavailable"].includes(localeSyncStatus)} options={[{ value: "vi", label: translate("Tiếng Việt") }, { value: "en", label: "English" }]} onChange={changeLocale} /></label>
+          <label><span>{t("Giao diện")}</span><PreferenceSelect ariaLabel={t("Giao diện")} value={theme} options={[{ value: "light", label: t("Sáng") }, { value: "dark", label: t("Tối") }]} onChange={setTheme} /></label>
         </div>
         {!USE_MOCK && (authenticated
           ? <button type="button" className="button-secondary header-logout" onClick={logout}>{t("Đăng xuất")}</button>
