@@ -51,8 +51,8 @@ resource "aws_vpc_security_group_ingress_rule" "alb_from_cloudfront" {
   prefix_list_id    = data.aws_ec2_managed_prefix_list.cloudfront.id
 
   ip_protocol = "tcp"
-  from_port   = 80
-  to_port     = 80
+  from_port   = var.origin_https ? 443 : 80
+  to_port     = var.origin_https ? 443 : 80
 }
 
 resource "aws_vpc_security_group_egress_rule" "alb_to_app" {

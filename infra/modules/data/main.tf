@@ -44,9 +44,14 @@ resource "aws_db_instance" "this" {
   backup_retention_period    = var.backup_retention
   deletion_protection        = var.deletion_protection
   skip_final_snapshot        = var.skip_final_snapshot
-  final_snapshot_identifier  = var.skip_final_snapshot ? null : "${var.name}-final"
-  auto_minor_version_upgrade = true
-  apply_immediately          = true
+  final_snapshot_identifier  = var.skip_final_snapshot ? null : coalesce(var.final_snapshot_identifier, "${var.name}-final")
+  auto_minor_version_upgrade = var.auto_minor_version_upgrade
+  apply_immediately          = var.apply_immediately
+
+  backup_window            = var.backup_window
+  maintenance_window       = var.maintenance_window
+  copy_tags_to_snapshot    = var.copy_tags_to_snapshot
+  delete_automated_backups = var.delete_automated_backups
 
   lifecycle {
     ignore_changes = [engine_version]

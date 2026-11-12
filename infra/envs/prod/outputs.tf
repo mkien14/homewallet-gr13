@@ -1,0 +1,10 @@
+output "cluster_name" { value = module.compute.cluster_name }
+output "api_service_name" { value = module.compute.service_name }
+output "worker_service_name" { value = module.compute.worker_service_name }
+output "repository_url" { value = module.ecr.repository_url }
+output "url" { value = module.edge.url }
+output "cloudfront_distribution_id" { value = module.edge.distribution_id }
+output "db_identifier" { value = module.data.identifier }
+output "runtime_secret_arn" { value = aws_secretsmanager_secret.runtime.arn }
+output "queue_url" { value = module.queue.queue_url }
+output "operations_topic_arn" { value = aws_sns_topic.operations.arn }

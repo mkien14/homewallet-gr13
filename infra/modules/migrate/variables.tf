@@ -1,4 +1,8 @@
 variable "name" { type = string }
+variable "log_retention_days" {
+  type    = number
+  default = 14
+}
 variable "cluster_name" { type = string }
 variable "image" { type = string }
 variable "db_host" { type = string }

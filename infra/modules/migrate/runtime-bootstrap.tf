@@ -17,14 +17,14 @@ resource "aws_iam_role_policy" "execution_read_runtime_secret" {
 resource "aws_cloudwatch_log_group" "runtime_bootstrap" {
   count = var.enable_runtime_bootstrap ? 1 : 0
 
-  name              = "/ecs/hw-db-runtime-bootstrap"
-  retention_in_days = 14
+  name              = "${local.log_prefix}db-runtime-bootstrap"
+  retention_in_days = var.log_retention_days
 }
 
 resource "aws_ecs_task_definition" "runtime_bootstrap" {
   count = var.enable_runtime_bootstrap ? 1 : 0
 
-  family                   = "hw-db-runtime-bootstrap"
+  family                   = "${local.prefix}-db-runtime-bootstrap"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   cpu                      = 256

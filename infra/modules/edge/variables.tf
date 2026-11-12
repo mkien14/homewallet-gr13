@@ -1,6 +1,10 @@
 variable "name" {
   type = string
 }
+variable "origin_https" {
+  type    = bool
+  default = false
+}
 
 variable "frontend_bucket_id" {
   type = string

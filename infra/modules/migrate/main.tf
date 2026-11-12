@@ -11,17 +11,17 @@ data "aws_iam_policy_document" "assume" {
 }
 
 resource "aws_iam_role" "task" {
-  name               = "hw-migrate-task-role"
+  name               = "${local.prefix}-migrate-task-role"
   assume_role_policy = data.aws_iam_policy_document.assume.json
 }
 
 resource "aws_cloudwatch_log_group" "migrate" {
-  name              = "/ecs/hw-migrate"
-  retention_in_days = 14
+  name              = "${local.log_prefix}migrate"
+  retention_in_days = var.log_retention_days
 }
 
 resource "aws_ecs_task_definition" "migrate" {
-  family                   = "hw-migrate"
+  family                   = "${local.prefix}-migrate"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   cpu                      = 256

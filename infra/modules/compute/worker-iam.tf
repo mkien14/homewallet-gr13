@@ -26,7 +26,7 @@ data "aws_iam_policy_document" "worker_assume" {
 }
 
 resource "aws_iam_role" "worker_task" {
-  name               = "hw-worker-task-role"
+  name               = "${local.prefix}-worker-task-role"
   assume_role_policy = data.aws_iam_policy_document.worker_assume.json
 }
 

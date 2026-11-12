@@ -19,7 +19,7 @@ resource "aws_iam_role_policy_attachment" "execution" {
 }
 
 resource "aws_iam_role" "api_task" {
-  name               = "hw-api-task-role"
+  name               = "${local.prefix}-api-task-role"
   assume_role_policy = data.aws_iam_policy_document.ecs_tasks_assume.json
 }
 

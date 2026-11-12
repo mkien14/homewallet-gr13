@@ -85,7 +85,7 @@ resource "aws_route_table_association" "public" {
 resource "aws_route_table_association" "app" {
   count          = length(var.azs)
   subnet_id      = aws_subnet.app[count.index].id
-  route_table_id = aws_route_table.app.id
+  route_table_id = var.nat_gateway_per_az && count.index > 0 ? aws_route_table.app_az[count.index - 1].id : aws_route_table.app.id
 }
 
 resource "aws_route_table_association" "data" {
@@ -98,6 +98,31 @@ resource "aws_vpc_endpoint" "s3" {
   vpc_id            = aws_vpc.this.id
   service_name      = "com.amazonaws.${data.aws_region.current.name}.s3"
   vpc_endpoint_type = "Gateway"
-  route_table_ids   = [aws_route_table.app.id]
+  route_table_ids   = concat([aws_route_table.app.id], aws_route_table.app_az[*].id)
   tags              = { Name = "${var.name}-vpce-s3" }
+}
+
+# The first NAT and route table keep their original DEV state addresses.
+resource "aws_eip" "nat_az" {
+  count  = var.nat_gateway_per_az ? length(var.azs) - 1 : 0
+  domain = "vpc"
+  tags   = { Name = "${var.name}-nat-eip-${count.index + 1}" }
+}
+resource "aws_nat_gateway" "az" {
+  count         = var.nat_gateway_per_az ? length(var.azs) - 1 : 0
+  allocation_id = aws_eip.nat_az[count.index].id
+  subnet_id     = aws_subnet.public[count.index + 1].id
+  tags          = { Name = "${var.name}-nat-${count.index + 1}" }
+  depends_on    = [aws_internet_gateway.this]
+}
+resource "aws_route_table" "app_az" {
+  count  = var.nat_gateway_per_az ? length(var.azs) - 1 : 0
+  vpc_id = aws_vpc.this.id
+  tags   = { Name = "${var.name}-rt-app-${count.index + 1}" }
+}
+resource "aws_route" "app_nat_az" {
+  count                  = var.nat_gateway_per_az ? length(var.azs) - 1 : 0
+  route_table_id         = aws_route_table.app_az[count.index].id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.az[count.index].id
 }

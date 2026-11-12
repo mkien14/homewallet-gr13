@@ -3,7 +3,7 @@ import pymysql.cursors
 from flask import current_app, g
 
 
-def connect(config, *, database=True):
+def connect(config, *, database=True, probe=False):
     options = {
         "host": config["DB_HOST"],
         "port": config["DB_PORT"],
@@ -16,6 +16,8 @@ def connect(config, *, database=True):
     }
     if database and config.get("DB_NAME"):
         options["database"] = config["DB_NAME"]
+    if probe:
+        options.update(connect_timeout=2, read_timeout=2, write_timeout=2)
     if config.get("DB_SSL_CA"):
         options.update(
             ssl_ca=config["DB_SSL_CA"],

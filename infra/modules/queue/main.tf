@@ -3,7 +3,7 @@ data "aws_caller_identity" "current" {}
 
 resource "aws_sqs_queue" "dlq" {
 
-  name = "receipts-dlq"
+  name = "${var.name_prefix}receipts-dlq"
 
   message_retention_seconds = 1209600 # 14 ngày
 
@@ -14,7 +14,7 @@ resource "aws_sqs_queue" "dlq" {
 
 resource "aws_sqs_queue" "main" {
 
-  name                       = "receipts-queue"
+  name                       = "${var.name_prefix}receipts-queue"
   receive_wait_time_seconds  = 20
   visibility_timeout_seconds = 180
   sqs_managed_sse_enabled    = true # SSE-SQS, KHÔNG dùng khóa KMS do AWS quản lý
