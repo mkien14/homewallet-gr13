@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { t as translate } from "../preferences";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../api";
 import { formatDate, formatVnd, parseVnd } from "../format";
 import { STATUS_LABEL } from "../image";
-import { t } from "../preferences";
+import { usePreferences } from "../preferences";
 import { createReceiptForm, receiptConfirmationBody, receiptDateLimit } from "../receiptForm";
 
 const PENDING = new Set(["UPLOADING", "UPLOADED", "PROCESSING"]);
@@ -18,6 +17,7 @@ const WARNINGS = {
 };
 
 function ConfirmationForm({ receipt, categories, categoriesReady }) {
+  const { t } = usePreferences();
   const [form, setForm] = useState(() => createReceiptForm(receipt.draft));
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -43,7 +43,7 @@ function ConfirmationForm({ receipt, categories, categoriesReady }) {
     try {
       body = receiptConfirmationBody(form, categories);
     } catch (err) {
-      setError(t(err.message));
+      setError(err.message);
       return;
     }
     submission.current = true;
@@ -59,9 +59,9 @@ function ConfirmationForm({ receipt, categories, categoriesReady }) {
       const confirmedDate = result.transaction.occurred_on || body.occurred_on;
       navigate(`/dashboard?period=${confirmedDate.slice(0, 7)}`, { replace: true, state: { receiptConfirmedId: receipt.id } });
     } catch (err) {
-      setError(t(err.code === "ALREADY_CONFIRMED"
+      setError(err.code === "ALREADY_CONFIRMED"
         ? "Hóa đơn đã được xác nhận. Hãy quay về danh sách để xem trạng thái mới nhất."
-        : err.status === 409 ? "Bản nháp không còn ở trạng thái có thể xác nhận. Hãy tải lại thông tin hóa đơn." : err.message));
+        : err.status === 409 ? "Bản nháp không còn ở trạng thái có thể xác nhận. Hãy tải lại thông tin hóa đơn." : err.message);
     } finally {
       submission.current = false;
       setSubmitting(false);
@@ -70,45 +70,46 @@ function ConfirmationForm({ receipt, categories, categoriesReady }) {
 
   function categoryOptions(selected) {
     const unknown = selected !== "" && !categories.some((category) => String(category.id) === selected);
-    return <><option value="">{translate("Chưa phân loại")}</option>{unknown && <option value={selected} disabled>{translate("Danh mục không còn khả dụng")}</option>}{categories.map((category) => <option key={category.id} value={category.id}>{t(category.name)}</option>)}</>;
+    return <><option value="">{t("Chưa phân loại")}</option>{unknown && <option value={selected} disabled>{t("Danh mục không còn khả dụng")}</option>}{categories.map((category) => <option key={category.id} value={category.id}>{t(category.name)}</option>)}</>;
   }
 
   return (
     <form className="receipt-form" onSubmit={confirm}>
       <fieldset disabled={submitting}>
-        <legend>{translate("Kiểm tra thông tin hóa đơn")}</legend>
-        {!categoriesReady && <p className="notice">{translate("Đang chờ danh mục. Nếu không tải được, hãy bấm Thử tải lại ở phía trên.")}</p>}
-        {categoriesReady && categories.length === 0 && <p className="notice">{translate("Hộ chưa có danh mục. Bạn vẫn có thể xác nhận dưới dạng Chưa phân loại.")}</p>}
+        <legend>{t("Kiểm tra thông tin hóa đơn")}</legend>
+        {!categoriesReady && <p className="notice">{t("Đang chờ danh mục. Nếu không tải được, hãy bấm Thử tải lại ở phía trên.")}</p>}
+        {categoriesReady && categories.length === 0 && <p className="notice">{t("Hộ chưa có danh mục. Bạn vẫn có thể xác nhận dưới dạng Chưa phân loại.")}</p>}
         <div className="form-grid">
-          <label className="field" htmlFor="receipt-merchant">{translate("Cửa hàng")}<input id="receipt-merchant" maxLength={255} value={form.merchant} onChange={(event) => update("merchant", event.target.value)} /></label>
-          <label className="field date-highlight" htmlFor="receipt-date">{translate("Ngày hóa đơn ")}<strong>{translate("Hãy kiểm tra ngày")}</strong><input id="receipt-date" type="date" required max={receiptDateLimit()} value={form.occurred_on} onChange={(event) => update("occurred_on", event.target.value)} /><span className="muted">{formatDate(form.occurred_on) || translate("Chọn ngày trên ảnh gốc")}</span></label>
-          <label className="field" htmlFor="receipt-total">{translate("Tổng tiền (VND)")}<input id="receipt-total" type="text" inputMode="numeric" required value={form.total_amount} onChange={(event) => update("total_amount", event.target.value)} /><span className="muted">{total !== null ? formatVnd(total) : translate("Nhập số tiền nguyên đồng")}</span></label>
-          <label className="field" htmlFor="receipt-category">{translate("Danh mục giao dịch")}<select id="receipt-category" value={form.category_id} onChange={(event) => update("category_id", event.target.value)}>{categoryOptions(form.category_id)}</select></label>
+          <label className="field" htmlFor="receipt-merchant">{t("Cửa hàng")}<input id="receipt-merchant" maxLength={255} value={form.merchant} onChange={(event) => update("merchant", event.target.value)} /></label>
+          <label className="field date-highlight" htmlFor="receipt-date">{t("Ngày hóa đơn ")}<strong>{t("Hãy kiểm tra ngày")}</strong><input id="receipt-date" type="date" required max={receiptDateLimit()} value={form.occurred_on} onChange={(event) => update("occurred_on", event.target.value)} /><span className="muted">{formatDate(form.occurred_on) || t("Chọn ngày trên ảnh gốc")}</span></label>
+          <label className="field" htmlFor="receipt-total">{t("Tổng tiền (VND)")}<input id="receipt-total" type="text" inputMode="numeric" required value={form.total_amount} onChange={(event) => update("total_amount", event.target.value)} /><span className="muted">{total !== null ? formatVnd(total) : t("Nhập số tiền nguyên đồng")}</span></label>
+          <label className="field" htmlFor="receipt-category">{t("Danh mục giao dịch")}<select id="receipt-category" value={form.category_id} onChange={(event) => update("category_id", event.target.value)}>{categoryOptions(form.category_id)}</select></label>
         </div>
-        <h2>{translate("Dòng hàng")}</h2>
-        <p className="muted">{translate("Thành tiền là tổng của từng dòng, đã gồm số lượng. Có thể để trống tên hoặc số lượng khi ảnh không cung cấp; chỉ tổng tiền là bắt buộc nếu không có dòng hàng.")}</p>
+        <h2>{t("Dòng hàng")}</h2>
+        <p className="muted">{t("Thành tiền là tổng của từng dòng, đã gồm số lượng. Có thể để trống tên hoặc số lượng khi ảnh không cung cấp; chỉ tổng tiền là bắt buộc nếu không có dòng hàng.")}</p>
         <div className="line-items">
           {form.items.map((item, index) => (
             <div className="line-item" key={item.key}>
-              <label className="field" htmlFor={`item-description-${item.key}`}>{translate("Món hàng ")}{index + 1}<input id={`item-description-${item.key}`} maxLength={255} value={item.description || ""} onChange={(event) => updateItem(item.key, "description", event.target.value)} /></label>
-              <label className="field" htmlFor={`item-quantity-${item.key}`}>{translate("Số lượng")}<input id={`item-quantity-${item.key}`} type="number" min="0.001" max="9999999.999" step="any" value={item.quantity} onChange={(event) => updateItem(item.key, "quantity", event.target.value)} /></label>
-              <label className="field" htmlFor={`item-amount-${item.key}`}>{translate("Thành tiền (VND)")}<input id={`item-amount-${item.key}`} inputMode="numeric" required value={item.amount} onChange={(event) => updateItem(item.key, "amount", event.target.value)} /></label>
-              <label className="field" htmlFor={`item-category-${item.key}`}>{translate("Danh mục")}<select id={`item-category-${item.key}`} value={item.category_id} onChange={(event) => updateItem(item.key, "category_id", event.target.value)}>{categoryOptions(item.category_id)}</select></label>
-              <button type="button" className="button-secondary" aria-label={`${t("Xóa dòng hàng")} ${index + 1}`} onClick={() => setForm((current) => ({ ...current, items: current.items.filter((row) => row.key !== item.key) }))}>{translate("Xóa dòng")}</button>
+              <label className="field" htmlFor={`item-description-${item.key}`}>{t("Món hàng ")}{index + 1}<input id={`item-description-${item.key}`} maxLength={255} value={item.description || ""} onChange={(event) => updateItem(item.key, "description", event.target.value)} /></label>
+              <label className="field" htmlFor={`item-quantity-${item.key}`}>{t("Số lượng")}<input id={`item-quantity-${item.key}`} type="number" min="0.001" max="9999999.999" step="any" value={item.quantity} onChange={(event) => updateItem(item.key, "quantity", event.target.value)} /></label>
+              <label className="field" htmlFor={`item-amount-${item.key}`}>{t("Thành tiền (VND)")}<input id={`item-amount-${item.key}`} inputMode="numeric" required value={item.amount} onChange={(event) => updateItem(item.key, "amount", event.target.value)} /></label>
+              <label className="field" htmlFor={`item-category-${item.key}`}>{t("Danh mục")}<select id={`item-category-${item.key}`} value={item.category_id} onChange={(event) => updateItem(item.key, "category_id", event.target.value)}>{categoryOptions(item.category_id)}</select></label>
+              <button type="button" className="button-secondary" aria-label={`${t("Xóa dòng hàng")} ${index + 1}`} onClick={() => setForm((current) => ({ ...current, items: current.items.filter((row) => row.key !== item.key) }))}>{t("Xóa dòng")}</button>
             </div>
           ))}
         </div>
-        <button type="button" className="button-secondary" onClick={() => setForm((current) => ({ ...current, items: [...current.items, { key: crypto.randomUUID(), description: "", quantity: "1", amount: "", category_id: current.category_id }] }))}>{translate("Thêm dòng hàng")}</button>
-        <p>{translate("Tổng các dòng: ")}<strong>{formatVnd(lineTotal)}</strong></p>
-        {mismatch && <p className="notice" role="status">{translate("Tổng dòng hàng đang lệch tổng hóa đơn ")}{formatVnd(Math.abs(lineTotal - total))}{translate(". Hãy đối chiếu trước khi xác nhận.")}</p>}
-        {error && <p className="error" role="alert">{error}</p>}
-        <div className="form-actions"><button type="submit" disabled={submitting || !categoriesReady}>{submitting ? translate("Đang xác nhận…") : translate("Xác nhận hóa đơn")}</button><Link to="/receipts">{translate("Quay về danh sách")}</Link></div>
+        <button type="button" className="button-secondary" onClick={() => setForm((current) => ({ ...current, items: [...current.items, { key: crypto.randomUUID(), description: "", quantity: "1", amount: "", category_id: current.category_id }] }))}>{t("Thêm dòng hàng")}</button>
+        <p>{t("Tổng các dòng: ")}<strong>{formatVnd(lineTotal)}</strong></p>
+        {mismatch && <p className="notice" role="status">{t("Tổng dòng hàng đang lệch tổng hóa đơn ")}{formatVnd(Math.abs(lineTotal - total))}{t(". Hãy đối chiếu trước khi xác nhận.")}</p>}
+        {error && <p className="error" role="alert">{t(error)}</p>}
+        <div className="form-actions"><button type="submit" disabled={submitting || !categoriesReady}>{submitting ? t("Đang xác nhận…") : t("Xác nhận hóa đơn")}</button><Link to="/receipts">{t("Quay về danh sách")}</Link></div>
       </fieldset>
     </form>
   );
 }
 
 function ReceiptContent({ id }) {
+  const { t } = usePreferences();
   const [receipt, setReceipt] = useState(null);
   const [categories, setCategories] = useState([]);
   const [categoriesReady, setCategoriesReady] = useState(false);
@@ -141,13 +142,13 @@ function ReceiptContent({ id }) {
       } catch (err) {
         if (!controller.signal.aborted) {
           if (err.status === 404) setReceipt(null);
-          setError(t(err.status === 404 ? "Không tìm thấy hóa đơn trong hộ của bạn, hoặc bạn không có quyền truy cập hóa đơn này." : err.message));
+          setError(err.status === 404 ? "Không tìm thấy hóa đơn trong hộ của bạn, hoặc bạn không có quyền truy cập hóa đơn này." : err.message);
         }
       }
     }
     void load();
     return () => { controller.abort(); window.clearTimeout(timer); };
-  }, [id, reload]);
+  }, [id, reload, t]);
 
   const editable = receipt && ["DRAFT_READY", "NEEDS_REVIEW"].includes(receipt.status) && receipt.draft;
   const previewUrl = receipt?.image_url;
@@ -156,29 +157,29 @@ function ReceiptContent({ id }) {
 
   return (
     <>
-      <div className="page-heading"><div><Link to="/receipts">{translate("← Danh sách hóa đơn")}</Link><h1>{translate("Hóa đơn #")}{id}</h1></div>{receipt && <span className={`status-badge status-${String(receipt.status).toLowerCase()}`}>{t(STATUS_LABEL[receipt.status] || receipt.status)}</span>}</div>
-      {error && <div className="notice" role="alert"><p className="error">{error}</p><button type="button" className="button-secondary" onClick={() => setReload((value) => value + 1)}>{translate("Thử tải lại")}</button></div>}
-      {!receipt && !error && <p role="status">{translate("Đang tải hóa đơn…")}</p>}
+      <div className="page-heading"><div><Link to="/receipts">{t("← Danh sách hóa đơn")}</Link><h1>{t("Hóa đơn #")}{id}</h1></div>{receipt && <span className={`status-badge status-${String(receipt.status).toLowerCase()}`}>{t(STATUS_LABEL[receipt.status] || receipt.status)}</span>}</div>
+      {error && <div className="notice" role="alert"><p className="error">{t(error)}</p><button type="button" className="button-secondary" onClick={() => setReload((value) => value + 1)}>{t("Thử tải lại")}</button></div>}
+      {!receipt && !error && <p role="status">{t("Đang tải hóa đơn…")}</p>}
       {receipt && <>
-        {receipt.warnings?.length > 0 && <div className="notice"><h2>{translate("Cần kiểm tra")}</h2><ul className="warning-list">{receipt.warnings.map((warning) => <li key={warning}>{t(WARNINGS[warning] || warning)}</li>)}</ul></div>}
-        {PENDING.has(receipt.status) && <p className="notice" role="status">{translate("Hóa đơn đang được xử lý. Trang tự cập nhật mỗi 3 giây; bản nháp sẽ xuất hiện khi đọc xong.")}</p>}
-        {receipt.status === "FAILED" && <div className="notice"><h2>{translate("Chưa đọc được hóa đơn")}</h2><p>{receipt.error_code ? `${t("Mã lỗi:")} ${receipt.error_code}. ` : ""}{translate("Bạn có thể nhập thông tin giao dịch thủ công.")}</p><Link className="button-link" to="/transactions/new">{translate("Nhập tay")}</Link></div>}
-        {receipt.status === "CONFIRMED" && <p className="notice success">{translate("Hóa đơn đã được xác nhận. ")}<Link to="/dashboard">{t("Xem dashboard")}</Link></p>}
+        {receipt.warnings?.length > 0 && <div className="notice"><h2>{t("Cần kiểm tra")}</h2><ul className="warning-list">{receipt.warnings.map((warning) => <li key={warning}>{t(WARNINGS[warning] || warning)}</li>)}</ul></div>}
+        {PENDING.has(receipt.status) && <p className="notice" role="status">{t("Hóa đơn đang được xử lý. Trang tự cập nhật mỗi 3 giây; bản nháp sẽ xuất hiện khi đọc xong.")}</p>}
+        {receipt.status === "FAILED" && <div className="notice"><h2>{t("Chưa đọc được hóa đơn")}</h2><p>{receipt.error_code ? `${t("Mã lỗi:")} ${receipt.error_code}. ` : ""}{t("Bạn có thể nhập thông tin giao dịch thủ công.")}</p><Link className="button-link" to="/transactions/new">{t("Nhập tay")}</Link></div>}
+        {receipt.status === "CONFIRMED" && <p className="notice success">{t("Hóa đơn đã được xác nhận. ")}<Link to="/dashboard">{t("Xem dashboard")}</Link></p>}
         <div className="receipt-layout">
-          <section className="card receipt-preview" aria-label={translate("Ảnh hóa đơn gốc")}>
-            <h2>{translate("Hóa đơn gốc")}</h2>
-            {receipt.image_is_sample && <p className="notice">{translate("Ảnh minh họa cho dữ liệu giả. Kết quả OCR trong chế độ này là dữ liệu mẫu.")}</p>}
-            {safePreview ? <>{isPdf ? <p>{translate("Tệp PDF: mở bản gốc để kiểm tra các trang.")}</p> : <img src={safePreview} alt={`${t("Ảnh gốc của hóa đơn")} ${id}`} onError={(event) => { event.currentTarget.alt = translate("Ảnh không tải được. Liên kết có thể đã hết hạn; hãy làm mới ảnh."); }} />}<p><a href={safePreview} target="_blank" rel="noopener noreferrer">{translate("Mở tệp gốc trong tab mới")}</a></p><button type="button" className="button-secondary" onClick={() => setReload((value) => value + 1)}>{translate("Làm mới liên kết ảnh")}</button><p className="muted">{translate("Liên kết ảnh có thời hạn. Làm mới nếu không mở được.")}</p></> : <p className="muted">{translate("Ảnh gốc chưa sẵn sàng. API cần cung cấp liên kết xem tệp khi xử lý xong.")}</p>}
+          <section className="card receipt-preview" aria-label={t("Ảnh hóa đơn gốc")}>
+            <h2>{t("Hóa đơn gốc")}</h2>
+            {receipt.image_is_sample && <p className="notice">{t("Ảnh minh họa cho dữ liệu giả. Kết quả OCR trong chế độ này là dữ liệu mẫu.")}</p>}
+            {safePreview ? <>{isPdf ? <p>{t("Tệp PDF: mở bản gốc để kiểm tra các trang.")}</p> : <img src={safePreview} alt={`${t("Ảnh gốc của hóa đơn")} ${id}`} onError={(event) => { event.currentTarget.alt = t("Ảnh không tải được. Liên kết có thể đã hết hạn; hãy làm mới ảnh."); }} />}<p><a href={safePreview} target="_blank" rel="noopener noreferrer">{t("Mở tệp gốc trong tab mới")}</a></p><button type="button" className="button-secondary" onClick={() => setReload((value) => value + 1)}>{t("Làm mới liên kết ảnh")}</button><p className="muted">{t("Liên kết ảnh có thời hạn. Làm mới nếu không mở được.")}</p></> : <p className="muted">{t("Ảnh gốc chưa sẵn sàng. API cần cung cấp liên kết xem tệp khi xử lý xong.")}</p>}
           </section>
           <section className="card">
-            {receipt.draft?.note && <p><strong>{translate("Ghi chú trên hóa đơn:")}</strong> {receipt.draft.note}</p>}
+            {receipt.draft?.note && <p><strong>{t("Ghi chú trên hóa đơn:")}</strong> {receipt.draft.note}</p>}
             {receipt.status === "CONFIRMED" && receipt.draft?.items?.length > 0 && <>
-              <h2>{translate("Các khoản đã chi")}</h2>
+              <h2>{t("Các khoản đã chi")}</h2>
               <ul>{receipt.draft.items.map((item, index) => <li key={index}>
-                {item.description || translate("Mặt hàng")}{translate(" · Số lượng: ")}{item.quantity ?? "—"} · {formatVnd(item.amount)}
+                {item.description || t("Mặt hàng")}{t(" · Số lượng: ")}{item.quantity ?? "—"} · {formatVnd(item.amount)}
               </li>)}</ul>
             </>}
-            {editable ? <ConfirmationForm receipt={receipt} categories={categories} categoriesReady={categoriesReady} /> : <><h2>{translate("Thông tin hóa đơn")}</h2><p>{receipt.merchant || receipt.draft?.merchant || translate("Chưa có thông tin cửa hàng")}</p><p>{receipt.occurred_on || receipt.draft?.occurred_on ? formatDate(receipt.occurred_on || receipt.draft.occurred_on) : translate("Chưa xác định ngày")}</p>{(receipt.total_amount ?? receipt.draft?.total_amount) != null && <p><strong>{formatVnd(receipt.total_amount ?? receipt.draft.total_amount)}</strong></p>}{["DRAFT_READY", "NEEDS_REVIEW"].includes(receipt.status) && !receipt.draft && <p className="error">{translate("Backend chưa cung cấp bản nháp để xác nhận.")}</p>}</>}
+            {editable ? <ConfirmationForm receipt={receipt} categories={categories} categoriesReady={categoriesReady} /> : <><h2>{t("Thông tin hóa đơn")}</h2><p>{receipt.merchant || receipt.draft?.merchant || t("Chưa có thông tin cửa hàng")}</p><p>{receipt.occurred_on || receipt.draft?.occurred_on ? formatDate(receipt.occurred_on || receipt.draft.occurred_on) : t("Chưa xác định ngày")}</p>{(receipt.total_amount ?? receipt.draft?.total_amount) != null && <p><strong>{formatVnd(receipt.total_amount ?? receipt.draft.total_amount)}</strong></p>}{["DRAFT_READY", "NEEDS_REVIEW"].includes(receipt.status) && !receipt.draft && <p className="error">{t("Backend chưa cung cấp bản nháp để xác nhận.")}</p>}</>}
           </section>
         </div>
       </>}

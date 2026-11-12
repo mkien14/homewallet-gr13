@@ -1,6 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { t as translate } from "./preferences";
-import { BrowserRouter, Link, NavLink, Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { BrowserRouter, Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { isLoggedIn, login, logout } from "./auth/auth";
 import { isReactAuthSession, reactSignOut } from "./auth/cognito";
 import { USE_MOCK } from "./mode";
@@ -11,6 +11,7 @@ import { config } from "./config";
 import Callback from "./pages/Callback";
 import Home from "./pages/Home";
 import Upload from "./pages/Upload";
+import Icon from "./components/Icon";
 
 const Receipts = lazy(() => import("./pages/Receipts"));
 const ReceiptDetail = lazy(() => import("./pages/ReceiptDetail"));
@@ -23,6 +24,62 @@ const ReactAuth = lazy(() => import("./pages/ReactAuth"));
 const Notifications = lazy(() => import("./pages/Notifications"));
 const Community = lazy(() => import("./pages/Community"));
 const LOCALE_PENDING_KEY = "hw.locale.pending";
+
+function PreferenceSelect({ ariaLabel, value, options, disabled, onChange }) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const close = (event) => {
+      if (!containerRef.current?.contains(event.target)) setOpen(false);
+    };
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("pointerdown", close);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", close);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [open]);
+
+  const selected = options.find((option) => option.value === value) || options[0];
+
+  return (
+    <div className="preference-select" ref={containerRef}>
+      <button
+        type="button"
+        className="preference-select-trigger"
+        aria-label={ariaLabel}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        disabled={disabled}
+        onClick={() => setOpen((current) => !current)}
+      >
+        <span>{selected.label}</span><Icon name="chevron-down" className="preference-select-chevron" />
+      </button>
+      {open && <div className="preference-select-menu" role="listbox" aria-label={ariaLabel}>
+        {options.map((option) => (
+          <button
+            type="button"
+            role="option"
+            aria-selected={option.value === value}
+            className={option.value === value ? "is-selected" : ""}
+            key={option.value}
+            onClick={() => {
+              onChange(option.value);
+              setOpen(false);
+            }}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>}
+    </div>
+  );
+}
 
 function pendingLocaleFor(userId) {
   const pending = localStorage.getItem(`${LOCALE_PENDING_KEY}.${userId}`);
@@ -44,7 +101,7 @@ function Protected({ children }) {
           <div className="guest-actions">{loginAction}<span>{t("Bắt đầu miễn phí với tài khoản của bạn")}</span></div>
         </div>
         <div className="guest-highlights">
-          <div><span className="guest-highlight-icon">↗</span><b>{t("Chi tiêu rõ ràng")}</b><small>{t("Xem khoản nào đang chiếm nhiều nhất.")}</small></div>
+          <div><span className="guest-highlight-icon"><Icon name="arrow-up-right" /></span><b>{t("Chi tiêu rõ ràng")}</b><small>{t("Xem khoản nào đang chiếm nhiều nhất.")}</small></div>
           <div><span className="guest-highlight-icon">▤</span><b>{t("Ngân sách chung")}</b><small>{t("Cả nhà cùng theo dõi kế hoạch tháng.")}</small></div>
           <div><span className="guest-highlight-icon">✓</span><b>{t("Hóa đơn gọn gàng")}</b><small>{t("Lưu và xác nhận hóa đơn tại một nơi.")}</small></div>
         </div>
@@ -68,11 +125,39 @@ function Protected({ children }) {
 
 function AppContent() {
   const [toolsOpen, setToolsOpen] = useState(false);
+  const toolsRef = useRef(null);
+  const toolsTriggerRef = useRef(null);
+  const location = useLocation();
   const navigate = useNavigate();
   const { locale, setLocale, theme, setTheme, t } = usePreferences();
   const authenticated = USE_MOCK || isLoggedIn();
   const localeUserId = useRef(null);
   const [localeSyncStatus, setLocaleSyncStatus] = useState("ready");
+
+  useEffect(() => {
+    if (!toolsOpen) return undefined;
+    const closeOutside = (event) => {
+      if (!toolsRef.current?.contains(event.target)) setToolsOpen(false);
+    };
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") {
+        setToolsOpen(false);
+        toolsTriggerRef.current?.focus();
+      }
+    };
+    document.addEventListener("pointerdown", closeOutside);
+    document.addEventListener("focusin", closeOutside);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOutside);
+      document.removeEventListener("focusin", closeOutside);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [toolsOpen]);
+
+  useEffect(() => {
+    queueMicrotask(() => setToolsOpen(false));
+  }, [location.pathname]);
 
   const persistLocale = useCallback(async (next, userId) => {
     localStorage.setItem(`${LOCALE_PENDING_KEY}.${userId}`, next);
@@ -145,16 +230,18 @@ function AppContent() {
       <a className="skip-link" href="#main-content">{t("Bỏ qua đến nội dung chính")}</a>
       <header className="app-header">
         <Link className="brand" to="/">HomeWallet</Link>
-        <span className="workspace-tab">⌂ &nbsp;{t("Cả hộ")}</span>
+        <span className="workspace-tab"><Icon name="home" />{t("Cả hộ")}</span>
+        <div className="header-actions">
         <div className="header-preferences">
-          <label><span>{t("Ngôn ngữ")}</span><select aria-label={t("Ngôn ngữ")} value={locale} disabled={authenticated && !USE_MOCK && ["loading", "saving", "cognito-unavailable", "profile-unavailable"].includes(localeSyncStatus)} onChange={(event) => changeLocale(event.target.value)}><option value="vi">{translate("Tiếng Việt")}</option><option value="en">English</option></select></label>
-          <label><span>{t("Giao diện")}</span><select aria-label={t("Giao diện")} value={theme} onChange={(event) => setTheme(event.target.value)}><option value="light">{t("Sáng")}</option><option value="dark">{t("Tối")}</option></select></label>
+          <label><span>{t("Ngôn ngữ")}</span><PreferenceSelect ariaLabel={t("Ngôn ngữ")} value={locale} disabled={authenticated && !USE_MOCK && ["loading", "saving", "cognito-unavailable", "profile-unavailable"].includes(localeSyncStatus)} options={[{ value: "vi", label: translate("Tiếng Việt") }, { value: "en", label: "English" }]} onChange={changeLocale} /></label>
+          <label><span>{t("Giao diện")}</span><PreferenceSelect ariaLabel={t("Giao diện")} value={theme} options={[{ value: "light", label: t("Sáng") }, { value: "dark", label: t("Tối") }]} onChange={setTheme} /></label>
         </div>
         {!USE_MOCK && (authenticated
           ? <button type="button" className="button-secondary header-logout" onClick={logout}>{t("Đăng xuất")}</button>
           : config.reactAuthEnabled
             ? <Link className="button button-secondary header-logout" to="/auth/react">{t("Đăng nhập hoặc đăng ký")}</Link>
             : <button type="button" className="button-secondary header-logout" onClick={login}>{t("Đăng nhập hoặc đăng ký")}</button>)}
+        </div>
       </header>
       {authenticated && !USE_MOCK && ["partial", "failed", "cognito-unavailable", "profile-unavailable"].includes(localeSyncStatus) && (
         <div className="notice" role="alert">
@@ -176,11 +263,11 @@ function AppContent() {
       )}
       {authenticated && (
           <nav className="workspace-nav" aria-label={t("Điều hướng chính")}>
-            <div className="workspace-tools">
-              <button className="workspace-tools-trigger" type="button" aria-expanded={toolsOpen} aria-haspopup="true" onClick={() => setToolsOpen((open) => !open)}>
+            <div className="workspace-tools" ref={toolsRef}>
+              <button ref={toolsTriggerRef} className="workspace-tools-trigger" type="button" aria-expanded={toolsOpen} aria-controls="workspace-menu" onClick={() => setToolsOpen((open) => !open)}>
                 {t("Menu")} <span className="workspace-tools-icon" aria-hidden="true"><i></i><i></i><i></i></span>
               </button>
-              {toolsOpen && <div className="workspace-tools-menu">
+              {toolsOpen && <div id="workspace-menu" className="workspace-tools-menu">
                 <NavLink onClick={() => setToolsOpen(false)} to="/dashboard">{t("Thống kê")}</NavLink>
                 <NavLink onClick={() => setToolsOpen(false)} to="/budgets">{t("Ngân sách")}</NavLink>
                 <NavLink onClick={() => setToolsOpen(false)} to="/recurring-bills">{t("Định kỳ")}</NavLink>

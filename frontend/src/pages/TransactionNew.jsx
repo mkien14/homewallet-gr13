@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { t as translate } from "../preferences";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api";
-import { formatVnd, parseVnd } from "../format";
-import { t } from "../preferences";
+import VndAmountInput from "../components/VndAmountInput";
+import LocalizedDatePicker from "../components/LocalizedDatePicker";
+import { t, usePreferences } from "../preferences";
 import { buildTransactionBody, transactionDateLimit } from "../transactionForm";
 
 function localToday() {
@@ -12,6 +13,7 @@ function localToday() {
 }
 
 export default function TransactionNew() {
+  const { locale } = usePreferences();
   const navigate = useNavigate();
   const [idempotencyKey] = useState(() => crypto.randomUUID());
   const [occurredOn, setOccurredOn] = useState(localToday);
@@ -92,7 +94,6 @@ export default function TransactionNew() {
   if (!setup) return <p role="status">{t("Đang tải danh mục...")}</p>;
   if (!setup.household) return <p>{t("Bạn cần")} <Link to="/">{t("tạo hoặc tham gia một hộ")}</Link> {t("trước khi nhập giao dịch.")}</p>;
 
-  const formattedAmount = parseVnd(amount);
   const locked = busy || Boolean(retryBody);
 
   return (
@@ -105,10 +106,9 @@ export default function TransactionNew() {
         <p>{translate("Ghi lại khoản chi không có hóa đơn hoặc hóa đơn chưa đọc được.")}</p>
         {retryBody && <p className="notice" role="status">{t("Chưa xác nhận được kết quả gửi. Dữ liệu được giữ nguyên; bấm “Gửi lại giao dịch” để kiểm tra và gửi lại cùng mã, tránh tạo trùng.")}</p>}
         <div className="form-grid">
-          <label className="field" htmlFor="transaction-date">{translate("Ngày chi tiêu")}<input id="transaction-date" type="date" min="0001-01-01" max={transactionDateLimit()} value={occurredOn} onChange={(e) => setOccurredOn(e.target.value)} required disabled={locked} />
+          <label className="field" htmlFor="transaction-date">{translate("Ngày chi tiêu")}<LocalizedDatePicker id="transaction-date" min="0001-01-01" max={transactionDateLimit()} value={occurredOn} locale={locale} onChange={setOccurredOn} required disabled={locked} />
           </label>
-          <label className="field" htmlFor="transaction-amount">{translate("Số tiền (đồng)")}<input id="transaction-amount" type="text" inputMode="numeric" placeholder={translate("Ví dụ: 150.000")} value={amount} onChange={(e) => setAmount(e.target.value)} required disabled={locked} aria-describedby="amount-preview" />
-            <small id="amount-preview">{formattedAmount !== null ? formatVnd(formattedAmount) : t("Nhập số nguyên đồng, không có phần thập phân.")}</small>
+          <label className="field" htmlFor="transaction-amount">{translate("Số tiền (đồng)")}<VndAmountInput id="transaction-amount" placeholder={translate("Ví dụ: 150.000")} value={amount} onValueChange={setAmount} required disabled={locked} />
           </label>
           <label className="field" htmlFor="transaction-category">{translate("Danh mục")}<select id="transaction-category" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} disabled={locked}>
               <option value="">{translate("Chưa phân loại")}</option>
@@ -125,7 +125,7 @@ export default function TransactionNew() {
           {!retryBody && <Link to="/dashboard" className="text-link">{translate("Hủy")}</Link>}
         </div>
         <p className="muted">{translate("Bấm gửi lại sau lỗi mạng vẫn sử dụng cùng một mã giao dịch.")}</p>
-      </form><aside className="workspace-stack"><section className="card"><h2>{translate("Thông tin giao dịch")}</h2><div className="dashboard-note">{translate("Giao dịch được tính vào thống kê sau khi lưu thành công.")}</div><p>{translate("Chọn ngày, số tiền và danh mục để gia đình dễ theo dõi.")}</p></section><section className="card"><h2>{translate("Có hóa đơn?")}</h2><p>{translate("Tải ảnh để đọc thông tin và kiểm tra trước khi xác nhận.")}</p><Link className="button button-secondary" to="/upload">{translate("Tải ảnh hóa đơn")}</Link></section></aside></div>
+      </form><aside className="workspace-stack"><section className="card"><h2>{translate("Thông tin giao dịch")}</h2><div className="dashboard-note">{translate("Giao dịch được tính vào thống kê sau khi lưu thành công.")}</div><p>{translate("Chọn ngày, số tiền và danh mục để gia đình dễ theo dõi.")}</p></section></aside></div>
     </>
   );
 }
