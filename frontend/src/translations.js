@@ -425,6 +425,8 @@ const messages = {
     "Thông báo trong ứng dụng và email vẫn tiếp tục hoạt động.": "In-app and email notifications will continue to work.",
     "Hãy cấp quyền thông báo trong cài đặt trình duyệt rồi tải lại trang.": "Allow notifications in your browser settings, then reload this page.",
     "Thông báo trong ứng dụng": "In-app notifications",
+    "Chưa đọc": "Unread",
+    "Đã đọc": "Read",
     "Đang tải thông báo…": "Loading notifications…",
     "Bạn chưa có thông báo.": "You do not have any notifications yet.",
     "Mới": "New",
@@ -708,4 +710,3 @@ export function t(text, locale = globalThis.localStorage?.getItem("hw.locale") |
   }
   return `${leading}${translated ?? key}${trailing}`;
 }
-

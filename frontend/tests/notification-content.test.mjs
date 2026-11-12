@@ -14,6 +14,12 @@ test("notifications accept string payloads and select requested language from ma
   }
 });
 
+test("known English notification payloads are localized for Vietnamese", () => {
+  const translate = (text) => text;
+  assert.equal(notificationText("Budget alert", "vi", translate), "Cảnh báo ngân sách");
+  assert.equal(notificationText("Bill reminder", "vi", translate), "Nhắc hóa đơn");
+});
+
 test("notification dates preserve UTC offsets and do not crash on malformed payloads", () => {
   assert.equal(notificationDate("2026-11-12T12:00:00+07:00", "en"), notificationDate("2026-11-12T05:00:00Z", "en"));
   assert.equal(notificationDate("2026-11-12T05:00:00", "en"), notificationDate("2026-11-12T05:00:00Z", "en"));
