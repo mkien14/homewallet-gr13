@@ -1,0 +1,6 @@
+{
+  "status": "PASS",
+  "default_dev_plan_rejected": true,
+  "reason": "production resources protected by lifecycle.prevent_destroy",
+  "aws_changes_applied": false
+}

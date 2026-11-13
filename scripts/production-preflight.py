@@ -2,11 +2,12 @@
 
 Use --settings with an operator-reviewed copy of deploy/production.example.json.
 Exit 2 means NO-GO. Output contains gate names/counts, never tokens or user data.
-HA/restore/rollback sign-off is a separate gate owned by the infrastructure team.
+HA topology and dated restore/rollback evidence are checked in addition to sign-off.
 """
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import re
 from pathlib import Path
@@ -63,6 +64,11 @@ def evaluate(settings, session):
     if not gate("api_service_exists", not response.get("failures") and len(response.get("services", [])) == 1):
         return results
     service = response["services"][0]
+    resilience_spec = importlib.util.spec_from_file_location(
+        "production_resilience", Path(__file__).with_name("production-resilience-check.py"))
+    resilience = importlib.util.module_from_spec(resilience_spec)
+    resilience_spec.loader.exec_module(resilience)
+    results.extend(resilience.evaluate(settings, session, service))
     gate("api_service_stable", service["runningCount"] >= 1 and service["pendingCount"] == 0 and
          len(service.get("deployments", [])) == 1 and service["deployments"][0].get("rolloutState") == "COMPLETED")
     task = ecs.describe_task_definition(taskDefinition=service["taskDefinition"])["taskDefinition"]
@@ -73,6 +79,9 @@ def evaluate(settings, session):
     gate("production_runtime_profile", env.get("APP_ENV") == "production")
     gate("immutable_api_image", bool(re.search(r"@sha256:[a-f0-9]{64}$", container.get("image", ""))))
     gate("identified_release", bool(re.fullmatch(r"[a-f0-9]{40}", env.get("APP_RELEASE", ""))))
+    gate("reviewed_release_matches_runtime", env.get("APP_RELEASE") == settings.get("release"))
+    gate("reviewed_image_matches_runtime", bool(settings.get("release_image_digest")) and
+         container.get("image", "").endswith("@" + settings.get("release_image_digest", "")))
     approved = settings.get("allowed_household_ids", [])
     approved_valid = isinstance(approved, list) and bool(approved) and all(type(value) is int and value > 1 for value in approved)
     configured_ids = env.get("PRODUCTION_ALLOWED_HOUSEHOLD_IDS", "").split(",")
@@ -155,6 +164,8 @@ def evaluate(settings, session):
             block = s3.get_public_access_block(Bucket=bucket)["PublicAccessBlockConfiguration"]
             gate(f"{kind}_bucket_private", len(block) == 4 and all(block.values()))
             gate(f"{kind}_bucket_encrypted", bool(s3.get_bucket_encryption(Bucket=bucket)["ServerSideEncryptionConfiguration"]["Rules"]))
+            if kind == "frontend":
+                gate("frontend_release_history_versioned", s3.get_bucket_versioning(Bucket=bucket).get("Status") == "Enabled")
     schedules = settings.get("schedule_names", [])
     gate("scheduler_inventory_recorded", len(schedules) == 3 and len(set(schedules)) == 3)
     for name in schedules:

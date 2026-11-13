@@ -1,0 +1,265 @@
+{
+  "status": "PASS",
+  "at_utc": "2026-11-13T08:24:14.746710+00:00",
+  "release": "1bba075aa1a6dd609d180f4610fe4f55d527cbdf",
+  "database_id": "homewallet-dev-mysql",
+  "source_overwritten": false,
+  "backup_lag_seconds": 117.563013,
+  "restore": {
+    "pitr": {
+      "instance": "hw-recovery-20261113-ad8e7e2a-pitr",
+      "seconds": 1697.376596,
+      "application_ready": true,
+      "tls_verified": true,
+      "schema_cleaned": true,
+      "application_auth_gate": true,
+      "migration_006": true,
+      "aggregate_counts": {
+        "users": 27,
+        "households": 17,
+        "household_members": 22,
+        "transactions": 40,
+        "receipts": 30,
+        "household_membership_history": 1
+      },
+      "task": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/7bb05b195d204f0f8377805756f164b5"
+    },
+    "snapshot": {
+      "instance": "hw-recovery-20261113-ad8e7e2a-snapshot",
+      "seconds": 1466.13861,
+      "application_ready": true,
+      "tls_verified": true,
+      "schema_cleaned": true,
+      "application_auth_gate": true,
+      "migration_006": true,
+      "aggregate_counts": {
+        "users": 27,
+        "households": 17,
+        "household_members": 22,
+        "transactions": 40,
+        "receipts": 30,
+        "household_membership_history": 1
+      },
+      "task": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/6943d1c844824265a9a27d3e8b516b22"
+    }
+  },
+  "drills": {
+    "redis_failover": {
+      "started_at_utc": "2026-11-13T07:57:49.116442+00:00",
+      "old_primary": "homewallet-dev-redis-001",
+      "samples": [
+        {
+          "at_utc": "2026-11-13T07:58:22.635638+00:00",
+          "readiness": 200,
+          "status": "available",
+          "primary": "homewallet-dev-redis-002"
+        }
+      ],
+      "new_primary": "homewallet-dev-redis-002",
+      "pass": true,
+      "finished_at_utc": "2026-11-13T07:58:22.635638+00:00",
+      "seconds": 33.519196
+    },
+    "api_task_replacement": {
+      "started_at_utc": "2026-11-13T08:01:20.894554+00:00",
+      "stopped_task": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/e909e7e29776497dbfee494f465f108f",
+      "old_tasks": [
+        "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/e909e7e29776497dbfee494f465f108f",
+        "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/f47708df50934d7392bf39d37037fd73"
+      ],
+      "baseline_azs": [
+        "ap-southeast-1a",
+        "ap-southeast-1b"
+      ],
+      "samples": [
+        {
+          "at_utc": "2026-11-13T08:01:59.554898+00:00",
+          "readiness": 200,
+          "healthy_tasks": 1
+        },
+        {
+          "at_utc": "2026-11-13T08:03:23.938402+00:00",
+          "readiness": 200,
+          "healthy_tasks": 2
+        }
+      ],
+      "pass": true,
+      "finished_at_utc": "2026-11-13T08:03:23.938402+00:00",
+      "seconds": 123.043848
+    },
+    "database_failover": {
+      "started_at_utc": "2026-11-13T08:04:11.210967+00:00",
+      "old_az": "ap-southeast-1a",
+      "samples": [
+        {
+          "at_utc": "2026-11-13T08:04:13.672078+00:00",
+          "readiness": 200,
+          "status": "rebooting",
+          "az": "ap-southeast-1a"
+        },
+        {
+          "at_utc": "2026-11-13T08:04:23.321741+00:00",
+          "readiness": 503,
+          "status": "rebooting",
+          "az": "ap-southeast-1a"
+        },
+        {
+          "at_utc": "2026-11-13T08:04:30.742481+00:00",
+          "readiness": 503,
+          "status": "rebooting",
+          "az": "ap-southeast-1a"
+        },
+        {
+          "at_utc": "2026-11-13T08:04:38.713459+00:00",
+          "readiness": 200,
+          "status": "rebooting",
+          "az": "ap-southeast-1a"
+        },
+        {
+          "at_utc": "2026-11-13T08:04:46.201539+00:00",
+          "readiness": 200,
+          "status": "rebooting",
+          "az": "ap-southeast-1a"
+        },
+        {
+          "at_utc": "2026-11-13T08:04:53.667912+00:00",
+          "readiness": 200,
+          "status": "rebooting",
+          "az": "ap-southeast-1a"
+        },
+        {
+          "at_utc": "2026-11-13T08:05:01.083211+00:00",
+          "readiness": 200,
+          "status": "rebooting",
+          "az": "ap-southeast-1a"
+        },
+        {
+          "at_utc": "2026-11-13T08:05:08.600422+00:00",
+          "readiness": 200,
+          "status": "rebooting",
+          "az": "ap-southeast-1a"
+        },
+        {
+          "at_utc": "2026-11-13T08:05:16.043735+00:00",
+          "readiness": 200,
+          "status": "rebooting",
+          "az": "ap-southeast-1a"
+        },
+        {
+          "at_utc": "2026-11-13T08:05:23.972942+00:00",
+          "readiness": 200,
+          "status": "available",
+          "az": "ap-southeast-1a"
+        },
+        {
+          "at_utc": "2026-11-13T08:05:31.720515+00:00",
+          "readiness": 200,
+          "status": "available",
+          "az": "ap-southeast-1a"
+        },
+        {
+          "at_utc": "2026-11-13T08:05:39.158640+00:00",
+          "readiness": 200,
+          "status": "available",
+          "az": "ap-southeast-1a"
+        },
+        {
+          "at_utc": "2026-11-13T08:05:46.796688+00:00",
+          "readiness": 200,
+          "status": "available",
+          "az": "ap-southeast-1a"
+        },
+        {
+          "at_utc": "2026-11-13T08:05:54.266024+00:00",
+          "readiness": 200,
+          "status": "available",
+          "az": "ap-southeast-1a"
+        },
+        {
+          "at_utc": "2026-11-13T08:06:01.794865+00:00",
+          "readiness": 200,
+          "status": "available",
+          "az": "ap-southeast-1a"
+        },
+        {
+          "at_utc": "2026-11-13T08:06:09.258279+00:00",
+          "readiness": 200,
+          "status": "available",
+          "az": "ap-southeast-1a"
+        },
+        {
+          "at_utc": "2026-11-13T08:06:16.773611+00:00",
+          "readiness": 200,
+          "status": "available",
+          "az": "ap-southeast-1a"
+        },
+        {
+          "at_utc": "2026-11-13T08:06:24.758265+00:00",
+          "readiness": 200,
+          "status": "available",
+          "az": "ap-southeast-1a"
+        },
+        {
+          "at_utc": "2026-11-13T08:06:32.141306+00:00",
+          "readiness": 200,
+          "status": "available",
+          "az": "ap-southeast-1a"
+        },
+        {
+          "at_utc": "2026-11-13T08:06:39.557678+00:00",
+          "readiness": 200,
+          "status": "available",
+          "az": "ap-southeast-1a"
+        }
+      ],
+      "new_az": "ap-southeast-1a",
+      "availability_zone_changed": false,
+      "aws_failover_started_at_utc": "2026-11-13T08:04:19.619000+00:00",
+      "aws_failover_completed_at_utc": "2026-11-13T08:05:08.321000+00:00",
+      "aws_failover_seconds": 48.702,
+      "pass": true,
+      "finished_at_utc": "2026-11-13T08:06:39.557678+00:00",
+      "seconds": 148.346711
+    },
+    "api_rollback": {
+      "pass": true,
+      "baseline": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-api:26",
+      "compatible_revision": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-api:27",
+      "production_guards_preserved": true,
+      "events": [
+        {
+          "phase": "compatible-candidate",
+          "started_at_utc": "2026-11-13T08:16:59.554441+00:00",
+          "finished_at_utc": "2026-11-13T08:19:25.374786+00:00",
+          "seconds": 145.820345,
+          "readiness": true,
+          "release_verified": true,
+          "running": 2
+        },
+        {
+          "phase": "rollback-production-baseline",
+          "started_at_utc": "2026-11-13T08:19:25.375758+00:00",
+          "finished_at_utc": "2026-11-13T08:22:03.506792+00:00",
+          "seconds": 158.131034,
+          "readiness": true,
+          "release_verified": true,
+          "running": 2
+        }
+      ]
+    }
+  },
+  "temporary_resources_cleaned": true,
+  "cleanup_scope": "recovery DB clones, recovery security groups/role, diagnostic analysis/path, temporary probe and rollback definitions",
+  "retained_snapshot": "hw-prod-before-core-20261113-ad8e7e2a",
+  "retained_snapshot_until": "2026-11-27",
+  "log_group": "/ecs/hw-recovery-20261113-ad8e7e2a",
+  "limitations": [
+    "Restore checks used isolated copies and the candidate runtime; no primary DNS cutover to a restored copy.",
+    "Durations include operator polling and are upper bounds for validated readiness.",
+    "RDS reports a completed requested Multi-AZ failover; the AvailabilityZone metadata remained unchanged.",
+    "CPU target tracking policy was checked; no sustained load test or AZ outage was simulated."
+  ],
+  "account": "179923444714",
+  "region": "ap-southeast-1",
+  "image_digest": "sha256:74d74145723517d20330c9bd9d34cc58e8f41dbda96a8da8a1dfd629b6699527"
+}

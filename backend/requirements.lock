@@ -1,6 +1,6 @@
 # Runtime dependency lock for Python 3.12, resolved in the built Linux amd64 image.
 # All transitive runtime versions are pinned; SHA256 values come from PyPI release metadata.
-# requirements.txt SHA256 (LF): e4329dce2dc00e42894ded5ed875a9da2ba2fc5fa62b8edf1b295ae7fb15cb2d
+# requirements.txt SHA256 (LF): cc4069ad47db8ff21d2902e51aa425a909a53248a8c0940d8a975e8385fde43c
 # Regenerate with pip-compile --generate-hashes --strip-extras -o requirements.lock requirements.txt,
 # then build and scan the complete image. Native wheels must support musllinux.
 

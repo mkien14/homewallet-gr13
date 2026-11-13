@@ -50,13 +50,14 @@ resource "aws_ecs_task_definition" "jobs" {
   }
 
   container_definitions = jsonencode([merge({
-    name        = "jobs"
-    image       = var.jobs_image
-    essential   = true
-    stopTimeout = 120
-    command     = ["python", "-m", "jobs.weekly_report"]
-    environment = [for k, v in var.jobs_environment : { name = k, value = v }]
-    secrets     = [for k, v in var.jobs_secrets : { name = k, valueFrom = v }]
+    name         = "jobs"
+    image        = var.jobs_image
+    essential    = true
+    stopTimeout  = 120
+    portMappings = []
+    command      = ["python", "-m", "jobs.weekly_report"]
+    environment  = [for k, v in var.jobs_environment : { name = k, value = v }]
+    secrets      = [for k, v in var.jobs_secrets : { name = k, valueFrom = v }]
     logConfiguration = {
       logDriver = "awslogs"
       options = {
@@ -201,7 +202,10 @@ resource "aws_scheduler_schedule" "jobs" {
 }
 
 resource "aws_scheduler_schedule" "jobs_release" {
-  lifecycle { ignore_changes = [target[0].ecs_parameters[0].task_definition_arn] }
+  lifecycle {
+    prevent_destroy = true
+    ignore_changes  = [target[0].ecs_parameters[0].task_definition_arn]
+  }
   for_each = var.autoscaling_enabled ? local.scheduled_jobs : {}
 
   name                         = each.value.name

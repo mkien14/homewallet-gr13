@@ -11,3 +11,15 @@ variable "throttling_rate_limit" {
     error_message = "Choose a reviewed API rate between 1 and 100 requests/second."
   }
 }
+variable "service_discovery_arn" {
+  type    = string
+  default = null
+}
+variable "service_discovery_enabled" {
+  type    = bool
+  default = false
+}
+variable "api_security_group_id" {
+  type    = string
+  default = null
+}

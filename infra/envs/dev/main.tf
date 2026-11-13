@@ -57,6 +57,7 @@ module "network" {
   cidr                         = "10.0.0.0/16"
   azs                          = ["ap-southeast-1a", "ap-southeast-1b"]
   allow_cloudfront_http_origin = !var.close_legacy_http_origin
+  nat_gateway_per_az           = var.resilience_hardening_enabled
 }
 
 module "ecr" {
@@ -68,9 +69,15 @@ module "ecr" {
 module "cache" {
   source = "../../modules/cache"
 
-  name              = "homewallet-dev"
-  subnet_ids        = module.network.data_subnet_ids
-  security_group_id = module.network.sg_ids.cache
+  name                       = "homewallet-dev"
+  subnet_ids                 = module.network.data_subnet_ids
+  security_group_id          = module.network.sg_ids.cache
+  num_cache_clusters         = var.resilience_hardening_enabled ? 2 : 1
+  automatic_failover_enabled = var.resilience_hardening_enabled
+  multi_az_enabled           = var.resilience_hardening_enabled
+  snapshot_retention_limit   = var.resilience_hardening_enabled ? 7 : 0
+  preferred_azs              = var.resilience_hardening_enabled ? ["ap-southeast-1a", "ap-southeast-1b"] : null
+  apply_immediately          = var.resilience_hardening_enabled ? var.resilience_apply_immediately : true
 }
 
 locals {
@@ -101,9 +108,14 @@ module "compute" {
   image               = local.image
   receipts_bucket_arn = module.storage.bucket_arn
 
-  desired_count               = var.api_desired_count
-  job_schedules_enabled       = var.job_schedules_enabled
-  container_hardening_enabled = var.application_hardening_enabled
+  desired_count                 = var.api_desired_count
+  job_schedules_enabled         = var.job_schedules_enabled
+  container_hardening_enabled   = var.application_hardening_enabled
+  autoscaling_enabled           = var.resilience_hardening_enabled
+  log_retention_days            = var.resilience_hardening_enabled ? 30 : 14
+  service_discovery_arn         = var.enable_api_service_discovery ? aws_service_discovery_service.api[0].arn : null
+  service_discovery_enabled     = var.enable_api_service_discovery
+  readiness_healthcheck_enabled = var.enable_api_service_discovery || var.resilience_hardening_enabled
 
   jobs_image = var.application_hardening_enabled ? local.image : coalesce(var.jobs_image_uri, "${module.ecr.repository_url}:${var.jobs_image_tag}")
 
@@ -120,7 +132,8 @@ module "compute" {
       module.cache.auth_token_secret_arn,
     ],
     var.use_db_runtime_credentials ? [local.runtime_db_secret_arn] : [],
-    var.application_hardening_enabled ? [aws_secretsmanager_secret.origin_verification[0].arn] : [aws_secretsmanager_secret.gemini.arn]
+    var.application_hardening_enabled ? [] : [aws_secretsmanager_secret.gemini.arn],
+    var.application_hardening_enabled || var.application_origin_verification_enabled ? [aws_secretsmanager_secret.origin_verification[0].arn] : []
   )
 
   worker_image     = var.application_hardening_enabled ? local.image : coalesce(var.worker_image_uri, "${module.ecr.repository_url}:${var.worker_image_tag}")
@@ -184,29 +197,40 @@ module "compute" {
     REDIS_AUTH_TOKEN  = module.cache.auth_token_secret_arn
     VAPID_PRIVATE_KEY = data.aws_secretsmanager_secret.vapid_private_key.arn
     }, var.application_hardening_enabled ? {
-    ORIGIN_VERIFY_HEADER = aws_secretsmanager_secret.origin_verification[0].arn
-  } : { GEMINI_API_KEY = aws_secretsmanager_secret.gemini.arn })
+    ORIGIN_VERIFY_HEADER       = aws_secretsmanager_secret.origin_verification[0].arn
+    } : merge({ GEMINI_API_KEY = aws_secretsmanager_secret.gemini.arn }, var.application_origin_verification_enabled ? {
+      ORIGIN_VERIFY_HEADER     = aws_secretsmanager_secret.origin_verification[0].arn
+  } : {}))
 }
 
 module "data" {
   source = "../../modules/data"
 
-  name                = "homewallet-dev"
-  data_subnet_ids     = module.network.data_subnet_ids
-  sg_db_id            = module.network.sg_ids.db
-  instance_class      = "db.t4g.micro"
-  deletion_protection = false
-  skip_final_snapshot = true
+  name                       = "homewallet-dev"
+  data_subnet_ids            = module.network.data_subnet_ids
+  sg_db_id                   = module.network.sg_ids.db
+  instance_class             = "db.t4g.micro"
+  multi_az                   = var.resilience_hardening_enabled
+  backup_retention           = var.resilience_hardening_enabled ? 14 : 7
+  deletion_protection        = var.resilience_hardening_enabled
+  skip_final_snapshot        = !var.resilience_hardening_enabled
+  delete_automated_backups   = !var.resilience_hardening_enabled
+  copy_tags_to_snapshot      = var.resilience_hardening_enabled
+  auto_minor_version_upgrade = !var.resilience_hardening_enabled
+  backup_window              = var.resilience_hardening_enabled ? "18:00-19:00" : null
+  maintenance_window         = var.resilience_hardening_enabled ? "sun:20:00-sun:21:00" : null
+  apply_immediately          = var.resilience_hardening_enabled ? var.resilience_apply_immediately : true
 }
 
 module "migrate" {
   source = "../../modules/migrate"
 
-  name          = "homewallet-dev"
-  cluster_name  = module.compute.cluster_name
-  image         = coalesce(var.migrate_image_uri, "${module.ecr.repository_url}:${var.migrate_image_tag}")
-  db_host       = module.data.address
-  db_secret_arn = module.data.secret_arn
+  name               = "homewallet-dev"
+  cluster_name       = module.compute.cluster_name
+  image              = coalesce(var.migrate_image_uri, "${module.ecr.repository_url}:${var.migrate_image_tag}")
+  db_host            = module.data.address
+  db_secret_arn      = module.data.secret_arn
+  log_retention_days = var.resilience_hardening_enabled ? 30 : 14
 
   enable_separate_execution_role = var.enable_db_runtime_setup
   legacy_execution_role_arn      = module.compute.execution_role_arn
@@ -218,6 +242,7 @@ module "migrate" {
 
 module "cognito" {
   self_signup_enabled = !var.application_hardening_enabled
+  log_retention_days  = var.resilience_hardening_enabled ? 30 : 14
   source              = "../../modules/cognito"
 
   name = "homewallet-dev"
@@ -231,7 +256,7 @@ module "cognito" {
 
   auth_email_sender   = var.weekly_report_sender
   enable_dev_client   = !var.application_hardening_enabled
-  deletion_protection = "INACTIVE"
+  deletion_protection = var.application_hardening_enabled ? "ACTIVE" : "INACTIVE"
 
 
 }
@@ -302,9 +327,12 @@ module "api_https" {
   count  = var.enable_api_https_gateway ? 1 : 0
   source = "../../modules/api-https"
 
-  name                  = "homewallet-dev"
-  vpc_id                = module.network.vpc_id
-  subnet_ids            = module.network.app_subnet_ids
-  alb_security_group_id = module.network.sg_ids.alb
-  alb_listener_arn      = module.compute.alb_listener_arn
+  name                      = "homewallet-dev"
+  vpc_id                    = module.network.vpc_id
+  subnet_ids                = module.network.app_subnet_ids
+  alb_security_group_id     = module.network.sg_ids.alb
+  alb_listener_arn          = module.compute.alb_listener_arn
+  api_security_group_id     = module.network.sg_ids.app
+  service_discovery_arn     = var.enable_api_service_discovery ? aws_service_discovery_service.api[0].arn : null
+  service_discovery_enabled = var.enable_api_service_discovery
 }

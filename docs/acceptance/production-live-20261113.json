@@ -1,0 +1,1129 @@
+{
+  "status": "PASS_CLOSED_CORE_RELEASE",
+  "at_utc": "2026-11-13T08:46:21.268593+00:00",
+  "account": "179923444714",
+  "region": "ap-southeast-1",
+  "release": "1bba075aa1a6dd609d180f4610fe4f55d527cbdf",
+  "ecr_digest": "sha256:74d74145723517d20330c9bd9d34cc58e8f41dbda96a8da8a1dfd629b6699527",
+  "candidate_run": 43375269892,
+  "artifact_id": 14014451095,
+  "archive_sha256": "db5198be37cac02dc9b300eb7fb01c689310b33f27811677f805979c5a29cfc8",
+  "container_scan": {
+    "high": 0,
+    "critical": 0,
+    "secrets": 0,
+    "unfixed_findings_included": true
+  },
+  "public_url": "https://daoedidcrnf1f.cloudfront.net",
+  "edge": {
+    "status": "Deployed",
+    "api_origin": "4o95mvff40.execute-api.ap-southeast-1.amazonaws.com",
+    "origin_protocol": "https-only",
+    "api_cache_disabled": true,
+    "legacy_public_http_rule_removed": true
+  },
+  "services": {
+    "api": {
+      "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-api:28",
+      "desired": 2,
+      "running": 2,
+      "pending": 0,
+      "availability_zones": [
+        "ap-southeast-1a",
+        "ap-southeast-1b"
+      ],
+      "health": [
+        "HEALTHY",
+        "HEALTHY"
+      ]
+    },
+    "worker": {
+      "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-worker:5",
+      "desired": 1,
+      "running": 1,
+      "pending": 0,
+      "availability_zones": [
+        "ap-southeast-1b"
+      ],
+      "health": [
+        "UNKNOWN"
+      ]
+    }
+  },
+  "jobs_task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:5",
+  "database": {
+    "DBInstanceIdentifier": "homewallet-dev-mysql",
+    "DBInstanceClass": "db.t4g.micro",
+    "DBInstanceStatus": "available",
+    "MultiAZ": true,
+    "BackupRetentionPeriod": 14,
+    "DeletionProtection": true,
+    "StorageEncrypted": true,
+    "PubliclyAccessible": false
+  },
+  "redis": {
+    "ReplicationGroupId": "homewallet-dev-redis",
+    "Status": "available",
+    "AutomaticFailover": "enabled",
+    "MultiAZ": "enabled",
+    "TransitEncryptionEnabled": true,
+    "AtRestEncryptionEnabled": true,
+    "AuthTokenEnabled": true,
+    "SnapshotRetentionLimit": 7
+  },
+  "preflight": {
+    "status": "GO",
+    "checks": 90,
+    "failed": 0
+  },
+  "approved_households": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    11,
+    12,
+    13,
+    22,
+    23,
+    24,
+    25,
+    26
+  ],
+  "held_household_1": {
+    "excluded": true,
+    "data_preserved": true,
+    "no_dlq_redrive_or_purge": true
+  },
+  "api_smoke": {
+    "status": "PASS",
+    "checks_recorded": 92,
+    "production_crud_budget_csv_recurring": true,
+    "write_quota_429_retry_after": true,
+    "fixture_household_removed": true,
+    "fixture_cognito_users_removed": true,
+    "no_ses_or_push_sent": true,
+    "checks": [
+      {
+        "method": "GET",
+        "path": "/api/me",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 1.816,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/households",
+        "expected": 201,
+        "actual": 201,
+        "seconds": 0.341,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/me",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.205,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/me",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.32,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/categories",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.236,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/transactions",
+        "expected": 201,
+        "actual": 201,
+        "seconds": 0.281,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/transactions",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.274,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/transactions/55",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.24,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/transactions",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.234,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/dashboard?period=2026-11",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.233,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/households/27/export.csv",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.27,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/transactions/55",
+        "expected": 204,
+        "actual": 204,
+        "seconds": 0.256,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/households/1/members",
+        "expected": 404,
+        "actual": 404,
+        "seconds": 0.232,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/transactions",
+        "expected": 400,
+        "actual": 400,
+        "seconds": 0.245,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/me",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.134,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/categories",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.139,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/transactions",
+        "expected": 201,
+        "actual": 201,
+        "seconds": 0.131,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/transactions",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.106,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/transactions/56",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.112,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/transactions",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.104,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/dashboard?period=2026-11",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.109,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/households/27/export.csv",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.157,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/transactions/56",
+        "expected": 204,
+        "actual": 204,
+        "seconds": 0.112,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/households/1/members",
+        "expected": 404,
+        "actual": 404,
+        "seconds": 0.095,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/transactions",
+        "expected": 400,
+        "actual": 400,
+        "seconds": 0.119,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/me",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.333,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/me",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.255,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/categories",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.261,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/transactions",
+        "expected": 201,
+        "actual": 201,
+        "seconds": 0.273,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/transactions",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.242,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/transactions/57",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.238,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/transactions",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.239,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/dashboard?period=2026-11",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.292,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/households/27/export.csv",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.276,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/transactions/57",
+        "expected": 204,
+        "actual": 204,
+        "seconds": 0.293,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/households/1/members",
+        "expected": 404,
+        "actual": 404,
+        "seconds": 0.235,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/transactions",
+        "expected": 400,
+        "actual": 400,
+        "seconds": 0.252,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/me",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.188,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/categories",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.153,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/transactions",
+        "expected": 201,
+        "actual": 201,
+        "seconds": 0.14,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/transactions",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.169,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/transactions/58",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.155,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/transactions",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.216,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/dashboard?period=2026-11",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.134,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/households/27/export.csv",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.089,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/transactions/58",
+        "expected": 204,
+        "actual": 204,
+        "seconds": 0.178,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/households/1/members",
+        "expected": 404,
+        "actual": 404,
+        "seconds": 0.166,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/transactions",
+        "expected": 400,
+        "actual": 400,
+        "seconds": 0.101,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/me",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.655,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/me",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.425,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/categories",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.33,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/budgets/2026-11",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.299,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "PUT",
+        "path": "/api/budgets/2026-11",
+        "expected": 201,
+        "actual": 201,
+        "seconds": 0.333,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/budgets/2026-11/suggest",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.342,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/community/posts",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.262,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/community/posts",
+        "expected": 403,
+        "actual": 403,
+        "seconds": 0.228,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/recurring-bills",
+        "expected": 201,
+        "actual": 201,
+        "seconds": 0.237,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/recurring-bills/3",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.304,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/recurring-bills/3",
+        "expected": 204,
+        "actual": 204,
+        "seconds": 0.27,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/transactions",
+        "expected": 201,
+        "actual": 201,
+        "seconds": 0.242,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/transactions",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.235,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/transactions/59",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.223,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/transactions",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.242,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/dashboard?period=2026-11",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.251,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/households/27/export.csv",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.29,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/transactions/59",
+        "expected": 204,
+        "actual": 204,
+        "seconds": 0.286,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/households/1/members",
+        "expected": 404,
+        "actual": 404,
+        "seconds": 0.218,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/transactions",
+        "expected": 400,
+        "actual": 400,
+        "seconds": 0.282,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/receipts",
+        "expected": 503,
+        "actual": 503,
+        "seconds": 0.209,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/me",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.705,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/categories",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.274,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/budgets/2026-11",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.252,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "PUT",
+        "path": "/api/budgets/2026-11",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.191,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/budgets/2026-11/suggest",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.196,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/community/posts",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.25,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/community/posts",
+        "expected": 403,
+        "actual": 403,
+        "seconds": 0.175,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/recurring-bills",
+        "expected": 201,
+        "actual": 201,
+        "seconds": 0.277,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/recurring-bills/4",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.254,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/recurring-bills/4",
+        "expected": 204,
+        "actual": 204,
+        "seconds": 0.2,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/transactions",
+        "expected": 201,
+        "actual": 201,
+        "seconds": 0.141,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/transactions",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.104,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/transactions/60",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.201,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/transactions",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.114,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/dashboard?period=2026-11",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.162,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/households/27/export.csv",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.122,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/transactions/60",
+        "expected": 204,
+        "actual": 204,
+        "seconds": 0.178,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/households/1/members",
+        "expected": 404,
+        "actual": 404,
+        "seconds": 0.091,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/transactions",
+        "expected": 400,
+        "actual": 400,
+        "seconds": 0.136,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/receipts",
+        "expected": 503,
+        "actual": 503,
+        "seconds": 0.11,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/me",
+        "expected": 403,
+        "actual": 403,
+        "seconds": 0.124,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/me",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.269,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/households/27/delete",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.286,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      }
+    ]
+  },
+  "https_shadow": {
+    "at_utc": "2026-11-13T08:43:49.311788+00:00",
+    "checks": [
+      {
+        "path": "/api/me",
+        "origin_header": false,
+        "expected": 403,
+        "actual": 403,
+        "seconds": 0.267
+      },
+      {
+        "path": "/api/me",
+        "origin_header": true,
+        "expected": 401,
+        "actual": 401,
+        "seconds": 0.249
+      },
+      {
+        "path": "/api/ready",
+        "origin_header": true,
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.265
+      },
+      {
+        "path": "/api/release",
+        "origin_header": true,
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.225,
+        "release_matches": true
+      }
+    ]
+  },
+  "post_failover_runtime": {
+    "event": "RUNTIME_COMPATIBILITY_PASS",
+    "mysql_tls": true,
+    "redis_tls_resp2_auth": true,
+    "redis_8_client_atomic_lua": true,
+    "test_keys_removed": true,
+    "household_1_retained": true
+  },
+  "frontend_checkpoint": {
+    "at_utc": "2026-11-13T08:33:55.477560+00:00",
+    "bucket": "hw-frontend-dev-179923444714",
+    "release": "1bba075aa1a6dd609d180f4610fe4f55d527cbdf",
+    "objects": [
+      {
+        "key": "index.html",
+        "source_version": "null",
+        "restored_version": "miB058t.V4e1eWBWH_kq5dhiyZEfpFmQ",
+        "sha256": "096124f1fa8c82f80792a0c44f2727508e4e6ee4d6f3b81a7c2cc6d3dc6913b3"
+      },
+      {
+        "key": "release.json",
+        "source_version": "null",
+        "restored_version": "1.rQfU1G07LIonUQQzqEAHN2bi_GxpCj",
+        "sha256": "1f09da7df569f8a076da4cf7d3137f75be97decfeab784240ac74c28a30d9108"
+      },
+      {
+        "key": "sw.js",
+        "source_version": "null",
+        "restored_version": "55uq7ODmvcLAHXHMZLWiNZLjvgkZB2Mo",
+        "sha256": "6d335504c1dfdea20b99ba97f3b2f61406731f77ce76fda83dc1b57284c690e5"
+      },
+      {
+        "key": "manifest.webmanifest",
+        "source_version": "null",
+        "restored_version": "7YiG5ckM2uNRn5.OpZ3QXPE36DiasEz1",
+        "sha256": "56f0ed0523bbe68353221a1e78f442e7e4bc329698193316c63a4a7b42e2d4eb"
+      }
+    ],
+    "scope": "Identical candidate entry points; verifies version-copy recovery, not compatibility with another frontend release.",
+    "status": "PASS"
+  },
+  "features": {
+    "ocr": false,
+    "gemini": false,
+    "schedules": "DISABLED"
+  },
+  "monthly_budget_usd": 100,
+  "budget_is_hard_cap": false,
+  "terraform_no_drift": true,
+  "tests": {
+    "terraform_dev_mock": 3,
+    "terraform_separate_prod_mock": 3,
+    "release_script_tests": 27
+  },
+  "source_changes_committed": false,
+  "source_branch": "fix/production-live-rollout",
+  "default_dev_downgrade_guard": {
+    "status": "PASS",
+    "default_dev_plan_rejected": true,
+    "reason": "production resources protected by lifecycle.prevent_destroy",
+    "aws_changes_applied": false
+  }
+}

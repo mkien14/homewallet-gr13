@@ -1,0 +1,895 @@
+{
+  "reviewed_at_utc": "2026-11-13T09:44:25.046246+00:00",
+  "repository": "mkien14/homewallet-gr13",
+  "local_branch": "fix/production-live-rollout",
+  "base_main": "1bba075aa1a6dd609d180f4610fe4f55d527cbdf",
+  "scope": "read_only_github_review_and_local_fix",
+  "prs": [
+    {
+      "number": 105,
+      "title": "chore(deps): bump hashicorp/setup-terraform from 3 to 4",
+      "url": "https://github.com/mkien14/homewallet-gr13/pull/105",
+      "head": "dependabot/github_actions/hashicorp/setup-terraform-4",
+      "sha": "43a7f9d765df59c4dbccab06d18dce6127f9050c",
+      "base_sha": "df40bd1a3c838cbf7a6ff1e587c72d84a1a6b60c",
+      "mergeable": true,
+      "mergeable_state": "clean",
+      "checks": [
+        {
+          "name": "Community authorization and MySQL acceptance",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362036152/job/131677558988",
+          "id": 131677558988,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362036152/job/131677558988",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677558988/annotations"
+        },
+        {
+          "name": "Terraform format and validate",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362036152/job/131677558956",
+          "id": 131677558956,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362036152/job/131677558956",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677558956/annotations"
+        },
+        {
+          "name": "Frontend lint, test and build",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362036152/job/131677558883",
+          "id": 131677558883,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362036152/job/131677558883",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677558883/annotations"
+        },
+        {
+          "name": "Build backend image",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362036152/job/131677558829",
+          "id": 131677558829,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362036152/job/131677558829",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677558829/annotations"
+        },
+        {
+          "name": "OCR pilot offline checks",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362036152/job/131677558806",
+          "id": 131677558806,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362036152/job/131677558806",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677558806/annotations"
+        },
+        {
+          "name": "Backend tests",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362036152/job/131677558509",
+          "id": 131677558509,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362036152/job/131677558509",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677558509/annotations"
+        }
+      ],
+      "files": [
+        ".github/workflows/ci.yml",
+        ".github/workflows/deploy-prod.yml"
+      ],
+      "recommendation": "merge_after_current_base_ci_passes"
+    },
+    {
+      "number": 106,
+      "title": "chore(deps): bump aws-actions/configure-aws-credentials from 5 to 6",
+      "url": "https://github.com/mkien14/homewallet-gr13/pull/106",
+      "head": "dependabot/github_actions/aws-actions/configure-aws-credentials-6",
+      "sha": "2420508faa6c755c10a3c768e0b28e29d1479571",
+      "base_sha": "df40bd1a3c838cbf7a6ff1e587c72d84a1a6b60c",
+      "mergeable": true,
+      "mergeable_state": "clean",
+      "checks": [
+        {
+          "name": "OCR pilot offline checks",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362043176/job/131677582210",
+          "id": 131677582210,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362043176/job/131677582210",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677582210/annotations"
+        },
+        {
+          "name": "Community authorization and MySQL acceptance",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362043176/job/131677582148",
+          "id": 131677582148,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362043176/job/131677582148",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677582148/annotations"
+        },
+        {
+          "name": "Backend tests",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362043176/job/131677582028",
+          "id": 131677582028,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362043176/job/131677582028",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677582028/annotations"
+        },
+        {
+          "name": "Frontend lint, test and build",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362043176/job/131677581993",
+          "id": 131677581993,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362043176/job/131677581993",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677581993/annotations"
+        },
+        {
+          "name": "Build backend image",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362043176/job/131677581985",
+          "id": 131677581985,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362043176/job/131677581985",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677581985/annotations"
+        },
+        {
+          "name": "Terraform format and validate",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362043176/job/131677581750",
+          "id": 131677581750,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362043176/job/131677581750",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677581750/annotations"
+        }
+      ],
+      "files": [
+        ".github/workflows/deploy-dev.yml",
+        ".github/workflows/deploy-prod.yml",
+        ".github/workflows/oidc-check.yml"
+      ],
+      "recommendation": "merge_after_current_base_ci_passes"
+    },
+    {
+      "number": 107,
+      "title": "chore(deps): bump actions/upload-artifact from 4 to 7",
+      "url": "https://github.com/mkien14/homewallet-gr13/pull/107",
+      "head": "dependabot/github_actions/actions/upload-artifact-7",
+      "sha": "9eb458f39abc059069181a3a76c3d9384be5580d",
+      "base_sha": "df40bd1a3c838cbf7a6ff1e587c72d84a1a6b60c",
+      "mergeable": true,
+      "mergeable_state": "clean",
+      "checks": [
+        {
+          "name": "Community authorization and MySQL acceptance",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362041931/job/131677579269",
+          "id": 131677579269,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362041931/job/131677579269",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677579269/annotations"
+        },
+        {
+          "name": "Build backend image",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362041931/job/131677579047",
+          "id": 131677579047,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362041931/job/131677579047",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677579047/annotations"
+        },
+        {
+          "name": "Terraform format and validate",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362041931/job/131677579045",
+          "id": 131677579045,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362041931/job/131677579045",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677579045/annotations"
+        },
+        {
+          "name": "Backend tests",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362041931/job/131677578927",
+          "id": 131677578927,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362041931/job/131677578927",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677578927/annotations"
+        },
+        {
+          "name": "Frontend lint, test and build",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362041931/job/131677578895",
+          "id": 131677578895,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362041931/job/131677578895",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677578895/annotations"
+        },
+        {
+          "name": "OCR pilot offline checks",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362041931/job/131677578663",
+          "id": 131677578663,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362041931/job/131677578663",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677578663/annotations"
+        }
+      ],
+      "files": [
+        ".github/workflows/deploy-prod.yml",
+        ".github/workflows/release-candidate.yml"
+      ],
+      "recommendation": "merge_after_current_base_ci_passes"
+    },
+    {
+      "number": 108,
+      "title": "chore(deps): bump actions/setup-python from 6 to 7",
+      "url": "https://github.com/mkien14/homewallet-gr13/pull/108",
+      "head": "dependabot/github_actions/actions/setup-python-7",
+      "sha": "c61cb5d43b11e80caeb0f2e4c67d9cc17049a27d",
+      "base_sha": "df40bd1a3c838cbf7a6ff1e587c72d84a1a6b60c",
+      "mergeable": true,
+      "mergeable_state": "clean",
+      "checks": [
+        {
+          "name": "Frontend lint, test and build",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362048533/job/131677600320",
+          "id": 131677600320,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362048533/job/131677600320",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677600320/annotations"
+        },
+        {
+          "name": "Community authorization and MySQL acceptance",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362048533/job/131677600105",
+          "id": 131677600105,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362048533/job/131677600105",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677600105/annotations"
+        },
+        {
+          "name": "Build backend image",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362048533/job/131677600030",
+          "id": 131677600030,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362048533/job/131677600030",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677600030/annotations"
+        },
+        {
+          "name": "OCR pilot offline checks",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362048533/job/131677599986",
+          "id": 131677599986,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362048533/job/131677599986",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677599986/annotations"
+        },
+        {
+          "name": "Backend tests",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362048533/job/131677599926",
+          "id": 131677599926,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362048533/job/131677599926",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677599926/annotations"
+        },
+        {
+          "name": "Terraform format and validate",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362048533/job/131677599625",
+          "id": 131677599625,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362048533/job/131677599625",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677599625/annotations"
+        }
+      ],
+      "files": [
+        ".github/workflows/ci.yml",
+        ".github/workflows/deploy-prod.yml",
+        ".github/workflows/release-candidate.yml"
+      ],
+      "recommendation": "merge_after_current_base_ci_passes"
+    },
+    {
+      "number": 109,
+      "title": "chore(deps): bump actions/download-artifact from 4 to 8",
+      "url": "https://github.com/mkien14/homewallet-gr13/pull/109",
+      "head": "dependabot/github_actions/actions/download-artifact-8",
+      "sha": "8cbf53a2549665949429da37e705eb367ee19a51",
+      "base_sha": "df40bd1a3c838cbf7a6ff1e587c72d84a1a6b60c",
+      "mergeable": true,
+      "mergeable_state": "clean",
+      "checks": [
+        {
+          "name": "Backend tests",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362053653/job/131677616094",
+          "id": 131677616094,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362053653/job/131677616094",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677616094/annotations"
+        },
+        {
+          "name": "Frontend lint, test and build",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362053653/job/131677616013",
+          "id": 131677616013,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362053653/job/131677616013",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677616013/annotations"
+        },
+        {
+          "name": "Build backend image",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362053653/job/131677615995",
+          "id": 131677615995,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362053653/job/131677615995",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677615995/annotations"
+        },
+        {
+          "name": "Terraform format and validate",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362053653/job/131677615986",
+          "id": 131677615986,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362053653/job/131677615986",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677615986/annotations"
+        },
+        {
+          "name": "OCR pilot offline checks",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362053653/job/131677615979",
+          "id": 131677615979,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362053653/job/131677615979",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677615979/annotations"
+        },
+        {
+          "name": "Community authorization and MySQL acceptance",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362053653/job/131677615679",
+          "id": 131677615679,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362053653/job/131677615679",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677615679/annotations"
+        }
+      ],
+      "files": [
+        ".github/workflows/deploy-prod.yml"
+      ],
+      "recommendation": "merge_after_current_base_ci_passes"
+    },
+    {
+      "number": 110,
+      "title": "chore(deps): bump actions/checkout from 5 to 7",
+      "url": "https://github.com/mkien14/homewallet-gr13/pull/110",
+      "head": "dependabot/github_actions/actions/checkout-7",
+      "sha": "4e65984f8e58ad5d6a792edc6beaf0ea1c5d5278",
+      "base_sha": "df40bd1a3c838cbf7a6ff1e587c72d84a1a6b60c",
+      "mergeable": true,
+      "mergeable_state": "clean",
+      "checks": [
+        {
+          "name": "Frontend lint, test and build",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362058909/job/131677633063",
+          "id": 131677633063,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362058909/job/131677633063",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677633063/annotations"
+        },
+        {
+          "name": "Community authorization and MySQL acceptance",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362058909/job/131677632893",
+          "id": 131677632893,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362058909/job/131677632893",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677632893/annotations"
+        },
+        {
+          "name": "Backend tests",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362058909/job/131677632805",
+          "id": 131677632805,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362058909/job/131677632805",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677632805/annotations"
+        },
+        {
+          "name": "Terraform format and validate",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362058909/job/131677632783",
+          "id": 131677632783,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362058909/job/131677632783",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677632783/annotations"
+        },
+        {
+          "name": "Build backend image",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362058909/job/131677632754",
+          "id": 131677632754,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362058909/job/131677632754",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677632754/annotations"
+        },
+        {
+          "name": "OCR pilot offline checks",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362058909/job/131677632500",
+          "id": 131677632500,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43362058909/job/131677632500",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131677632500/annotations"
+        }
+      ],
+      "files": [
+        ".github/workflows/ci.yml",
+        ".github/workflows/deploy-dev.yml",
+        ".github/workflows/deploy-prod.yml",
+        ".github/workflows/release-candidate.yml"
+      ],
+      "recommendation": "merge_after_current_base_ci_passes"
+    },
+    {
+      "number": 124,
+      "title": "chore(deps): update cryptography requirement from >=42 to >=50.0.2 in /backend",
+      "url": "https://github.com/mkien14/homewallet-gr13/pull/124",
+      "head": "dependabot/pip/backend/cryptography-gte-50.0.2",
+      "sha": "47959c8e6aa1879ab7a2a74f080ebb3e0aaeecea",
+      "base_sha": "1bba075aa1a6dd609d180f4610fe4f55d527cbdf",
+      "mergeable": true,
+      "mergeable_state": "unstable",
+      "checks": [
+        {
+          "name": "Build backend image",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374882936/job/131718933481",
+          "id": 131718933481,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374882936/job/131718933481",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131718933481/annotations"
+        },
+        {
+          "name": "Backend tests",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374882936/job/131718933476",
+          "id": 131718933476,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374882936/job/131718933476",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131718933476/annotations"
+        },
+        {
+          "name": "Terraform format and validate",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374882936/job/131718933434",
+          "id": 131718933434,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374882936/job/131718933434",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131718933434/annotations"
+        },
+        {
+          "name": "Frontend lint, test and build",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374882936/job/131718933350",
+          "id": 131718933350,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374882936/job/131718933350",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131718933350/annotations"
+        },
+        {
+          "name": "OCR pilot offline checks",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374882936/job/131718933335",
+          "id": 131718933335,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374882936/job/131718933335",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131718933335/annotations"
+        },
+        {
+          "name": "Community authorization and MySQL acceptance",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374882936/job/131718933073",
+          "id": 131718933073,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374882936/job/131718933073",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131718933073/annotations"
+        }
+      ],
+      "files": [
+        "backend/requirements.txt"
+      ],
+      "recommendation": "supersede_with_local_fix_then_close_after_merge",
+      "failure": {
+        "check": "Backend tests",
+        "file": "backend/tests/test_dependency_lock.py",
+        "line": 26,
+        "cause": "requirements_fingerprint_not_updated",
+        "passed": 221,
+        "skipped": 59,
+        "failed": 1
+      }
+    },
+    {
+      "number": 125,
+      "title": "chore(deps-dev): update pytest requirement from >=8 to >=9.2.0 in /backend",
+      "url": "https://github.com/mkien14/homewallet-gr13/pull/125",
+      "head": "dependabot/pip/backend/pytest-gte-9.2.0",
+      "sha": "7913fe089ae29c29e48c1eacf8b02f45b22eaa6c",
+      "base_sha": "1bba075aa1a6dd609d180f4610fe4f55d527cbdf",
+      "mergeable": true,
+      "mergeable_state": "clean",
+      "checks": [
+        {
+          "name": "OCR pilot offline checks",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374892574/job/131718964548",
+          "id": 131718964548,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374892574/job/131718964548",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131718964548/annotations"
+        },
+        {
+          "name": "Frontend lint, test and build",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374892574/job/131718964452",
+          "id": 131718964452,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374892574/job/131718964452",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131718964452/annotations"
+        },
+        {
+          "name": "Community authorization and MySQL acceptance",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374892574/job/131718964396",
+          "id": 131718964396,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374892574/job/131718964396",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131718964396/annotations"
+        },
+        {
+          "name": "Build backend image",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374892574/job/131718964379",
+          "id": 131718964379,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374892574/job/131718964379",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131718964379/annotations"
+        },
+        {
+          "name": "Backend tests",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374892574/job/131718964335",
+          "id": 131718964335,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374892574/job/131718964335",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131718964335/annotations"
+        },
+        {
+          "name": "Terraform format and validate",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374892574/job/131718964154",
+          "id": 131718964154,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374892574/job/131718964154",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131718964154/annotations"
+        }
+      ],
+      "files": [
+        "backend/requirements-dev.txt"
+      ],
+      "recommendation": "merge_after_current_base_ci_passes"
+    },
+    {
+      "number": 126,
+      "title": "chore(deps): update google-genai requirement from >=1.0 to >=3.0.0 in /backend",
+      "url": "https://github.com/mkien14/homewallet-gr13/pull/126",
+      "head": "dependabot/pip/backend/google-genai-gte-3.0.0",
+      "sha": "8d2c5d3fdfc8e37507d4787120e6d1f83d364848",
+      "base_sha": "1bba075aa1a6dd609d180f4610fe4f55d527cbdf",
+      "mergeable": true,
+      "mergeable_state": "unstable",
+      "checks": [
+        {
+          "name": "Backend tests",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374901713/job/131718994290",
+          "id": 131718994290,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374901713/job/131718994290",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131718994290/annotations"
+        },
+        {
+          "name": "Build backend image",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374901713/job/131718994266",
+          "id": 131718994266,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374901713/job/131718994266",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131718994266/annotations"
+        },
+        {
+          "name": "Community authorization and MySQL acceptance",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374901713/job/131718994141",
+          "id": 131718994141,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374901713/job/131718994141",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131718994141/annotations"
+        },
+        {
+          "name": "Frontend lint, test and build",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374901713/job/131718994106",
+          "id": 131718994106,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374901713/job/131718994106",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131718994106/annotations"
+        },
+        {
+          "name": "OCR pilot offline checks",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374901713/job/131718994074",
+          "id": 131718994074,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374901713/job/131718994074",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131718994074/annotations"
+        },
+        {
+          "name": "Terraform format and validate",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374901713/job/131718993800",
+          "id": 131718993800,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374901713/job/131718993800",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131718993800/annotations"
+        }
+      ],
+      "files": [
+        "backend/requirements.txt"
+      ],
+      "recommendation": "supersede_with_local_fix_then_close_after_merge",
+      "failure": {
+        "check": "Backend tests",
+        "file": "backend/tests/test_dependency_lock.py",
+        "line": 26,
+        "cause": "requirements_fingerprint_not_updated",
+        "passed": 221,
+        "skipped": 59,
+        "failed": 1
+      }
+    },
+    {
+      "number": 127,
+      "title": "chore(deps-dev): update python-dotenv requirement from >=1 to >=1.2.4 in /backend",
+      "url": "https://github.com/mkien14/homewallet-gr13/pull/127",
+      "head": "dependabot/pip/backend/python-dotenv-gte-1.2.4",
+      "sha": "43fbbc7cb4b614a595645729e0653fc650a1efb8",
+      "base_sha": "1bba075aa1a6dd609d180f4610fe4f55d527cbdf",
+      "mergeable": true,
+      "mergeable_state": "clean",
+      "checks": [
+        {
+          "name": "Frontend lint, test and build",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374908094/job/131719012941",
+          "id": 131719012941,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374908094/job/131719012941",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131719012941/annotations"
+        },
+        {
+          "name": "Terraform format and validate",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374908094/job/131719012728",
+          "id": 131719012728,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374908094/job/131719012728",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131719012728/annotations"
+        },
+        {
+          "name": "Build backend image",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374908094/job/131719012716",
+          "id": 131719012716,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374908094/job/131719012716",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131719012716/annotations"
+        },
+        {
+          "name": "Backend tests",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374908094/job/131719012683",
+          "id": 131719012683,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374908094/job/131719012683",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131719012683/annotations"
+        },
+        {
+          "name": "Community authorization and MySQL acceptance",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374908094/job/131719012589",
+          "id": 131719012589,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374908094/job/131719012589",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131719012589/annotations"
+        },
+        {
+          "name": "OCR pilot offline checks",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374908094/job/131719012322",
+          "id": 131719012322,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374908094/job/131719012322",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131719012322/annotations"
+        }
+      ],
+      "files": [
+        "backend/requirements-dev.txt"
+      ],
+      "recommendation": "merge_after_current_base_ci_passes"
+    },
+    {
+      "number": 128,
+      "title": "chore(deps): bump @aws-sdk/client-cognito-identity-provider from 3.1164.0 to 3.1165.0 in /frontend",
+      "url": "https://github.com/mkien14/homewallet-gr13/pull/128",
+      "head": "dependabot/npm_and_yarn/frontend/aws-sdk/client-cognito-identity-provider-3.1165.0",
+      "sha": "71c628dde0a955f31779533949e7ad4ac83811b6",
+      "base_sha": "1bba075aa1a6dd609d180f4610fe4f55d527cbdf",
+      "mergeable": true,
+      "mergeable_state": "clean",
+      "checks": [
+        {
+          "name": "Community authorization and MySQL acceptance",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374924458/job/131719063407",
+          "id": 131719063407,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374924458/job/131719063407",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131719063407/annotations"
+        },
+        {
+          "name": "Frontend lint, test and build",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374924458/job/131719063376",
+          "id": 131719063376,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374924458/job/131719063376",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131719063376/annotations"
+        },
+        {
+          "name": "Build backend image",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374924458/job/131719063344",
+          "id": 131719063344,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374924458/job/131719063344",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131719063344/annotations"
+        },
+        {
+          "name": "OCR pilot offline checks",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374924458/job/131719063338",
+          "id": 131719063338,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374924458/job/131719063338",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131719063338/annotations"
+        },
+        {
+          "name": "Terraform format and validate",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374924458/job/131719063325",
+          "id": 131719063325,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374924458/job/131719063325",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131719063325/annotations"
+        },
+        {
+          "name": "Backend tests",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374924458/job/131719062977",
+          "id": 131719062977,
+          "details_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43374924458/job/131719062977",
+          "annotations_url": "https://api.github.com/repos/mkien14/homewallet-gr13/check-runs/131719062977/annotations"
+        }
+      ],
+      "files": [
+        "frontend/package-lock.json",
+        "frontend/package.json"
+      ],
+      "recommendation": "merge_after_current_base_ci_passes"
+    }
+  ],
+  "local_fix": {
+    "replaces_prs": [
+      124,
+      126
+    ],
+    "requirements_lf_sha256": "cc4069ad47db8ff21d2902e51aa425a909a53248a8c0940d8a975e8385fde43c",
+    "runtime_lock_entries_and_artifact_hashes_unchanged": true,
+    "direct_requirements": {
+      "flask": {
+        "requirement": "<4,>=3.1.3",
+        "locked": "3.1.3",
+        "satisfied": true
+      },
+      "gunicorn": {
+        "requirement": ">=26.2.0",
+        "locked": "27.0.0",
+        "satisfied": true
+      },
+      "pymysql": {
+        "requirement": ">=1.2.4",
+        "locked": "1.2.4",
+        "satisfied": true
+      },
+      "redis": {
+        "requirement": "<9,>=8.1.0",
+        "locked": "8.1.0",
+        "satisfied": true
+      },
+      "cryptography": {
+        "requirement": ">=50.0.2",
+        "locked": "50.0.2",
+        "satisfied": true
+      },
+      "PyJWT": {
+        "requirement": ">=2.15.1",
+        "locked": "2.15.1",
+        "satisfied": true
+      },
+      "boto3": {
+        "requirement": "",
+        "locked": "1.44.1",
+        "satisfied": true
+      },
+      "pillow": {
+        "requirement": ">=13.0.0",
+        "locked": "13.0.0",
+        "satisfied": true
+      },
+      "google-genai": {
+        "requirement": ">=3.0.0",
+        "locked": "3.2.0",
+        "satisfied": true
+      },
+      "pywebpush": {
+        "requirement": "<3,>=2.5.0",
+        "locked": "2.5.0",
+        "satisfied": true
+      },
+      "tzdata": {
+        "requirement": "",
+        "locked": "2026.6",
+        "satisfied": true
+      }
+    },
+    "github_ci_for_local_fix": "pending_user_commit_and_push",
+    "new_tests_run_in_this_review": false
+  },
+  "merge_order": [
+    "fix/production-live-rollout",
+    128,
+    127,
+    125,
+    110,
+    108,
+    105,
+    106,
+    109,
+    107
+  ],
+  "close_after_local_merge": [
+    124,
+    126
+  ],
+  "git_staged_by_agent": false,
+  "git_commit_by_agent": false,
+  "git_push_by_agent": false,
+  "github_mutations_by_agent": false,
+  "aws_mutations_in_this_review": false
+}

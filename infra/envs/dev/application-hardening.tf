@@ -1,14 +1,14 @@
-# Existing-stack promotion, not a second VPC/RDS/Redis deployment. This leaves
-# the availability/restore/scaling work with its assigned owner. Nothing below
+# Existing-stack promotion, not a second VPC/RDS/Redis deployment. Resilience
+# is opt-in through resilience.tf. Nothing below
 # is enabled by default; no legacy household, receipt or DLQ data is deleted.
 resource "aws_secretsmanager_secret" "origin_verification" {
-  count                   = var.application_hardening_enabled ? 1 : 0
+  count                   = var.application_hardening_enabled || var.application_origin_verification_enabled ? 1 : 0
   name                    = "hw/production/origin-verification"
   recovery_window_in_days = 30
 }
 
 resource "aws_secretsmanager_secret_version" "origin_verification" {
-  count         = var.application_hardening_enabled ? 1 : 0
+  count         = var.application_hardening_enabled || var.application_origin_verification_enabled ? 1 : 0
   secret_id     = aws_secretsmanager_secret.origin_verification[0].id
   secret_string = random_password.origin_verify.result
 }

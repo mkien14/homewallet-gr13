@@ -1,5 +1,5 @@
 {
-  "status": "NO_GO",
+  "status": "GO",
   "checks": [
     {
       "gate": "settings_complete",
@@ -7,7 +7,7 @@
     },
     {
       "gate": "data_boundary_reviewed",
-      "pass": false
+      "pass": true
     },
     {
       "gate": "operations_owner_named",
@@ -27,7 +27,7 @@
     },
     {
       "gate": "public_api_origin_https",
-      "pass": false
+      "pass": true
     },
     {
       "gate": "cloudfront_deployed",
@@ -55,11 +55,11 @@
     },
     {
       "gate": "waf_common_rules_enforced",
-      "pass": false
+      "pass": true
     },
     {
       "gate": "waf_rate_rule_enforced",
-      "pass": false
+      "pass": true
     },
     {
       "gate": "origin_header_present",
@@ -70,12 +70,96 @@
       "pass": true
     },
     {
+      "gate": "resilience_inventory_complete",
+      "pass": true
+    },
+    {
+      "gate": "api_running_in_two_azs",
+      "pass": true
+    },
+    {
+      "gate": "api_circuit_breaker_enabled",
+      "pass": true
+    },
+    {
+      "gate": "api_scaling_limits",
+      "pass": true
+    },
+    {
+      "gate": "api_cpu_target_tracking",
+      "pass": true
+    },
+    {
+      "gate": "database_multi_az_available",
+      "pass": true
+    },
+    {
+      "gate": "database_private_encrypted_protected",
+      "pass": true
+    },
+    {
+      "gate": "database_recent_restore_point",
+      "pass": true
+    },
+    {
+      "gate": "redis_multi_az_failover_available",
+      "pass": true
+    },
+    {
+      "gate": "redis_tls_auth_backups",
+      "pass": true
+    },
+    {
+      "gate": "legacy_public_origin_ingress_closed",
+      "pass": true
+    },
+    {
+      "gate": "private_subnet_nat_in_each_az",
+      "pass": true
+    },
+    {
+      "gate": "retention_inventory_recorded",
+      "pass": true
+    },
+    {
+      "gate": "operational_log_retention",
+      "pass": true
+    },
+    {
+      "gate": "operational_log_retention",
+      "pass": true
+    },
+    {
+      "gate": "operational_log_retention",
+      "pass": true
+    },
+    {
+      "gate": "operational_log_retention",
+      "pass": true
+    },
+    {
+      "gate": "operational_log_retention",
+      "pass": true
+    },
+    {
+      "gate": "public_api_alarms_enabled",
+      "pass": true
+    },
+    {
+      "gate": "operations_email_subscription_confirmed",
+      "pass": true
+    },
+    {
+      "gate": "dated_scoped_recovery_drills",
+      "pass": true
+    },
+    {
       "gate": "api_service_stable",
       "pass": true
     },
     {
       "gate": "production_runtime_profile",
-      "pass": false
+      "pass": true
     },
     {
       "gate": "immutable_api_image",
@@ -83,11 +167,19 @@
     },
     {
       "gate": "identified_release",
-      "pass": false
+      "pass": true
+    },
+    {
+      "gate": "reviewed_release_matches_runtime",
+      "pass": true
+    },
+    {
+      "gate": "reviewed_image_matches_runtime",
+      "pass": true
     },
     {
       "gate": "approved_household_scope_enforced",
-      "pass": false
+      "pass": true
     },
     {
       "gate": "api_image_in_expected_private_registry",
@@ -95,11 +187,11 @@
     },
     {
       "gate": "release_tags_immutable",
-      "pass": false
+      "pass": true
     },
     {
       "gate": "api_unprivileged_runtime",
-      "pass": false
+      "pass": true
     },
     {
       "gate": "api_private_network",
@@ -119,39 +211,39 @@
     },
     {
       "gate": "worker_matches_production_release",
-      "pass": false
+      "pass": true
     },
     {
       "gate": "worker_unprivileged_runtime",
-      "pass": false
+      "pass": true
     },
     {
       "gate": "jobs_match_production_release",
-      "pass": false
+      "pass": true
     },
     {
       "gate": "jobs_unprivileged_runtime",
-      "pass": false
+      "pass": true
     },
     {
       "gate": "admin_mfa_challenge_verified",
-      "pass": false
+      "pass": true
     },
     {
       "gate": "admission_and_consent",
-      "pass": false
+      "pass": true
     },
     {
       "gate": "runtime_credentials_tls",
-      "pass": false
+      "pass": true
     },
     {
       "gate": "gemini_rotation_or_disabled",
-      "pass": false
+      "pass": true
     },
     {
       "gate": "ocr_acceptance_or_disabled",
-      "pass": false
+      "pass": true
     },
     {
       "gate": "cognito_pool_configured",
@@ -159,23 +251,15 @@
     },
     {
       "gate": "closed_rollout_no_self_signup",
-      "pass": false
+      "pass": true
     },
     {
       "gate": "one_spa_client_only",
-      "pass": false
+      "pass": true
     },
     {
       "gate": "srp_client_without_password_flow",
       "pass": true
-    },
-    {
-      "gate": "no_localhost_production_callbacks",
-      "pass": false
-    },
-    {
-      "gate": "srp_client_without_password_flow",
-      "pass": false
     },
     {
       "gate": "no_localhost_production_callbacks",
@@ -183,7 +267,7 @@
     },
     {
       "gate": "admin_totp_enrolled_and_preferred",
-      "pass": false
+      "pass": true
     },
     {
       "gate": "ses_transactional_sending_available",
@@ -199,6 +283,10 @@
     },
     {
       "gate": "frontend_bucket_encrypted",
+      "pass": true
+    },
+    {
+      "gate": "frontend_release_history_versioned",
       "pass": true
     },
     {
@@ -247,11 +335,31 @@
     },
     {
       "gate": "monthly_cost_budget_exists",
-      "pass": false
+      "pass": true
+    },
+    {
+      "gate": "cost_budget_notifications_configured",
+      "pass": true
+    },
+    {
+      "gate": "cost_notification_has_subscriber",
+      "pass": true
+    },
+    {
+      "gate": "cost_notification_has_subscriber",
+      "pass": true
+    },
+    {
+      "gate": "cost_notification_has_subscriber",
+      "pass": true
+    },
+    {
+      "gate": "cost_notification_has_subscriber",
+      "pass": true
     },
     {
       "gate": "external_resilience_signoff",
-      "pass": false
+      "pass": true
     }
   ]
 }

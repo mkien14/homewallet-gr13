@@ -1,12 +1,11 @@
 # Chuyển phiên bản production trên stack hiện có
 
-Kiên thực hiện commit/push. Đã chốt cảnh báo 100 USD/tháng; phối hợp với người
-sửa HA/restore trước mở production. Mỗi phase có saved plan riêng, không dùng `-target`. Không gửi
+Kiên thực hiện commit/push. Đã chốt cảnh báo 100 USD/tháng; HA/restore đã nghiệm thu trên stack hiện tại; xem biên bản ngày 13/11/2026. Mỗi phase có saved plan riêng, không dùng `-target`. Không gửi
 plan/state/token/secret vào báo cáo. Không có bước bật lịch hay xóa dữ liệu.
 
 ## 1. Source và candidate
 
-Review nhánh `fix/production-integration`, commit/push/merge main theo quy trình
+Review nhánh `fix/production-live-rollout`, commit/push/merge main theo quy trình
 nhóm. Không dùng `git add .` khi còn công việc khác; bỏ DOCX hướng dẫn các tuần.
 Không chạy workflow Deploy Dev sau chuyển production vì nó dùng tag dev.
 
@@ -61,55 +60,62 @@ Dùng cấu hình SPA/pool hiện có trong .env.local. Mở localhost:5173/auth
 đăng nhập rồi vào /security. Vite proxy API qua CloudFront; Cognito nhận SRP
 trực tiếp. Dừng server và Remove-Item Env:VITE_API_TARGET khi không còn dùng.
 
-## 3. Tạo HTTPS origin, chưa đổi traffic
+## 3. HTTPS và HA trên stack hiện tại
 
-```powershell
-$actualAccount = aws sts get-caller-identity --query Account --output text
-if ($LASTEXITCODE -ne 0 -or $actualAccount -ne '179923444714') { throw 'Sai AWS account' }
-terraform '-chdir=infra/envs/dev' init
-if ($LASTEXITCODE -ne 0) { throw 'Init lỗi' }
-$phaseInputs = Join-Path $env:TEMP 'homewallet-https-origin.tfvars.json'
-.\backend\.venv\Scripts\python.exe .\scripts\prepare-https-origin-plan.py --output $phaseInputs
-if ($LASTEXITCODE -ne 0) { throw 'Không chuẩn bị được input hoặc file đã có; kiểm tra trước khi dùng lại' }
-terraform '-chdir=infra/envs/dev' plan "-var-file=$phaseInputs" '-out=https-origin.tfplan'
-if ($LASTEXITCODE -ne 0) { throw 'Plan lỗi' }
+**Stack đã chuyển production ngày 13/11/2026.** Không dùng lại bootstrap helper
+HTTPS/default dev. Dùng tfvars vận hành đã review trong
+[bàn giao](runbooks/current-stack-production.md). Mỗi phase dùng saved plan
+riêng; không dùng `-target` hoặc tạo lại ECS service để đổi state address.
+
+Luồng đang chạy: CloudFront → HTTP API HTTPS → VPC Link → Cloud Map SRV → API.
+Canary đầu với ALB trả 503; network probe xác nhận ALB vẫn truy cập được trong
+VPC. Không kết luận nguyên nhân 503 chỉ từ scheme ALB. Cloud Map được tạo,
+ECS đăng ký SRV/health, app nhận origin secret trước khi chuyển traffic.
+Canary mới đạt 403/401/200 và CRUD có token trên HTTPS.
+
+Các flag phải giữ trong input của stack này:
+
+```hcl
+enable_api_https_gateway                = true
+enable_api_service_discovery            = true
+application_origin_verification_enabled = true
+resilience_hardening_enabled            = true
+resilience_apply_immediately            = false
+api_desired_count                       = 2
 ```
 
-Review: API Gateway/VPC Link/SG thêm mới, WAF rate rule COUNT, output mới. Không
-thay RDS/VPC/Redis, không xóa pool/data. Có thể đăng ký revision task definition
-API mới do Terraform vẫn quản lý revision cũ trong khi service đã lên `hw-api:22`.
-Service không được đổi revision ở phase HTTPS; giữ revision cũ để rollback bằng
-`skip_destroy=true`. Các cập nhật metadata skip_destroy không thay task đang chạy.
-Drift khác cần xử lý cùng người phụ
-trách trước apply; không áp dụng plan có thay đổi ngoài phạm vi chưa review.
-Helper giữ nguyên URI image API/worker/jobs/migrate, bao gồm digest: default cũ trong source có thể
-khác runtime và gây kế hoạch thay revision không liên quan. Helper không đọc
-secret. Giữ các giá trị image/model đó trong tfvars ở phase tiếp theo.
+Lần chuyển HA đầu đã backup state và thực hiện **năm state move**, giữ AWS ID:
+`module.compute.aws_ecs_service.api[0]` sang `api_scaled[0]`, `worker[0]` sang
+`worker_release[0]`, ba schedule `jobs["key"]` sang `jobs_release["key"]`.
+Key: `budget_alerts`, `recurring_reminders`, `weekly_report`.
+**Không lặp lại move trên state đã chuyển.** Không apply plan xóa/tạo lại ECS
+service, RDS hay bucket. Service/schedule production có `prevent_destroy` để
+chặn apply nhầm default dev; tháo bỏ có kiểm soát cần review guard riêng.
 
-```powershell
-terraform '-chdir=infra/envs/dev' apply https-origin.tfplan
-if ($LASTEXITCODE -ne 0) { throw 'Apply lỗi' }
+HA bật Multi-AZ/backup RDS, replica/failover Redis, NAT mỗi AZ, API min 2/max 4,
+readiness/circuit breaker và log 30 ngày. `resilience_apply_immediately=true`
+chỉ dùng trong đợt thay đổi đã review; trạng thái cuối đặt false.
+Budget 100 USD không dừng tài nguyên khi vượt mức.
+
+## 4. CloudFront, WAF và đóng ingress cũ
+
+```hcl
+route_api_via_https_gateway = true
+close_legacy_http_origin   = true
+waf_enforce_common_rules   = true
+waf_enforce_api_rate       = true
 ```
 
-Đợi VPC Link AVAILABLE. Direct gateway thiếu origin header phải bị từ chối.
-Canary có Authorization và origin header chỉ dùng trong bộ nhớ, không in giá
-trị, không gửi qua HTTP/query string. Kiểm tra GET/PATCH/POST/DELETE, presign,
-CSV, 413/429. HTTP API integration tối đa 30 giây: đo các endpoint chậm trước
-chuyển. Đây là HTTPS trên các hop public, HTTP trên VPC Link/ALB/task nội bộ.
+Đã tách canary, chuyển edge và đóng ingress CloudFront → ALB:80 thành các phase.
+Luồng public dùng HTTPS, hop VPC Link → task là HTTP nội bộ. ALB còn để health
+check/đường dự phòng có kiểm soát, không còn rule CloudFront prefix list.
+Direct HTTP API không có origin secret phải bị từ chối. Không gửi origin secret
+hay bearer token qua query string/HTTP, không log chúng hoặc đưa vào Git.
 
-## 4. Chuyển CloudFront, sau đó đóng ingress cũ
-
-Trong tfvars cục bộ đã review, giữ enable_api_https_gateway=true và thêm
-route_api_via_https_gateway=true. Plan/apply saved plan mới. Chờ CloudFront
-Deployed và nghiệm thu API, đăng nhập, hình/PDF, request ID/cache.
-
-Sau canary, thêm close_legacy_http_origin=true, plan/apply riêng để đóng rule
-CloudFront → public ALB:80 cũ. Không đóng cùng lúc đổi origin vì edge cần thời
-gian lan truyền; VPC Link vẫn dùng SG riêng vào ALB:80.
-
-Quan sát WAF COUNT với login/upload/cộng đồng hợp lệ rồi mới bật
-waf_enforce_common_rules=true và waf_enforce_api_rate=true. Rate theo IP có thể
-ảnh hưởng nhiều user chung NAT; Redis quota bổ sung giới hạn theo user.
+Cảnh báo public API dùng HTTP API `5xx` và `IntegrationLatency`, dimension
+`ApiId`; alarm ALB cũ không đại diện lưu lượng Cloud Map. SNS có email đã
+confirm. Rate theo IP có thể dùng chung cho nhiều người sau NAT; Redis bổ sung
+giới hạn theo user. Kiểm tra canary sau mỗi thay đổi WAF.
 
 ## 5. Kiểm tra candidate và đưa image vào ECR
 
@@ -174,8 +180,9 @@ chạy và revision chuẩn bị mới nhất, từ chối profile production tr
 không dùng workflow đó để ghi lại tag dev sau khi chuyển.
 
 API service có ignore_changes task_definition từ thiết kế cũ; chuyển sang
-revision mới sau apply. Worker/job/Scheduler target do Terraform cập nhật, lịch
-vẫn DISABLED:
+revision mới sau apply. Khi bật HA, worker service và Scheduler target cũng
+ignore task revision. Phải cập nhật worker và cả ba target theo saved outputs;
+giữ lịch DISABLED:
 
 Health check ALB dùng `/health` hoặc `/ready` trực tiếp nên chỉ hai đường nội bộ
 này được miễn origin header. Các đường `/api/health`, `/api/ready`, `/api/release`
@@ -194,8 +201,9 @@ if ($LASTEXITCODE -ne 0) { throw 'API chưa stable; dùng quy trình rollback đ
 
 Copy deploy/production.example.json ra ngoài repo, điền cluster/service/bucket,
 admin group, ba schedule name/group, budget/subscriber thật. Attestation chỉ
-true khi có bằng chứng. resilience_signoff thuộc người phụ trách hạ tầng; không
-đổi true để vượt gate. Không đặt token/key/email người dùng vào settings.
+true khi có bằng chứng. resilience_signoff chỉ được true sau nghiệm thu có bằng chứng. Gate còn kiểm
+tra topology AWS và bằng chứng cùng account/Region/DB/release/image không quá
+30 ngày; không đổi true hoặc sửa ngày để vượt gate. Không đặt token/key/email người dùng vào settings.
 
 ```powershell
 $settingsFile = '<absolute-path-to-reviewed-settings.json>'
@@ -235,3 +243,14 @@ nạp Gemini key. Mở AI/OCR sau benchmark #34, quota/cost, consent và failure
 acceptance. Bật Scheduler sau opt-out, bounce/complaint, review người nhận,
 chống gửi trùng, delivery và stop procedure. Không gắn hai bước đó vào release
 core hiện tại.
+
+## 9. Sau khi đã triển khai
+
+Dùng cấu hình vận hành bền vững ngoài Git theo
+[bàn giao](runbooks/current-stack-production.md). Dùng lại bootstrap tfvars từ
+TEMP/default dev có thể đề xuất hạ cấu hình hoặc xóa tài nguyên; giữ guard
+production. Không dùng `git clean -fdx` để dọn cấu hình vận hành.
+
+Frontend có S3 versioning; entry point cùng candidate đã thử copy từ version
+và đối chiếu hash. Giữ hashed asset cũ, không sync `--delete`. Rollback về app
+khác release vẫn cần kiểm tra tương thích API, guard và migration.
