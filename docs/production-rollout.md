@@ -1,12 +1,23 @@
 # Chuyển phiên bản production trên stack hiện có
 
-Kiên thực hiện commit/push. Đã chốt cảnh báo 100 USD/tháng; HA/restore đã nghiệm thu trên stack hiện tại; xem biên bản ngày 13/11/2026. Mỗi phase có saved plan riêng, không dùng `-target`. Không gửi
+Kiên thực hiện commit/push. Đã chốt cảnh báo 100 USD/tháng; HA/restore đã nghiệm thu trên stack hiện tại; xem biên bản ngày 13/11/2026. Thay đổi Terraform cần saved plan riêng, không dùng `-target`. Không gửi
 plan/state/token/secret vào báo cáo. Không có bước bật lịch hay xóa dữ liệu.
+
+**Điểm chuẩn mới:** main `26a0645709af3acb123768bb21a6a788d4252373`, API
+`hw-api:29`, worker/jobs `:6`, frontend cùng candidate; gate cuối 90/90 GO.
+Xem [biên bản và giới hạn nghiệm thu](acceptance/production-release-26a0645-20261113.md).
+Đợt này triển khai revision từ baseline bằng ECS API vì plan local timeout khi
+đọc metadata Secrets Manager; không Terraform apply. Input vận hành đã cập nhật,
+state/output task revision có thể còn cũ: xử lý kết nối và review saved plan
+trước lần apply sau. Các bước plan/apply bên dưới là quy trình cho thay đổi tiếp
+theo, không phải ghi nhận một apply đã thành công cho release này.
 
 ## 1. Source và candidate
 
-Review nhánh `fix/production-live-rollout`, commit/push/merge main theo quy trình
-nhóm. Không dùng `git add .` khi còn công việc khác; bỏ DOCX hướng dẫn các tuần.
+Các thay đổi hạ tầng/dependency đã merge main; candidate `26a0645` đã phát hành.
+Biên bản mới ở `release/production-26a0645`. Với lần phát hành sau, review và
+merge source mới theo quy trình nhóm. Không dùng `git add .` khi còn công việc
+khác; bỏ DOCX hướng dẫn các tuần.
 Không chạy workflow Deploy Dev sau chuyển production vì nó dùng tag dev.
 
 Đây là runbook cho stack hiện có. Workflow **Reviewed production release** trong
