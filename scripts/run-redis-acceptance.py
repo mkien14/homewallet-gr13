@@ -32,6 +32,15 @@ def docker(*args):
     return subprocess.run(["docker", *args], check=True, capture_output=True, text=True).stdout.strip()
 
 
+def container_user():
+    # POSIX TemporaryDirectory is 0700. Match its owner instead of making its
+    # private key/config readable to other host users. Desktop bind mounts on
+    # Windows do not use the caller's POSIX UID, so use the fixture's normal UID.
+    if os.name == "posix":
+        return f"{os.getuid()}:{os.getgid()}"
+    return "999:999"
+
+
 def certificates(directory):
     now = datetime.datetime.now(datetime.timezone.utc)
     key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
@@ -46,9 +55,10 @@ def certificates(directory):
     (directory / "server.key").write_bytes(key.private_bytes(
         serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption()))
     (directory / "ca.pem").write_bytes(cert.public_bytes(serialization.Encoding.PEM))
-    # Readable by the unprivileged, disposable Docker process; not a real credential.
+    # The POSIX container uses the caller's UID/GID and can read private files
+    # without broadening the TemporaryDirectory's 0700 permissions.
     for path in directory.iterdir():
-        path.chmod(0o644)
+        path.chmod(0o600)
 
 
 def main():
@@ -68,9 +78,9 @@ def main():
             "tls-key-file /tls/server.key\ntls-ca-cert-file /tls/ca.pem\n"
             "tls-auth-clients no\nrequirepass " + password + "\nsave \"\"\nappendonly no\n",
             encoding="utf-8")
-        (directory / "redis.conf").chmod(0o644)
+        (directory / "redis.conf").chmod(0o600)
         try:
-            docker("run", "--detach", "--name", name, "--user", "999:999", "--read-only",
+            docker("run", "--detach", "--name", name, "--user", container_user(), "--read-only",
                    "--cap-drop", "ALL", "--tmpfs", "/data:rw,noexec,nosuid,size=16m",
                    "--publish", "127.0.0.1::6379",
                    "--mount", f"type=bind,source={directory},target=/tls,readonly",
@@ -78,6 +88,10 @@ def main():
             # PING needs no password in argv and tests will verify trusted TLS/auth.
             ready = False
             for _ in range(40):
+                state = json.loads(docker("inspect", name))[0]["State"]
+                if not state["Running"]:
+                    diagnostic = docker("logs", "--tail", "8", name).replace(password, "[redacted]")
+                    raise RuntimeError(f"Disposable TLS Redis exited ({state['ExitCode']}): {diagnostic}")
                 probe = subprocess.run(["docker", "exec", name, "redis-cli", "--tls",
                                         "--cacert", "/tls/ca.pem", "-h", "localhost", "PING"],
                                        capture_output=True, text=True)
