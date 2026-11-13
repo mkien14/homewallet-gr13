@@ -278,6 +278,28 @@ def s3_event(key="receipts%2Freceipt+one.jpg"):
     }]}
 
 
+@pytest.mark.parametrize("denial", ["household", "legacy", "bucket", "disabled"])
+def test_production_denial_before_s3_or_status_change(worker_state, denial):
+    state, s3, cfg = worker_state
+    cfg.update(APP_ENV="production", OCR_ENABLED=True, GEMINI_ENABLED=True,
+               PRODUCTION_ALLOWED_HOUSEHOLD_IDS={3})
+    state.receipt["s3_key"] = "receipts/production/3/new.jpg"
+    bucket = "receipt-bucket"
+    if denial == "household":
+        state.receipt["household_id"] = 1
+    elif denial == "legacy":
+        state.receipt["s3_key"] = "receipts/uploads/3/old.jpg"
+    elif denial == "bucket":
+        bucket = "unapproved-bucket"
+    elif denial == "disabled":
+        cfg["OCR_ENABLED"] = False
+    with pytest.raises(pipeline.receipt_policy.ReceiptRejected):
+        pipeline.process_receipt({"bucket": bucket, "key": state.receipt["s3_key"]}, config=cfg)
+    assert s3.requests == []
+    assert state.receipt["status"] == "UPLOADED"
+    assert not state.transactions
+
+
 def test_valid_gemini_response_creates_draft_and_deletes_message(
     monkeypatch, worker_state, capsys
 ):

@@ -132,12 +132,12 @@ module "compute" {
       module.cache.auth_token_secret_arn,
     ],
     var.use_db_runtime_credentials ? [local.runtime_db_secret_arn] : [],
-    var.application_hardening_enabled ? [] : [aws_secretsmanager_secret.gemini.arn],
+    var.application_hardening_enabled && !var.production_ocr_enabled ? [] : [aws_secretsmanager_secret.gemini.arn],
     var.application_hardening_enabled || var.application_origin_verification_enabled ? [aws_secretsmanager_secret.origin_verification[0].arn] : []
   )
 
   worker_image     = var.application_hardening_enabled ? local.image : coalesce(var.worker_image_uri, "${module.ecr.repository_url}:${var.worker_image_tag}")
-  worker_queue_arn = module.queue.queue_arn
+  worker_queue_arn = var.application_hardening_enabled ? module.queue.production_queue_arn : module.queue.queue_arn
 
   worker_environment = merge({
     DB_HOST   = module.data.address
@@ -146,17 +146,20 @@ module "compute" {
     DB_SSL_CA = "/etc/ssl/rds-global-bundle.pem"
 
     S3_BUCKET                 = module.storage.bucket_name
-    SQS_QUEUE_URL             = module.queue.queue_url
+    SQS_QUEUE_URL             = var.application_hardening_enabled ? module.queue.production_queue_url : module.queue.queue_url
     AWS_REGION                = "ap-southeast-1"
     GEMINI_MODEL              = var.gemini_model
-    TEXTRACT_FALLBACK_ENABLED = "true"
+    TEXTRACT_FALLBACK_ENABLED = var.application_hardening_enabled ? "false" : "true"
     TEXTRACT_REGION           = "ap-southeast-1"
-  }, local.hardened_environment)
+    }, local.hardened_environment, var.application_hardening_enabled ? {
+    GEMINI_ENABLED            = tostring(var.production_ocr_enabled)
+    GEMINI_ROTATION_CONFIRMED = tostring(var.gemini_rotation_confirmed)
+  } : {})
 
   worker_secrets = merge({
     DB_USER     = "${local.service_db_secret_arn}:username::"
     DB_PASSWORD = "${local.service_db_secret_arn}:password::"
-  }, var.application_hardening_enabled ? {} : { GEMINI_API_KEY = aws_secretsmanager_secret.gemini.arn })
+  }, var.application_hardening_enabled && !var.production_ocr_enabled ? {} : { GEMINI_API_KEY = aws_secretsmanager_secret.gemini.arn })
 
   jobs_environment = merge({
     DB_HOST          = module.data.address
@@ -166,7 +169,7 @@ module "compute" {
     AWS_REGION       = "ap-southeast-1"
     TZ               = "Asia/Ho_Chi_Minh"
     SES_FROM_ADDRESS = var.weekly_report_sender
-  }, local.hardened_environment)
+  }, local.hardened_environment, var.application_hardening_enabled ? { OCR_ENABLED = "false" } : {})
 
   jobs_secrets = {
     DB_USER           = "${local.service_db_secret_arn}:username::"
@@ -274,8 +277,9 @@ module "storage" {
 module "queue" {
   source = "../../modules/queue"
 
-  bucket_id  = module.storage.bucket_name
-  bucket_arn = module.storage.bucket_arn
+  bucket_id              = module.storage.bucket_name
+  bucket_arn             = module.storage.bucket_arn
+  production_ocr_enabled = var.application_hardening_enabled
 }
 
 resource "aws_secretsmanager_secret" "gemini" {

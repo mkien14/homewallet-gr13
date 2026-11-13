@@ -65,11 +65,34 @@ Metadata thiết bị MFA AWS không thay cho kiểm tra chính sách IAM của 
 
 ## 4. Thay đổi Terraform tiếp theo
 
+Ngày 13/11, kết nối Secrets Manager đã hoạt động lại: TLS và DescribeSecret đạt,
+plan đầy đủ bằng input production hoàn tất. Xem
+[biên bản đối chiếu](../acceptance/production-terraform-reconcile-20261113.md).
+Chưa apply/rebind state; revision state còn cũ dù cấu hình dự kiến khớp task live.
+Kiểm tra kết nối trước lần plan tiếp theo để lỗi mạng dừng sớm:
+
 ```powershell
+$metadataArn = aws secretsmanager describe-secret `
+    --secret-id 'hw/dev/vapid-private-key' `
+    --region ap-southeast-1 `
+    --cli-connect-timeout 5 --cli-read-timeout 10 `
+    --query ARN --output text
+if ($LASTEXITCODE -ne 0) {
+    throw 'Không đọc được metadata Secrets Manager. Kiểm tra mạng/phiên AWS trước plan; không tắt TLS.'
+}
+
 $nextPlan = Join-Path $ops 'next-change.tfplan'
-terraform '-chdir=infra/envs/dev' plan "-var-file=$productionVars" "-out=$nextPlan"
-if ($LASTEXITCODE -ne 0) { throw 'Plan lỗi' }
-# Review saved plan, các ARN/revision và chi phí trước bước apply.
+terraform '-chdir=infra/envs/dev' plan "-var-file=$productionVars" "-out=$nextPlan" -input=false -lock-timeout=60s -detailed-exitcode
+$nextPlanExit = $LASTEXITCODE
+if ($nextPlanExit -notin @(0, 2)) { throw 'Plan lỗi. Không apply.' }
+# 0: không thay đổi; 2: plan thành công và có thay đổi cần review.
+```
+
+Review saved plan, ARN/revision và chi phí trước bước apply dưới đây. Plan có
+replacement task definition khác với replacement service/DB; phải đọc đúng
+address và `skip_destroy`. Không dùng trực tiếp plan cũ sau khi input/AWS thay đổi.
+
+```powershell
 terraform '-chdir=infra/envs/dev' apply $nextPlan
 if ($LASTEXITCODE -ne 0) { throw 'Apply lỗi; xem log và trạng thái thật trước khi chạy tiếp' }
 ```
@@ -163,6 +186,12 @@ AI/OCR và ba lịch tiếp tục tắt. Trước bật lại phải xác nhận
 cũ tại HWAPI, quota/benchmark, consent, lỗi/chi phí và phạm vi worker/job/recipient.
 Không chỉ đổi biến enabled: cần chứng minh worker/job không xử lý hộ đang giữ,
 opt-out, bounce/complaint, chống trùng, delivery và stop procedure.
+Đã lưu version khóa mới, kiểm tra AWSCURRENT và truy cập metadata model thành
+công; Kiên đã xác nhận thu hồi khóa cũ ở Google. Attestation trong settings vận
+hành đã cập nhật, `ocr_benchmark_accepted` vẫn false và tính năng vẫn tắt. Xem
+[cách thay khóa bằng nhập ẩn và điều kiện bật đọc ảnh](../gemini-ocr-production-enablement.md).
+Worker hiện chưa kiểm tra lại allowlist/consent trước đọc ảnh/provider; phải khắc
+phục và nghiệm thu thông điệp mới trước khi bật consumer.
 
 ## 8. Theo dõi vận hành và chi phí
 

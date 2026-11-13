@@ -168,7 +168,8 @@ def create_receipt():
         raise ApiError(422, "CONSENT_REQUIRED", "Bạn cần đồng ý xử lý hóa đơn trước khi tải lên.")
     admit_costly_operation("receipt", m["household_id"])
 
-    key = f"receipts/uploads/{m['household_id']}/{uuid.uuid4().hex}.{ALLOWED_TYPES[ctype]}"
+    prefix = "receipts/production" if cfg.get("APP_ENV") == "production" else "receipts/uploads"
+    key = f"{prefix}/{m['household_id']}/{uuid.uuid4().hex}.{ALLOWED_TYPES[ctype]}"
     upload = storage.presign_upload(key, ctype)  
 
     with db.cursor() as cur:

@@ -15,6 +15,7 @@ from app.cache import invalidate_dashboard
 from app.db import connect
 from app.parsing import parse_date, parse_vnd
 from jobs.llm import extract_invoice
+from jobs import receipt_policy
 
 
 MAX_SIDE = 2000
@@ -203,7 +204,7 @@ def _mark_processing(cursor, receipt_id):
     return current is not None and current["status"] == "PROCESSING"
 
 
-def _persist_receipt(db, receipt, raw_bytes, duplicate):
+def _persist_receipt(db, receipt, raw_bytes, duplicate, *, config=None):
     sha256 = hashlib.sha256(raw_bytes).hexdigest()
     with db.cursor() as cursor:
         cursor.execute(
@@ -216,7 +217,10 @@ def _persist_receipt(db, receipt, raw_bytes, duplicate):
         category_names = [row["name"] for row in categories]
 
     processed_bytes, processed_type = prepare_file(receipt["s3_key"], raw_bytes)
-    raw = extract_invoice(processed_bytes, processed_type, category_names)
+    raw = extract_invoice(
+        processed_bytes, processed_type, category_names,
+        before_attempt=lambda: receipt_policy.reserve_attempt(db, receipt, config or load_config()),
+    )
     ocr_source = raw.get("_source", "gemini")
     raw["_duplicate_file"] = is_duplicate
     result = normalize_invoice(raw, categories, receipt["created_at"])
@@ -321,6 +325,14 @@ def process_receipt(reference, *, config=None, s3_client=None, file_bytes=None):
             receipt = _receipt_for_reference(cursor, reference)
             if receipt is None:
                 raise ReceiptNotFound(reference["key"])
+            receipt_policy.authorize(cursor, receipt, config, bucket=reference.get("bucket") or config.get("S3_BUCKET"))
+            if config.get("APP_ENV") == "production":
+                cursor.execute("SELECT GET_LOCK(%s, 0) AS acquired", (f"hw.ocr.receipt.{receipt['id']}",))
+                lock = cursor.fetchone()
+                if not lock or lock["acquired"] != 1:
+                    raise receipt_policy.ReceiptQuotaExceeded("RECEIPT_BUSY")
+                # Closing this dedicated DB connection in finally releases
+                # the named lock after the entire provider/persist operation.
             if receipt["status"] in FINISHED_RECEIPT_STATUSES:
                 return {
                     "receipt_id": receipt["id"],
@@ -354,7 +366,7 @@ def process_receipt(reference, *, config=None, s3_client=None, file_bytes=None):
             with response["Body"] as body:
                 file_bytes = body.read()
 
-        return _persist_receipt(db, receipt, file_bytes, False)
+        return _persist_receipt(db, receipt, file_bytes, False, config=config)
     except ReceiptNotFound:
         db.rollback()
         raise
@@ -389,6 +401,8 @@ def process_s3_event(event, *, config=None, s3_client=None):
 
 def process_local_file(file_path, household_id, user_id, *, config=None):
     config = config or load_config()
+    if config.get("APP_ENV") == "production":
+        raise receipt_policy.ReceiptRejected("PRODUCTION_REQUIRES_CONSENT_UPLOAD")
     path = resolve_file(file_path)
     raw_bytes = path.read_bytes()
     db = connect(config)
@@ -435,6 +449,8 @@ def process_local_file(file_path, household_id, user_id, *, config=None):
 
 
 def process_file(file_path, *, config=None, household_id=None, user_id=None):
+    if (config or load_config()).get("APP_ENV") == "production":
+        raise receipt_policy.ReceiptRejected("PRODUCTION_REQUIRES_CONSENT_UPLOAD")
     path = resolve_file(file_path)
     if household_id is not None or user_id is not None:
         if household_id is None or user_id is None:
@@ -455,9 +471,15 @@ def process_file(file_path, *, config=None, household_id=None, user_id=None):
 
 
 def mark_receipt_failed(receipt_key, error_code, *, config=None):
-    db = connect(config or load_config())
+    config = config or load_config()
+    db = connect(config)
     try:
         with db.cursor() as cursor:
+            if config.get("APP_ENV") == "production":
+                receipt = _receipt_for_reference(cursor, {"key": receipt_key})
+                if receipt is None:
+                    return
+                receipt_policy.authorize(cursor, receipt, config, bucket=config.get("S3_BUCKET"))
             cursor.execute(
                 "UPDATE receipts SET status = 'FAILED', error_code = %s, "
                 "processed_at = CURRENT_TIMESTAMP WHERE s3_key = %s "

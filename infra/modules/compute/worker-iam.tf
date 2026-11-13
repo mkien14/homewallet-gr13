@@ -52,7 +52,7 @@ data "aws_iam_policy_document" "worker" {
   statement {
     sid       = "ReadReceiptUploads"
     actions   = ["s3:GetObject"]
-    resources = ["${var.receipts_bucket_arn}/receipts/uploads/*"]
+    resources = [var.container_hardening_enabled ? "${var.receipts_bucket_arn}/receipts/production/*" : "${var.receipts_bucket_arn}/receipts/uploads/*"]
   }
 
   statement {

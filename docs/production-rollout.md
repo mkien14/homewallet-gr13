@@ -12,6 +12,15 @@ state/output task revision có thể còn cũ: xử lý kết nối và review s
 trước lần apply sau. Các bước plan/apply bên dưới là quy trình cho thay đổi tiếp
 theo, không phải ghi nhận một apply đã thành công cho release này.
 
+**Rà soát tiếp theo cùng ngày:** kết nối metadata/TLS đã hoạt động và saved plan
+production hoàn tất; cấu hình ba task khớp AWS live. State vẫn giữ revision cũ,
+chưa apply/rebind. Chi tiết và giới hạn ở
+[biên bản Terraform](acceptance/production-terraform-reconcile-20261113.md).
+Version khóa mới đã lưu vào AWS; Kiên đã xác nhận thu hồi khóa cũ ở Google và
+probe metadata model bằng khóa mới đạt. Chưa gọi generate hoặc nghiệm thu OCR;
+giữ OCR/Gemini tắt theo
+[phương án mở đọc ảnh](gemini-ocr-production-enablement.md).
+
 ## 1. Source và candidate
 
 Các thay đổi hạ tầng/dependency đã merge main; candidate `26a0645` đã phát hành.

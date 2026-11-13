@@ -1,0 +1,24 @@
+{
+  "at_utc": "2026-11-13T16:31:35.453275+00:00",
+  "model": "gemini-3.6-flash",
+  "synthetic_image_only": true,
+  "real_receipts_sent": 0,
+  "generation_attempts": 2,
+  "maximum_attempts": 2,
+  "status": "FAIL",
+  "error_type": "ServerError",
+  "http_code": 503,
+  "provider_request_accepted": false,
+  "seconds": 2.5,
+  "retry": {
+    "attempt": 2,
+    "at_utc": "2026-11-13T16:32:50.819434+00:00",
+    "model": "gemini-3.6-flash",
+    "status": "FAIL",
+    "error_type": "ServerError",
+    "http_code": 503,
+    "error_categories": [
+      "high demand"
+    ]
+  }
+}

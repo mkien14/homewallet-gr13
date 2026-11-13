@@ -20,10 +20,11 @@ locals {
     PRODUCTION_ALLOWED_HOUSEHOLD_IDS = join(",", sort([for id in var.production_allowed_household_ids : tostring(id)]))
     RATE_LIMIT_ENABLED               = "true"
     OCR_REQUIRE_CONSENT              = "true"
-    OCR_ENABLED                      = "false"
+    OCR_ENABLED                      = tostring(var.production_ocr_enabled)
     GEMINI_ENABLED                   = "false"
     GEMINI_ROTATION_CONFIRMED        = "false"
     GEMINI_MAX_TRIES                 = "2"
+    OCR_PROVIDER_REQUESTS_PER_DAY    = "10"
     API_REQUESTS_PER_MINUTE          = "120"
     API_WRITES_PER_MINUTE            = "30"
     RECEIPTS_PER_USER_DAY            = "10"

@@ -1,0 +1,178 @@
+{
+  "status": "PASS_PLAN_AND_AWS_COMPARISON",
+  "at_utc": "2026-11-13T15:54:47.641598+00:00",
+  "source_commit": "0cc9821c6dc5673a9f5d62bd1135af7ad8f67d59",
+  "branch": "fix/production-reconcile-gemini",
+  "release": "26a0645709af3acb123768bb21a6a788d4252373",
+  "account": "179923444714",
+  "region": "ap-southeast-1",
+  "secrets_manager": {
+    "endpoint": "secretsmanager.ap-southeast-1.amazonaws.com",
+    "verified_tls": "TLSv1.3",
+    "metadata": [
+      {
+        "name": "hw/dev/vapid-private-key",
+        "describe_secret": "PASS",
+        "secret_value_read": false
+      },
+      {
+        "name": "hw/dev/gemini-api-key",
+        "describe_secret": "PASS",
+        "secret_value_read": false
+      }
+    ],
+    "prior_timeout_reproduced": false,
+    "root_cause": "Previous local public-endpoint timeout no longer reproduced; underlying network cause not established.",
+    "iam_or_network_configuration_changed": false
+  },
+  "terraform": {
+    "plan_exit_code": 2,
+    "plan_success": true,
+    "plan_sha256": "5f919d900de62deabc4f922e604e87dd0a23894f448d4cbdbd880d1f1ae21405",
+    "saved_plan_outside_git": true,
+    "state_backup_outside_git": true,
+    "state_serial_before": 143,
+    "changes": [
+      {
+        "address": "module.compute.data.aws_iam_policy_document.scheduler_run_jobs",
+        "actions": [
+          "read"
+        ],
+        "reason": "read_because_dependency_pending"
+      },
+      {
+        "address": "module.compute.aws_ecs_task_definition.api",
+        "actions": [
+          "delete",
+          "create"
+        ],
+        "reason": "replace_because_cannot_update"
+      },
+      {
+        "address": "module.compute.aws_ecs_task_definition.jobs",
+        "actions": [
+          "delete",
+          "create"
+        ],
+        "reason": "replace_because_cannot_update"
+      },
+      {
+        "address": "module.compute.aws_ecs_task_definition.worker",
+        "actions": [
+          "delete",
+          "create"
+        ],
+        "reason": "replace_because_cannot_update"
+      },
+      {
+        "address": "module.compute.aws_iam_role_policy.scheduler_run_jobs",
+        "actions": [
+          "update"
+        ],
+        "reason": null
+      }
+    ],
+    "managed_resource_counts": {
+      "add": 3,
+      "change": 1,
+      "destroy": 3
+    },
+    "task_replacement_is_registration_not_service_replacement": true,
+    "scheduler_policy_deferred_read": true,
+    "scheduler_policy_semantically_matches_live": true,
+    "database_network_service_bucket_changes": false,
+    "apply_performed": false,
+    "state_import_remove_push_performed": false,
+    "state_revision_alignment_pending": true
+  },
+  "tasks": [
+    {
+      "name": "api",
+      "state_revision": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-api:28",
+      "live_revision": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-api:29",
+      "planned_configuration_matches_live": true,
+      "container_roles_resources_platform_tags_match": true,
+      "image": "179923444714.dkr.ecr.ap-southeast-1.amazonaws.com/homewallet-backend@sha256:dfef1a60b3fee7e1733563a3aa040ebfc1cb0d92021b154b16f00eb788d74348",
+      "release": "26a0645709af3acb123768bb21a6a788d4252373",
+      "gemini_key_injected": false,
+      "skip_destroy": true
+    },
+    {
+      "name": "worker",
+      "state_revision": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-worker:5",
+      "live_revision": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-worker:6",
+      "planned_configuration_matches_live": true,
+      "container_roles_resources_platform_tags_match": true,
+      "image": "179923444714.dkr.ecr.ap-southeast-1.amazonaws.com/homewallet-backend@sha256:dfef1a60b3fee7e1733563a3aa040ebfc1cb0d92021b154b16f00eb788d74348",
+      "release": "26a0645709af3acb123768bb21a6a788d4252373",
+      "gemini_key_injected": false,
+      "skip_destroy": true
+    },
+    {
+      "name": "jobs",
+      "state_revision": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:5",
+      "live_revision": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:6",
+      "planned_configuration_matches_live": true,
+      "container_roles_resources_platform_tags_match": true,
+      "image": "179923444714.dkr.ecr.ap-southeast-1.amazonaws.com/homewallet-backend@sha256:dfef1a60b3fee7e1733563a3aa040ebfc1cb0d92021b154b16f00eb788d74348",
+      "release": "26a0645709af3acb123768bb21a6a788d4252373",
+      "gemini_key_injected": false,
+      "skip_destroy": true
+    }
+  ],
+  "services": [
+    {
+      "name": "api",
+      "running": 2,
+      "desired": 2,
+      "pending": 0
+    },
+    {
+      "name": "worker",
+      "running": 1,
+      "desired": 1,
+      "pending": 0
+    }
+  ],
+  "schedules": [
+    {
+      "name": "hw-recurring-reminders",
+      "state": "DISABLED",
+      "jobs_revision": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:6"
+    },
+    {
+      "name": "hw-budget-alerts",
+      "state": "DISABLED",
+      "jobs_revision": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:6"
+    },
+    {
+      "name": "hw-weekly-report",
+      "state": "DISABLED",
+      "jobs_revision": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:6"
+    }
+  ],
+  "preflight": {
+    "status": "GO",
+    "checks": 90,
+    "failed": 0
+  },
+  "gemini_decision": {
+    "status": "NO_GO_KEEP_DISABLED",
+    "model": "gemini-3.6-flash",
+    "provider_revocation_confirmed": false,
+    "owner_reported_not_rotated": true,
+    "secret_changed": false,
+    "provider_generation_calls": 0,
+    "images_sent_to_provider": 0,
+    "blockers": [
+      "Owner has not revoked exposed provider key or stored a new key.",
+      "No accepted production OCR quota/quality/end-to-end evidence.",
+      "Worker pipeline lacks household allowlist and persisted consent checks before S3 read/provider call; retained messages must not be consumed or redriven.",
+      "Frontend candidate and Terraform production profile intentionally hard-disable OCR; enabling requires a reviewed candidate and controlled rollout."
+    ],
+    "household_1_and_dlq_preserved": true
+  },
+  "private_work_directory": "%LOCALAPPDATA%/HomeWallet/production/20261113/reconcile-20261113",
+  "committed": false,
+  "pushed": false
+}
