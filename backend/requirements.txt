@@ -3,7 +3,7 @@ gunicorn>=26.2.0
 pymysql>=1.1
 redis>=5,<7
 cryptography>=42
-PyJWT>=2.8
+PyJWT>=2.15.1
 boto3
 pillow>=10
 google-genai>=1.0
