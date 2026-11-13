@@ -1,12 +1,22 @@
 data "aws_region" "current" {}
 
 locals {
+  api_health_check = var.readiness_healthcheck_enabled ? {
+    healthCheck = {
+      command     = ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:${var.container_port}/ready', timeout=3).close()\""]
+      interval    = 30
+      timeout     = 5
+      retries     = 3
+      startPeriod = 30
+    }
+  } : {}
   container_security = merge(
+    { mountPoints = [], volumesFrom = [], systemControls = [] },
     var.container_hardening_enabled ? { user = "10001:10001" } : {},
     var.container_hardening_enabled ? {
       linuxParameters = {
         initProcessEnabled = true
-        capabilities       = { drop = ["ALL"] }
+        capabilities       = { add = [], drop = ["ALL"] }
       }
     } : {},
   )
@@ -48,7 +58,7 @@ resource "aws_ecs_task_definition" "api" {
     image        = var.image
     essential    = true
     stopTimeout  = 30
-    portMappings = [{ containerPort = var.container_port, protocol = "tcp" }]
+    portMappings = [{ containerPort = var.container_port, hostPort = var.container_port, protocol = "tcp" }]
     environment  = [for k, v in var.api_environment : { name = k, value = v }]
     secrets      = [for k, v in var.api_secrets : { name = k, valueFrom = v }]
     logConfiguration = {
@@ -59,7 +69,7 @@ resource "aws_ecs_task_definition" "api" {
         "awslogs-stream-prefix" = "api"
       }
     }
-  }, local.container_security)])
+  }, local.container_security, local.api_health_check)])
 }
 
 resource "aws_ecs_service" "api" {
@@ -73,6 +83,15 @@ resource "aws_ecs_service" "api" {
   deployment_maximum_percent         = 200
 
   health_check_grace_period_seconds = 30
+
+  dynamic "service_registries" {
+    for_each = var.service_discovery_enabled ? [var.service_discovery_arn] : []
+    content {
+      registry_arn   = service_registries.value
+      container_name = "api"
+      container_port = var.container_port
+    }
+  }
 
   network_configuration {
     subnets          = var.app_subnet_ids
@@ -111,6 +130,15 @@ resource "aws_ecs_service" "api_scaled" {
 
   health_check_grace_period_seconds = 30
 
+  dynamic "service_registries" {
+    for_each = var.service_discovery_enabled ? [var.service_discovery_arn] : []
+    content {
+      registry_arn   = service_registries.value
+      container_name = "api"
+      container_port = var.container_port
+    }
+  }
+
   network_configuration {
     subnets          = var.app_subnet_ids
     security_groups  = [var.sg_app_id, var.sg_api_id]
@@ -130,7 +158,8 @@ resource "aws_ecs_service" "api_scaled" {
 
   lifecycle {
     # The approved release workflow and autoscaling own these attributes.
-    ignore_changes = [task_definition, desired_count]
+    prevent_destroy = true
+    ignore_changes  = [task_definition, desired_count]
   }
 
   depends_on = [aws_lb_listener.http, aws_lb_listener.https, aws_lb_listener_rule.cloudfront_only, aws_iam_role_policy.execution_read_secrets]

@@ -11,6 +11,18 @@ variable "autoscaling_enabled" {
   type    = bool
   default = false
 }
+variable "service_discovery_arn" {
+  type    = string
+  default = null
+}
+variable "service_discovery_enabled" {
+  type    = bool
+  default = false
+}
+variable "readiness_healthcheck_enabled" {
+  type    = bool
+  default = false
+}
 variable "container_hardening_enabled" {
   description = "Run reviewed production images as UID/GID 10001, drop Linux capabilities, and reap child processes."
   type        = bool

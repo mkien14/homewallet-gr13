@@ -40,3 +40,25 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "frontend" {
     }
   }
 }
+
+# Preserve overwritten entry points for a reviewed frontend rollback. Current
+# hashed assets remain available; only noncurrent versions expire after 30 days.
+resource "aws_s3_bucket_versioning" "frontend" {
+  bucket = aws_s3_bucket.frontend.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "frontend_history" {
+  bucket = aws_s3_bucket.frontend.id
+  rule {
+    id     = "retain-frontend-history-30-days"
+    status = "Enabled"
+    filter {}
+    noncurrent_version_expiration {
+      noncurrent_days = 30
+    }
+  }
+  depends_on = [aws_s3_bucket_versioning.frontend]
+}

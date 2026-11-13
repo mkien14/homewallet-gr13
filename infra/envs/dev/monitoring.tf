@@ -11,6 +11,24 @@ resource "aws_sns_topic_subscription" "operations_email" {
 
 locals {
   operational_alarms = merge(
+    var.enable_api_https_gateway ? {
+      api_gateway_5xx = {
+        namespace   = "AWS/ApiGateway", metric = "5xx"
+        dimensions  = { ApiId = module.api_https[0].api_id }
+        statistic   = "Sum", period = 60, threshold = 5
+        comparison  = "GreaterThanOrEqualToThreshold", evaluation = 3, datapoints = 2
+        missing     = "notBreaching"
+        description = "Public HTTP API 5xx including integration errors; ALB metrics no longer cover this traffic."
+      }
+      api_gateway_latency = {
+        namespace   = "AWS/ApiGateway", metric = "IntegrationLatency"
+        dimensions  = { ApiId = module.api_https[0].api_id }
+        statistic   = "Average", period = 60, threshold = 1000
+        comparison  = "GreaterThanOrEqualToThreshold", evaluation = 3, datapoints = 3
+        missing     = "notBreaching"
+        description = "Public HTTP API integration latency averages at least one second for three minutes."
+      }
+    } : {},
     {
       dlq_visible = {
         namespace   = "AWS/SQS", metric = "ApproximateNumberOfMessagesVisible"

@@ -21,10 +21,11 @@ resource "aws_ecs_task_definition" "worker" {
 
   container_definitions = jsonencode([
     merge({
-      name        = "worker"
-      image       = var.worker_image
-      essential   = true
-      stopTimeout = 30
+      name         = "worker"
+      image        = var.worker_image
+      essential    = true
+      stopTimeout  = 30
+      portMappings = []
 
       command = ["python", "-m", "jobs.worker"]
 
@@ -88,7 +89,10 @@ resource "aws_ecs_service" "worker" {
 }
 resource "aws_ecs_service" "worker_release" {
   count = var.autoscaling_enabled ? 1 : 0
-  lifecycle { ignore_changes = [task_definition] }
+  lifecycle {
+    prevent_destroy = true
+    ignore_changes  = [task_definition]
+  }
   name            = "worker"
   cluster         = aws_ecs_cluster.this.id
   task_definition = aws_ecs_task_definition.worker.arn
