@@ -1,0 +1,257 @@
+{
+  "status": "NO_GO",
+  "checks": [
+    {
+      "gate": "settings_complete",
+      "pass": true
+    },
+    {
+      "gate": "data_boundary_reviewed",
+      "pass": false
+    },
+    {
+      "gate": "operations_owner_named",
+      "pass": true
+    },
+    {
+      "gate": "monthly_budget_chosen",
+      "pass": true
+    },
+    {
+      "gate": "expected_aws_account",
+      "pass": true
+    },
+    {
+      "gate": "public_cloudfront_url",
+      "pass": true
+    },
+    {
+      "gate": "public_api_origin_https",
+      "pass": false
+    },
+    {
+      "gate": "cloudfront_deployed",
+      "pass": true
+    },
+    {
+      "gate": "api_viewer_https",
+      "pass": true
+    },
+    {
+      "gate": "api_cache_policy_present",
+      "pass": true
+    },
+    {
+      "gate": "authenticated_api_not_cached",
+      "pass": true
+    },
+    {
+      "gate": "frontend_bucket_matches_distribution",
+      "pass": true
+    },
+    {
+      "gate": "cloudfront_waf_present",
+      "pass": true
+    },
+    {
+      "gate": "waf_common_rules_enforced",
+      "pass": false
+    },
+    {
+      "gate": "waf_rate_rule_enforced",
+      "pass": false
+    },
+    {
+      "gate": "origin_header_present",
+      "pass": true
+    },
+    {
+      "gate": "api_service_exists",
+      "pass": true
+    },
+    {
+      "gate": "api_service_stable",
+      "pass": true
+    },
+    {
+      "gate": "production_runtime_profile",
+      "pass": false
+    },
+    {
+      "gate": "immutable_api_image",
+      "pass": true
+    },
+    {
+      "gate": "identified_release",
+      "pass": false
+    },
+    {
+      "gate": "approved_household_scope_enforced",
+      "pass": false
+    },
+    {
+      "gate": "api_image_in_expected_private_registry",
+      "pass": true
+    },
+    {
+      "gate": "release_tags_immutable",
+      "pass": false
+    },
+    {
+      "gate": "api_unprivileged_runtime",
+      "pass": false
+    },
+    {
+      "gate": "api_private_network",
+      "pass": true
+    },
+    {
+      "gate": "worker_service_exists",
+      "pass": true
+    },
+    {
+      "gate": "worker_service_stable",
+      "pass": true
+    },
+    {
+      "gate": "worker_private_network",
+      "pass": true
+    },
+    {
+      "gate": "worker_matches_production_release",
+      "pass": false
+    },
+    {
+      "gate": "worker_unprivileged_runtime",
+      "pass": false
+    },
+    {
+      "gate": "jobs_match_production_release",
+      "pass": false
+    },
+    {
+      "gate": "jobs_unprivileged_runtime",
+      "pass": false
+    },
+    {
+      "gate": "admin_mfa_challenge_verified",
+      "pass": false
+    },
+    {
+      "gate": "admission_and_consent",
+      "pass": false
+    },
+    {
+      "gate": "runtime_credentials_tls",
+      "pass": false
+    },
+    {
+      "gate": "gemini_rotation_or_disabled",
+      "pass": false
+    },
+    {
+      "gate": "ocr_acceptance_or_disabled",
+      "pass": false
+    },
+    {
+      "gate": "cognito_pool_configured",
+      "pass": true
+    },
+    {
+      "gate": "closed_rollout_no_self_signup",
+      "pass": false
+    },
+    {
+      "gate": "one_spa_client_only",
+      "pass": false
+    },
+    {
+      "gate": "srp_client_without_password_flow",
+      "pass": true
+    },
+    {
+      "gate": "no_localhost_production_callbacks",
+      "pass": false
+    },
+    {
+      "gate": "srp_client_without_password_flow",
+      "pass": false
+    },
+    {
+      "gate": "no_localhost_production_callbacks",
+      "pass": true
+    },
+    {
+      "gate": "admin_totp_enrolled_and_preferred",
+      "pass": false
+    },
+    {
+      "gate": "ses_transactional_sending_available",
+      "pass": true
+    },
+    {
+      "gate": "frontend_bucket_configured",
+      "pass": true
+    },
+    {
+      "gate": "frontend_bucket_private",
+      "pass": true
+    },
+    {
+      "gate": "frontend_bucket_encrypted",
+      "pass": true
+    },
+    {
+      "gate": "receipts_bucket_configured",
+      "pass": true
+    },
+    {
+      "gate": "receipts_bucket_private",
+      "pass": true
+    },
+    {
+      "gate": "receipts_bucket_encrypted",
+      "pass": true
+    },
+    {
+      "gate": "scheduler_inventory_recorded",
+      "pass": true
+    },
+    {
+      "gate": "schedule_disabled",
+      "pass": true
+    },
+    {
+      "gate": "schedule_targets_reviewed_jobs_revision",
+      "pass": true
+    },
+    {
+      "gate": "schedule_disabled",
+      "pass": true
+    },
+    {
+      "gate": "schedule_targets_reviewed_jobs_revision",
+      "pass": true
+    },
+    {
+      "gate": "schedule_disabled",
+      "pass": true
+    },
+    {
+      "gate": "schedule_targets_reviewed_jobs_revision",
+      "pass": true
+    },
+    {
+      "gate": "budget_name_configured",
+      "pass": true
+    },
+    {
+      "gate": "monthly_cost_budget_exists",
+      "pass": false
+    },
+    {
+      "gate": "external_resilience_signoff",
+      "pass": false
+    }
+  ]
+}

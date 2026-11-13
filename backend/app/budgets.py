@@ -9,6 +9,7 @@ from .budget_suggestions import BudgetSuggestionError, suggest_with_gemini
 from .budget_rules import suggest_budget, validate_budget
 from .db import get_db
 from .errors import ApiError
+from .limits import admit_costly_operation
 from .households import json_body, membership, require_owner
 
 bp = Blueprint("budgets", __name__, url_prefix="/api")
@@ -263,6 +264,9 @@ def suggest_budget_for_period(period):
     previous_periods = _previous_periods(period)
     historical = _historical_spending(db, household["household_id"], period)
     try:
+        if not current_app.config.get("GEMINI_ENABLED", True):
+            raise BudgetSuggestionError("Gemini is disabled by release configuration")
+        admit_costly_operation("suggestion", household["household_id"])
         allocations = suggest_with_gemini(
             period=period,
             income_estimate=income_estimate,

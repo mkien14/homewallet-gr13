@@ -21,6 +21,14 @@
     "react-router-dom": "^7.18.4",
     "recharts": "^3.10.1"
   },
+  "overrides": {
+    "@eslint/config-array": {
+      "minimatch": "11.0.1"
+    },
+    "eslint": {
+      "minimatch": "11.0.1"
+    }
+  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/react": "^19.2.18",

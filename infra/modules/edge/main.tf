@@ -14,6 +14,42 @@ data "aws_cloudfront_response_headers_policy" "security" {
   name = "Managed-SecurityHeadersPolicy"
 }
 
+resource "aws_cloudfront_response_headers_policy" "application" {
+  count = var.content_security_policy == null ? 0 : 1
+  name  = "${var.name}-application-security"
+
+  security_headers_config {
+    content_security_policy {
+      content_security_policy = var.content_security_policy
+      override                = true
+    }
+    content_type_options { override = true }
+    frame_options {
+      frame_option = "DENY"
+      override     = true
+    }
+    referrer_policy {
+      referrer_policy = "strict-origin-when-cross-origin"
+      override        = true
+    }
+    strict_transport_security {
+      access_control_max_age_sec = 31536000
+      override                   = true
+    }
+  }
+  custom_headers_config {
+    items {
+      header   = "Permissions-Policy"
+      value    = "camera=(), microphone=(), geolocation=()"
+      override = true
+    }
+  }
+}
+
+locals {
+  security_headers_policy_id = var.content_security_policy == null ? data.aws_cloudfront_response_headers_policy.security.id : aws_cloudfront_response_headers_policy.application[0].id
+}
+
 resource "aws_cloudfront_origin_access_control" "frontend" {
   name                              = "${var.name}-frontend-oac"
   origin_access_control_origin_type = "s3"
@@ -45,7 +81,7 @@ resource "aws_cloudfront_distribution" "this" {
 
   origin {
     origin_id   = "backend-alb"
-    domain_name = var.alb_domain_name
+    domain_name = coalesce(var.api_origin_domain_name, var.alb_domain_name)
 
     custom_header {
       name  = "X-Origin-Verify"
@@ -55,7 +91,7 @@ resource "aws_cloudfront_distribution" "this" {
     custom_origin_config {
       http_port              = 80
       https_port             = 443
-      origin_protocol_policy = var.origin_https ? "https-only" : "http-only"
+      origin_protocol_policy = (var.origin_https || var.api_origin_https) ? "https-only" : "http-only"
       origin_ssl_protocols   = ["TLSv1.2"]
     }
   }
@@ -71,7 +107,7 @@ resource "aws_cloudfront_distribution" "this" {
     cache_policy_id = data.aws_cloudfront_cache_policy.frontend.id
 
     response_headers_policy_id = (
-      data.aws_cloudfront_response_headers_policy.security.id
+      local.security_headers_policy_id
     )
 
     function_association {
@@ -105,7 +141,7 @@ resource "aws_cloudfront_distribution" "this" {
     )
 
     response_headers_policy_id = (
-      data.aws_cloudfront_response_headers_policy.security.id
+      local.security_headers_policy_id
     )
   }
 

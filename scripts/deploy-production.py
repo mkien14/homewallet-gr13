@@ -1,5 +1,6 @@
 """Manually approved release only; no Terraform apply, migrations or secret output."""
 import datetime
+import importlib.util
 import json
 import os
 import re
@@ -52,8 +53,17 @@ def main():
     if not queue.startswith(f"https://sqs.ap-southeast-1.amazonaws.com/{account}/homewallet-prod-"):
         raise RuntimeError("Queue is not an isolated production queue")
     cluster = "homewallet-prod"
+    spec = importlib.util.spec_from_file_location("production_plan_summary", Path(__file__).with_name("production-plan-summary.py"))
+    plan_summary = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(plan_summary)
+    review_path = Path("production-plan-actions.json")
+    if not review_path.is_file():
+        raise RuntimeError("Missing approved production plan review")
+    review_data = plan_summary.require_review(json.loads(review_path.read_text(encoding="utf-8")), commit, digest, account)
+    reviewed_tasks = {name: item["task_definition"] for name, item in review_data["tasks"].items()}
     record = {"commit": commit, "digest": digest, "migration_version": required("MIGRATION_VERSION"),
               "compatibility_review": review, "cloudfront_distribution": distribution_id,
+              "reviewed_task_definitions": reviewed_tasks,
               "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(), "services": {}}
     path = Path("production-release-record.json")
 
@@ -76,8 +86,10 @@ def main():
                 raise RuntimeError("Task secrets must belong to production")
             if definition["name"] == container:
                 definition["image"] = image
-        allowed = {"family", "taskRoleArn", "executionRoleArn", "networkMode", "containerDefinitions", "volumes",
-                   "placementConstraints", "requiresCompatibilities", "cpu", "memory", "runtimePlatform", "ephemeralStorage"}
+                env = definition.setdefault("environment", [])
+                env[:] = [item for item in env if item["name"] != "APP_RELEASE"]
+                env.append({"name": "APP_RELEASE", "value": commit})
+        allowed = ecs.meta.service_model.operation_model("RegisterTaskDefinition").input_shape.members
         return ecs.register_task_definition(**{k: v for k, v in task.items() if k in allowed})["taskDefinition"]["taskDefinitionArn"]
 
     def rollout(service):
@@ -87,7 +99,9 @@ def main():
         record["services"][service] = {"previous_task_definition": old,
                                          "previous_images": [c["image"] for c in previous["containerDefinitions"]]}
         save()
-        new = register(old, service)
+        # The plan-reviewed revision supplies all runtime configuration. The
+        # running revision is recorded only as the explicit rollback target.
+        new = register(reviewed_tasks[service], service)
         record["services"][service]["new_task_definition"] = new
         save()
         ecs.update_service(cluster=cluster, service=service, taskDefinition=new)
@@ -132,7 +146,7 @@ def main():
     names = scheduler.list_schedules(GroupName="homewallet-prod-jobs")["Schedules"]
     if len(names) != 3:
         raise RuntimeError("Expected three isolated disabled schedules")
-    jobs = register("homewallet-prod-jobs", "jobs")
+    jobs = register(reviewed_tasks["jobs"], "jobs")
     record["jobs_task_definition"] = jobs
     save()
     for item in names:

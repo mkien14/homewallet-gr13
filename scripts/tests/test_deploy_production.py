@@ -27,6 +27,15 @@ def release(monkeypatch, tmp_path):
     clients["ecr"].describe_images.return_value = {"imageDetails": [{"imageTags": ["sha-" + values["RELEASE_COMMIT"]]}]}
     clients["ecr"].describe_image_scan_findings.return_value = {"imageScanStatus": {"status": "COMPLETE"}, "imageScanFindings": {"findingSeverityCounts": {}}}
     monkeypatch.chdir(tmp_path)
+    # Existing rollout fixture now includes the plan-reviewed task revisions.
+    Path("production-plan-actions.json").write_text(json.dumps({
+        "schema_version": 2, "commit": values["RELEASE_COMMIT"],
+        "digest": values["RELEASE_DIGEST"], "account": values["PROD_ACCOUNT_ID"],
+        "changes": [], "tasks": {
+            name: {"task_definition": f"arn:aws:ecs:ap-southeast-1:123456789012:task-definition/homewallet-prod-{name}:1"}
+            for name in ("api", "worker", "jobs")
+        },
+    }))
     monkeypatch.setattr(module.time, "sleep", lambda _: None)
     return module, clients, values
 

@@ -29,3 +29,7 @@ def register_error_handlers(app):
     def _internal(e):
         current_app.logger.exception("unhandled error", exc_info=getattr(e, "original_exception", e))
         return error_response(500, "INTERNAL", "Lỗi hệ thống")
+
+    @app.errorhandler(413)
+    def _too_large(_e):
+        return error_response(413, "PAYLOAD_TOO_LARGE", "Yêu cầu vượt quá kích thước cho phép")

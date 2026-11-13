@@ -8,6 +8,8 @@ output "identities" {
   }
 }
 output "target_group_arn_suffix" { value = aws_lb_target_group.api.arn_suffix }
+output "alb_listener_arn" { value = aws_lb_listener.http.arn }
+output "api_task_definition_arn" { value = aws_ecs_task_definition.api.arn }
 output "cluster_name" { value = aws_ecs_cluster.this.name }
 output "service_name" { value = var.autoscaling_enabled ? aws_ecs_service.api_scaled[0].name : aws_ecs_service.api[0].name }
 output "execution_role_arn" { value = aws_iam_role.execution.arn }

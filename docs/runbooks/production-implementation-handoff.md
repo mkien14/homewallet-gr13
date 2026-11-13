@@ -3,6 +3,21 @@
 Implemented from the supplied production implementation brief on 2026-11-12.
 This is a code delivery, not an operational acceptance or deployment report.
 
+## Integration follow-up — 2026-11-13
+
+PR #103 was merged after PR #102. Follow-up fixes and the restored application
+hardening are on `fix/production-integration`; see
+[integration record](../acceptance/production-integration-20261113.md).
+CloudWatch publishing permission and the ECS deployment-event filter were fixed.
+Release approval now checks image/APP_RELEASE-only changes and binds deployment
+to the task revisions in the redacted plan. Migration images remain separate.
+Readiness and both supported HTTPS-origin configurations are retained.
+
+The active administrator decision keeps the existing stack and CloudFront URL
+without buying a domain; this isolated-stack implementation is an alternative,
+not deployed resilience for that stack. The verification table below records
+the original author's earlier checks. Those tests were not rerun in this follow-up.
+
 ## Verification
 
 | Check | Observed output |

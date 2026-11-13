@@ -4,6 +4,7 @@ resource "aws_cloudwatch_log_group" "worker" {
 }
 
 resource "aws_ecs_task_definition" "worker" {
+  skip_destroy             = true
   family                   = "${local.prefix}-worker"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
@@ -19,7 +20,7 @@ resource "aws_ecs_task_definition" "worker" {
   }
 
   container_definitions = jsonencode([
-    {
+    merge({
       name        = "worker"
       image       = var.worker_image
       essential   = true
@@ -50,7 +51,7 @@ resource "aws_ecs_task_definition" "worker" {
           "awslogs-stream-prefix" = "worker"
         }
       }
-    }
+    }, local.container_security)
   ])
 }
 

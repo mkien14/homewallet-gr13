@@ -38,3 +38,9 @@ variable "alb_ingress_cidr" {
   type    = string
   default = "0.0.0.0/0"
 }
+
+variable "allow_cloudfront_http_origin" {
+  description = "Close only after the HTTPS VPC Link origin is deployed and accepted."
+  type        = bool
+  default     = true
+}

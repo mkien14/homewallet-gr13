@@ -53,14 +53,16 @@ resource "random_password" "origin_verify" {
 module "network" {
   source = "../../modules/network"
 
-  name = "homewallet-dev"
-  cidr = "10.0.0.0/16"
-  azs  = ["ap-southeast-1a", "ap-southeast-1b"]
+  name                         = "homewallet-dev"
+  cidr                         = "10.0.0.0/16"
+  azs                          = ["ap-southeast-1a", "ap-southeast-1b"]
+  allow_cloudfront_http_origin = !var.close_legacy_http_origin
 }
 
 module "ecr" {
-  source = "../../modules/ecr"
-  name   = "homewallet-backend"
+  source                 = "../../modules/ecr"
+  name                   = "homewallet-backend"
+  preserve_tagged_images = var.application_hardening_enabled
 }
 
 module "cache" {
@@ -72,7 +74,7 @@ module "cache" {
 }
 
 locals {
-  image = "${module.ecr.repository_url}:${var.api_image_tag}"
+  image = var.application_hardening_enabled ? "${module.ecr.repository_url}@${var.release_image_digest}" : coalesce(var.api_image_uri, "${module.ecr.repository_url}:${var.api_image_tag}")
 
   runtime_db_secret_arn = (
     var.enable_db_runtime_setup
@@ -99,10 +101,11 @@ module "compute" {
   image               = local.image
   receipts_bucket_arn = module.storage.bucket_arn
 
-  desired_count         = var.api_desired_count
-  job_schedules_enabled = var.job_schedules_enabled
+  desired_count               = var.api_desired_count
+  job_schedules_enabled       = var.job_schedules_enabled
+  container_hardening_enabled = var.application_hardening_enabled
 
-  jobs_image = "${module.ecr.repository_url}:dev"
+  jobs_image = var.application_hardening_enabled ? local.image : coalesce(var.jobs_image_uri, "${module.ecr.repository_url}:${var.jobs_image_tag}")
 
   ses_from_address = var.weekly_report_sender
 
@@ -113,17 +116,17 @@ module "compute" {
   secret_arns = concat(
     var.use_db_runtime_credentials ? [] : [module.data.secret_arn],
     [
-      aws_secretsmanager_secret.gemini.arn,
       data.aws_secretsmanager_secret.vapid_private_key.arn,
       module.cache.auth_token_secret_arn,
     ],
-    var.use_db_runtime_credentials ? [local.runtime_db_secret_arn] : []
+    var.use_db_runtime_credentials ? [local.runtime_db_secret_arn] : [],
+    var.application_hardening_enabled ? [aws_secretsmanager_secret.origin_verification[0].arn] : [aws_secretsmanager_secret.gemini.arn]
   )
 
-  worker_image     = "${module.ecr.repository_url}:${var.worker_image_tag}"
+  worker_image     = var.application_hardening_enabled ? local.image : coalesce(var.worker_image_uri, "${module.ecr.repository_url}:${var.worker_image_tag}")
   worker_queue_arn = module.queue.queue_arn
 
-  worker_environment = {
+  worker_environment = merge({
     DB_HOST   = module.data.address
     DB_PORT   = "3306"
     DB_NAME   = "homewallet"
@@ -135,15 +138,14 @@ module "compute" {
     GEMINI_MODEL              = var.gemini_model
     TEXTRACT_FALLBACK_ENABLED = "true"
     TEXTRACT_REGION           = "ap-southeast-1"
-  }
+  }, local.hardened_environment)
 
-  worker_secrets = {
-    DB_USER        = "${local.service_db_secret_arn}:username::"
-    DB_PASSWORD    = "${local.service_db_secret_arn}:password::"
-    GEMINI_API_KEY = aws_secretsmanager_secret.gemini.arn
-  }
+  worker_secrets = merge({
+    DB_USER     = "${local.service_db_secret_arn}:username::"
+    DB_PASSWORD = "${local.service_db_secret_arn}:password::"
+  }, var.application_hardening_enabled ? {} : { GEMINI_API_KEY = aws_secretsmanager_secret.gemini.arn })
 
-  jobs_environment = {
+  jobs_environment = merge({
     DB_HOST          = module.data.address
     DB_PORT          = "3306"
     DB_NAME          = "homewallet"
@@ -151,7 +153,7 @@ module "compute" {
     AWS_REGION       = "ap-southeast-1"
     TZ               = "Asia/Ho_Chi_Minh"
     SES_FROM_ADDRESS = var.weekly_report_sender
-  }
+  }, local.hardened_environment)
 
   jobs_secrets = {
     DB_USER           = "${local.service_db_secret_arn}:username::"
@@ -159,10 +161,10 @@ module "compute" {
     VAPID_PRIVATE_KEY = data.aws_secretsmanager_secret.vapid_private_key.arn
   }
 
-  api_environment = {
+  api_environment = merge({
     COGNITO_ISSUER     = module.cognito.issuer
     COGNITO_JWKS_URI   = module.cognito.jwks_uri
-    COGNITO_CLIENT_IDS = join(",", compact([module.cognito.spa_client_id, module.cognito.dev_client_id]))
+    COGNITO_CLIENT_IDS = join(",", compact([module.cognito.spa_client_id, var.application_hardening_enabled ? null : module.cognito.dev_client_id]))
     COGNITO_HOSTED_UI  = module.cognito.hosted_ui_base
     DB_HOST            = module.data.address
     DB_PORT            = "3306"
@@ -174,15 +176,16 @@ module "compute" {
     REDIS_HOST         = module.cache.endpoint_address
     REDIS_PORT         = tostring(module.cache.port)
     REDIS_SSL_CA       = "/etc/ssl/certs/ca-certificates.crt"
-  }
+  }, local.hardened_environment)
 
-  api_secrets = {
+  api_secrets = merge({
     DB_USER           = "${local.service_db_secret_arn}:username::"
     DB_PASSWORD       = "${local.service_db_secret_arn}:password::"
-    GEMINI_API_KEY    = aws_secretsmanager_secret.gemini.arn
     REDIS_AUTH_TOKEN  = module.cache.auth_token_secret_arn
     VAPID_PRIVATE_KEY = data.aws_secretsmanager_secret.vapid_private_key.arn
-  }
+    }, var.application_hardening_enabled ? {
+    ORIGIN_VERIFY_HEADER = aws_secretsmanager_secret.origin_verification[0].arn
+  } : { GEMINI_API_KEY = aws_secretsmanager_secret.gemini.arn })
 }
 
 module "data" {
@@ -201,7 +204,7 @@ module "migrate" {
 
   name          = "homewallet-dev"
   cluster_name  = module.compute.cluster_name
-  image         = "${module.ecr.repository_url}:${var.migrate_image_tag}"
+  image         = coalesce(var.migrate_image_uri, "${module.ecr.repository_url}:${var.migrate_image_tag}")
   db_host       = module.data.address
   db_secret_arn = module.data.secret_arn
 
@@ -214,21 +217,20 @@ module "migrate" {
 }
 
 module "cognito" {
-  source = "../../modules/cognito"
+  self_signup_enabled = !var.application_hardening_enabled
+  source              = "../../modules/cognito"
 
   name = "homewallet-dev"
-  callback_urls = [
-    "http://localhost:5173/auth/callback",
+  callback_urls = concat(var.application_hardening_enabled ? [] : ["http://localhost:5173/auth/callback"], [
     "${module.edge.url}/auth/callback"
-  ]
+  ])
 
-  logout_urls = [
-    "http://localhost:5173/",
+  logout_urls = concat(var.application_hardening_enabled ? [] : ["http://localhost:5173/"], [
     "${module.edge.url}/"
-  ]
+  ])
 
   auth_email_sender   = var.weekly_report_sender
-  enable_dev_client   = true
+  enable_dev_client   = !var.application_hardening_enabled
   deletion_protection = "INACTIVE"
 
 
@@ -288,7 +290,21 @@ module "edge" {
   frontend_bucket_arn    = module.frontend.bucket_arn
   frontend_bucket_domain = module.frontend.bucket_regional_domain_name
 
-  alb_domain_name      = module.compute.alb_dns_name
-  origin_verify_header = random_password.origin_verify.result
-  web_acl_arn          = aws_wafv2_web_acl.frontend.arn
+  alb_domain_name         = module.compute.alb_dns_name
+  origin_verify_header    = random_password.origin_verify.result
+  web_acl_arn             = aws_wafv2_web_acl.frontend.arn
+  api_origin_domain_name  = var.route_api_via_https_gateway ? module.api_https[0].origin_domain_name : null
+  api_origin_https        = var.route_api_via_https_gateway
+  content_security_policy = var.application_hardening_enabled ? local.application_csp : var.content_security_policy
+}
+
+module "api_https" {
+  count  = var.enable_api_https_gateway ? 1 : 0
+  source = "../../modules/api-https"
+
+  name                  = "homewallet-dev"
+  vpc_id                = module.network.vpc_id
+  subnet_ids            = module.network.app_subnet_ids
+  alb_security_group_id = module.network.sg_ids.alb
+  alb_listener_arn      = module.compute.alb_listener_arn
 }

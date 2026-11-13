@@ -10,7 +10,7 @@ from google.genai import errors, types
 from app.parsing import parse_date, parse_vnd
 
 
-MAX_TRIES = 6
+MAX_TRIES = min(6, max(1, int(os.getenv("GEMINI_MAX_TRIES", "6"))))
 MIN_INTERVAL = max(0.0, float(os.getenv("GEMINI_MIN_INTERVAL_SECONDS", "13")))
 _last_request_at = 0.0
 
@@ -54,7 +54,7 @@ def _attach_source(payload, source, *, error=None):
     if error is not None:
         result["_error"] = {
             "type": type(error).__name__,
-            "message": str(error),
+            "message": "Receipt provider request failed",
         }
     return result
 
@@ -164,6 +164,17 @@ def extract_invoice_textract(image_bytes, mime_type, category_names, *, client=N
 
 
 def extract_invoice(image_bytes, mime_type, category_names, *, client=None, sleep=None):
+    default = "false" if os.getenv("APP_ENV", "").strip().lower() == "production" else "true"
+    if os.getenv("GEMINI_ENABLED", default).strip().lower() not in {"true", "1"}:
+        if _should_fallback():
+            return _attach_source(
+                extract_invoice_textract(image_bytes, mime_type, category_names), "textract"
+            )
+        raise ValueError("Receipt AI processing is disabled")
+    if os.getenv("APP_ENV", "").strip().lower() == "production" and os.getenv(
+        "GEMINI_ROTATION_CONFIRMED", "false"
+    ).strip().lower() not in {"true", "1"}:
+        raise ValueError("Gemini key rotation must be confirmed before production processing")
     api_key = os.getenv("GEMINI_API_KEY")
     model = os.getenv("GEMINI_MODEL")
     if not api_key:

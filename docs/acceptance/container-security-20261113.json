@@ -1,0 +1,72 @@
+{
+  "record_date_local": "2026-11-13",
+  "timezone": "Asia/Bangkok",
+  "status": "LOCAL_CONTAINER_GATE_PASS_NOT_DEPLOYED",
+  "source_commit_base": "63fd2b9ae935097c557f56adbf1928aaa9e8ef13",
+  "source_dirty": true,
+  "app_release": "working-tree",
+  "scanner": {
+    "version": "0.76.2",
+    "image": "ghcr.io/aquasecurity/trivy@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb",
+    "scanned_at_utc": "2026-11-12T19:27:11.507370342Z",
+    "severity": [
+      "HIGH",
+      "CRITICAL"
+    ],
+    "include_unfixed": true,
+    "ignore_file": "/dev/null",
+    "exit_on_eol": 1,
+    "exit_code": 0
+  },
+  "before": {
+    "os": {
+      "Family": "debian",
+      "Name": "13.7"
+    },
+    "high": 47,
+    "critical": 0,
+    "unique_cves": 11,
+    "affected_packages": 18
+  },
+  "after": {
+    "os": {
+      "Family": "alpine",
+      "Name": "3.24.4"
+    },
+    "high": 0,
+    "critical": 0,
+    "secret_findings": 0,
+    "python_dependency_audit_findings": 0,
+    "python_dependencies_audited": 56,
+    "sbom_components": 95,
+    "image_id": "sha256:b7db14c31a952f5a2522176d2f7c5758c4ad2c886644d462a79d684847e9f443",
+    "sqlite_components": 0,
+    "os_packages": 37
+  },
+  "source_sha256": {
+    "backend/Dockerfile": "8138adb38f996f824084963f0fed178abf4188f197d463c0bf5c281ad241aa6e",
+    "backend/requirements.txt": "592002307f3e31a623be3e23f4eee929940d13b922ed94f62f25a9eb7ab8c2c8",
+    "backend/requirements.lock": "710aff59d87c67acc5941ddb6164c291438596fa6e3c493ffaeed81774992ffa"
+  },
+  "evidence_files": {
+    "backend-alpine-runtime-20261113.tar": {
+      "sha256": "e8e0ccd2f0d350ecfac46715b1f8ed164102a293c8791cd7af32e964fb007467"
+    },
+    "backend-alpine-runtime-vulnerabilities-20261113.json": {
+      "sha256": "c78e536512262cbde4ecdadd34730e10bd39183ea21071645ae2fc7c1df632e4"
+    },
+    "backend-alpine-runtime-sbom-20261113.cdx.json": {
+      "sha256": "78f9539a62cea8d9a992ccad65fc70ae957c3a3bb9505c6333bf89736fa1d880"
+    },
+    "python-lock-audit-20261113.json": {
+      "sha256": "2abe7131da9a4ddebae41c55bde60c515d69f31e50d3f99faf4c11d17bf0e824"
+    }
+  },
+  "limitations": [
+    "Local working tree image, not a reviewed commit release",
+    "No regression, load, or application compatibility tests executed",
+    "No ECR push, ECS deployment, Terraform apply, traffic cutover, or scheduler enablement",
+    "Production remains NO_GO until runtime, owner, and release gates pass"
+  ],
+  "runtime_policy": "MySQL-only: unused sqlite3 Python module and sqlite-libs removed; original base runtime dependencies preserved except SQLite"
+}

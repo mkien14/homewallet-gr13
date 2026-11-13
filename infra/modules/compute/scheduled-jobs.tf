@@ -35,6 +35,7 @@ resource "aws_iam_role_policy" "weekly_report_ses" {
 }
 
 resource "aws_ecs_task_definition" "jobs" {
+  skip_destroy             = true
   family                   = "${local.prefix}-jobs"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
@@ -48,7 +49,7 @@ resource "aws_ecs_task_definition" "jobs" {
     cpu_architecture        = "X86_64"
   }
 
-  container_definitions = jsonencode([{
+  container_definitions = jsonencode([merge({
     name        = "jobs"
     image       = var.jobs_image
     essential   = true
@@ -64,7 +65,7 @@ resource "aws_ecs_task_definition" "jobs" {
         "awslogs-stream-prefix" = "scheduled"
       }
     }
-  }])
+  }, local.container_security)])
 }
 
 data "aws_iam_policy_document" "scheduler_assume" {

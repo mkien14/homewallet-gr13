@@ -7,19 +7,22 @@ mock_provider "aws" {
 mock_provider "aws" { alias = "us_east_1" }
 mock_provider "random" {}
 variables {
-  expected_account_id       = "123456789012"
-  release_digest            = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
-  origin_hostname           = "origin.example.com"
-  origin_zone_id            = "Z1234567890"
-  origin_certificate_arn    = "arn:aws:acm:ap-southeast-1:123456789012:certificate/00000000-0000-0000-0000-000000000000"
-  gemini_model              = "offline-test"
-  ses_sender                = "ops@example.com"
-  db_instance_class         = "db.t4g.small"
-  db_engine_version         = "8.4"
-  final_snapshot_identifier = "homewallet-prod-final-test123"
-  operations_emails         = ["ops@example.com"]
-  monthly_budget_usd        = 500
-  waf_validation_reference  = "offline-test-only"
+  production_allowed_household_ids = [2]
+  expected_account_id              = "123456789012"
+  release_commit                   = "0000000000000000000000000000000000000000"
+  migration_image_digest           = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  release_digest                   = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  origin_hostname                  = "origin.example.com"
+  origin_zone_id                   = "Z1234567890"
+  origin_certificate_arn           = "arn:aws:acm:ap-southeast-1:123456789012:certificate/00000000-0000-0000-0000-000000000000"
+  gemini_model                     = "offline-test"
+  ses_sender                       = "ops@example.com"
+  db_instance_class                = "db.t4g.small"
+  db_engine_version                = "8.4"
+  final_snapshot_identifier        = "homewallet-prod-final-test123"
+  operations_emails                = ["ops@example.com"]
+  monthly_budget_usd               = 500
+  waf_validation_reference         = "offline-test-only"
 }
 run "isolated_production" {
   command = plan

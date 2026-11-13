@@ -6,6 +6,8 @@ from jwt import PyJWKClient
 
 from . import users
 from .errors import ApiError
+from .limits import enforce_user_limit
+from .tenant_policy import require_approved_subject
 
 _clients = {}
 
@@ -49,6 +51,8 @@ def require_auth(fn):
             raise ApiError(401, "UNAUTHENTICATED", "Thiếu hoặc sai định dạng token")
         token = token.strip()
         g.claims = verify_token(token, current_app.config)
+        enforce_user_limit(g.claims["sub"])
+        require_approved_subject(g.claims)
         g.user = users.get_or_create_user(g.claims, token)
         return fn(*args, **kwargs)
     return wrapper

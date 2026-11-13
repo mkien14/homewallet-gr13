@@ -35,6 +35,16 @@ locals {
     DB_USER     = "${aws_secretsmanager_secret.runtime.arn}:username::"
     DB_PASSWORD = "${aws_secretsmanager_secret.runtime.arn}:password::"
   }
+  application_environment = {
+    APP_ENV                          = "production"
+    APP_RELEASE                      = var.release_commit
+    PRODUCTION_ALLOWED_HOUSEHOLD_IDS = join(",", sort([for id in var.production_allowed_household_ids : tostring(id)]))
+    RATE_LIMIT_ENABLED               = "true"
+    OCR_REQUIRE_CONSENT              = "true"
+    OCR_ENABLED                      = "false"
+    GEMINI_ENABLED                   = "false"
+    GEMINI_ROTATION_CONFIRMED        = "false"
+  }
 }
 module "network" {
   source              = "../../modules/network"
@@ -104,31 +114,41 @@ resource "random_password" "origin_verify" {
   length  = 40
   special = false
 }
+resource "aws_secretsmanager_secret" "origin_verification" {
+  name                    = "hw/prod/origin-verification"
+  recovery_window_in_days = 30
+  lifecycle { prevent_destroy = true }
+}
+resource "aws_secretsmanager_secret_version" "origin_verification" {
+  secret_id     = aws_secretsmanager_secret.origin_verification.id
+  secret_string = random_password.origin_verify.result
+}
 module "compute" {
-  source                 = "../../modules/compute"
-  name                   = local.name
-  vpc_id                 = module.network.vpc_id
-  public_subnet_ids      = module.network.public_subnet_ids
-  app_subnet_ids         = module.network.app_subnet_ids
-  sg_alb_id              = module.network.sg_ids.alb
-  sg_app_id              = module.network.sg_ids.app
-  sg_api_id              = module.network.sg_ids.api
-  image                  = local.image
-  worker_image           = local.image
-  jobs_image             = local.image
-  receipts_bucket_arn    = module.storage.bucket_arn
-  worker_queue_arn       = module.queue.queue_arn
-  desired_count          = 2
-  autoscaling_enabled    = true
-  autoscaling_min        = 2
-  autoscaling_max        = 4
-  log_retention_days     = 30
-  job_schedules_enabled  = false
-  origin_certificate_arn = var.origin_certificate_arn
-  origin_verify_header   = random_password.origin_verify.result
-  ses_from_address       = var.ses_sender
-  secret_arns            = [aws_secretsmanager_secret.runtime.arn, aws_secretsmanager_secret.gemini.arn, aws_secretsmanager_secret.vapid.arn, module.cache.auth_token_secret_arn]
-  api_environment = merge(local.db_environment, {
+  source                      = "../../modules/compute"
+  name                        = local.name
+  vpc_id                      = module.network.vpc_id
+  public_subnet_ids           = module.network.public_subnet_ids
+  app_subnet_ids              = module.network.app_subnet_ids
+  sg_alb_id                   = module.network.sg_ids.alb
+  sg_app_id                   = module.network.sg_ids.app
+  sg_api_id                   = module.network.sg_ids.api
+  image                       = local.image
+  worker_image                = local.image
+  jobs_image                  = local.image
+  receipts_bucket_arn         = module.storage.bucket_arn
+  worker_queue_arn            = module.queue.queue_arn
+  desired_count               = 2
+  autoscaling_enabled         = true
+  container_hardening_enabled = true
+  autoscaling_min             = 2
+  autoscaling_max             = 4
+  log_retention_days          = 30
+  job_schedules_enabled       = false
+  origin_certificate_arn      = var.origin_certificate_arn
+  origin_verify_header        = random_password.origin_verify.result
+  ses_from_address            = var.ses_sender
+  secret_arns                 = [aws_secretsmanager_secret.runtime.arn, aws_secretsmanager_secret.origin_verification.arn, aws_secretsmanager_secret.vapid.arn, module.cache.auth_token_secret_arn]
+  api_environment = merge(local.db_environment, local.application_environment, {
     COGNITO_ISSUER     = module.cognito.issuer
     COGNITO_JWKS_URI   = module.cognito.jwks_uri
     COGNITO_CLIENT_IDS = module.cognito.spa_client_id
@@ -138,23 +158,23 @@ module "compute" {
     REDIS_SSL_CA       = "/etc/ssl/certs/ca-certificates.crt"
   })
   api_secrets = merge(local.db_secrets, {
-    GEMINI_API_KEY    = aws_secretsmanager_secret.gemini.arn
-    VAPID_PRIVATE_KEY = aws_secretsmanager_secret.vapid.arn
-    REDIS_AUTH_TOKEN  = module.cache.auth_token_secret_arn
+    ORIGIN_VERIFY_HEADER = aws_secretsmanager_secret.origin_verification.arn
+    VAPID_PRIVATE_KEY    = aws_secretsmanager_secret.vapid.arn
+    REDIS_AUTH_TOKEN     = module.cache.auth_token_secret_arn
   })
-  worker_environment = merge(local.db_environment, {
+  worker_environment = merge(local.db_environment, local.application_environment, {
     S3_BUCKET    = module.storage.bucket_name, SQS_QUEUE_URL = module.queue.queue_url
     GEMINI_MODEL = var.gemini_model, TEXTRACT_FALLBACK_ENABLED = "true", TEXTRACT_REGION = "ap-southeast-1"
   })
-  worker_secrets   = merge(local.db_secrets, { GEMINI_API_KEY = aws_secretsmanager_secret.gemini.arn })
-  jobs_environment = merge(local.db_environment, { TZ = "Asia/Ho_Chi_Minh", SES_FROM_ADDRESS = var.ses_sender })
+  worker_secrets   = local.db_secrets
+  jobs_environment = merge(local.db_environment, local.application_environment, { TZ = "Asia/Ho_Chi_Minh", SES_FROM_ADDRESS = var.ses_sender })
   jobs_secrets     = merge(local.db_secrets, { VAPID_PRIVATE_KEY = aws_secretsmanager_secret.vapid.arn })
 }
 module "migrate" {
   source                         = "../../modules/migrate"
   name                           = local.name
   cluster_name                   = module.compute.cluster_name
-  image                          = local.image
+  image                          = "${module.ecr.repository_url}@${var.migration_image_digest}"
   db_host                        = module.data.address
   db_secret_arn                  = module.data.secret_arn
   enable_separate_execution_role = true
@@ -175,6 +195,7 @@ module "queue" {
   bucket_arn  = module.storage.bucket_arn
 }
 module "cognito" {
+  self_signup_enabled = false
   source              = "../../modules/cognito"
   name                = local.name
   callback_urls       = ["${module.edge.url}/auth/callback"]

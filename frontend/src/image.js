@@ -45,7 +45,7 @@ export async function prepareFile(file) {
   throw new Error("Không nén được ảnh xuống dưới 5 MB");
 }
 
-export async function uploadReceipt(file, onStage, { signal } = {}) {
+export async function uploadReceipt(file, onStage, { signal, processingConsent = false } = {}) {
   signal?.throwIfAborted();
   onStage("Đang nén ảnh");
   const blob = await prepareFile(file);
@@ -54,7 +54,7 @@ export async function uploadReceipt(file, onStage, { signal } = {}) {
   onStage("Đang xin phép tải lên");
   const { receipt, upload } = await api("/api/receipts", {
     method: "POST",
-    body: { content_type: blob.type, size: blob.size },
+    body: { content_type: blob.type, size: blob.size, external_processing_consent: processingConsent === true },
     signal,
   });
 

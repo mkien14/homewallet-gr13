@@ -10,10 +10,10 @@ riêng được Kiên xác nhận. File Word hướng dẫn tuần tiếp tục 
 | Ưu tiên | Việc | Kết luận | Hướng hoàn tất / người phụ trách |
 | --- | --- | --- | --- |
 | 1 | **#34 — benchmark Bedrock/Gemini** | **PARTIAL / NO-GO cho ảnh:** Kiên xác nhận Hoàng đã chạy smoke bằng identity riêng, kết quả đúng mong đợi; artifact chưa có trong checkout. Quota Gemini mới chưa được xác nhận; pilot ảnh cũ đã khóa. | Không gửi ảnh hoặc gỡ guard. Nếu cần, thêm artifact smoke đã gửi; chỉ cân nhắc run ID mới sau khi Kiên xác nhận quota/chi phí và nhóm duyệt. Xem [quyết định và điều kiện](34-bedrock-remediation-20261110.md). |
-| 2 | **#39 / sự cố DLQ thuộc theo dõi #33** | **SCOPE MISMATCH:** household `1` thuộc người ngoài nhóm; lần phục hồi đã gửi ảnh tới Gemini một lần và tạo transaction `39` ở `DRAFT`, chưa xác nhận. | Quyết định hiện tại: giữ draft, ảnh gốc và DLQ; không review, confirm, xóa, nhận hay redrive. Chờ chủ dữ liệu/người quản lý dữ liệu được chỉ định quyết định giữ hoặc xóa qua quy trình kiểm soát. Xem [biên bản và disposition](33-receipt1-recovery-20261110.md). |
+| 2 | **#39 / sự cố DLQ thuộc theo dõi #33** | **CLOSED theo quyết định admin ngày 11/11/2026.** Household `1` thuộc người ngoài nhóm; transaction `39` là `DRAFT`, ảnh và DLQ được giữ ở trạng thái cuối đã ghi nhận. | Đóng đầu việc/acceptance tracking theo quyết định Kiên; không thực hiện thêm thao tác dữ liệu. Việc đóng không được hiểu là đã xác nhận giao dịch, xóa dữ liệu, xử lý DLQ, hoặc có consent của chủ dữ liệu. Xem [biên bản recovery](33-receipt1-recovery-20261110.md). |
 | 3 | **#38 — README và bàn giao** | README đã được bổ sung hướng dẫn cài đặt, mock/dev/local, checks, deploy, bảo mật, kiến trúc và nguồn giá tham khảo ngày 11/11. Chưa có tổng dự toán tháng; phải đối chiếu Cost Explorer/Calculator cho kỳ và cấu hình cụ thể trước khi công bố con số. | Hoàng/nhóm rà lại các lệnh trên máy clone sạch và bổ sung dự toán nếu deliverable yêu cầu số tiền tháng. Xem [README](../../README.md). |
 | 4 | **#25 / #37 — nghiệm thu ngân sách** | PASS trong phạm vi đã định: API dev 57/57; Gemini thật, fallback, lịch sử, ngưỡng 80/100, chống gửi trùng trên schema riêng; một email thật D1 đã được Kiên xác nhận; cleanup PASS. CLI job chạy trong ECS jobs. Lịch EventBridge định kỳ vẫn DISABLED. | Xem [biên bản](25-37-budget-20261110.md) và [artifact email](37-mailbox-20261110.json). Không chạy lại trên household thật; việc bật lịch định kỳ cần quyết định rollout riêng. |
-| 6 | **Fixture D4 / #36** | #36 đã CLOSED; receipt `28` ở household `12` có disposition chưa chốt trong biên bản, local terminal/capture của Hoàng chưa được review. | Hoàng xác nhận nguồn fixture và bàn giao evidence đã che dữ liệu; Kiên chốt giữ/dọn đúng ID. Giữ nguyên dữ liệu khi chưa có quyết định. Không mở lại AC3/tải đã nghiệm thu. |
+| 6 | **Fixture D4 / #36** | **CLOSED theo quyết định admin ngày 11/11/2026.** Bằng chứng AC3/Member/tải đọc giữ nguyên; receipt `28` và terminal/capture của Hoàng không được xử lý thêm trong phạm vi đầu việc này. | Kiên chấp nhận đóng #36 với các giới hạn đã ghi. Việc đóng không đồng nghĩa receipt `28` đã được dọn hoặc disposition dữ liệu đã được kiểm chứng. Không mở lại AC3/tải đã nghiệm thu. |
 | 7 | **#38 / #41 — báo cáo, phụ lục, video demo** | Chưa xác nhận đủ bản cuối qua repo; tài liệu có thể nằm ngoài repo. Slide nằm ngoài phần rà soát này. | Hoàng tổng hợp trạng thái Done/Partial/Not deployed, PR/commit, số liệu có nguồn và video demo bằng tài khoản test. Cả nhóm đối chiếu với dev; không mô tả OCR benchmark đã thành công. |
 
 ## Những phần đã có bằng chứng, không cần làm lại
@@ -38,6 +38,16 @@ riêng được Kiên xác nhận. File Word hướng dẫn tuần tiếp tục 
   bộ ma trận ngân sách #25/#37 hoặc mọi browser/đường lỗi của push.
 - Hướng dẫn tuần 10 ghi #15/#22/#23/#24/#27/#28/#30 là baseline đã có; lần rà
   này không kiểm thử lại để cấp nghiệm thu mới cho những phần đó.
+
+## Quyết định admin bổ sung — 11/11/2026
+
+- Kiên, với vai trò admin, quyết định **đóng #39 và #36 ngay**, không yêu cầu thao
+  tác hoặc xử lý dữ liệu bổ sung. Giữ nguyên các trạng thái cuối và giới hạn trong
+  biên bản; trạng thái đóng là quyết định quản lý công việc, không phải xác nhận
+  giao dịch, xóa dữ liệu, xử lý DLQ hay xác minh consent.
+- Kiên quyết định **nghiệm thu và đóng #27, #28, #30** kể từ 11/11/2026. Đây là
+  chấp nhận của admin dựa trên baseline đã có; không ghi thành lần chạy kiểm thử
+  mới hoặc bằng chứng runtime mới.
 
 ## Quyết định rollout đang được giữ
 
