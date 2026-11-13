@@ -31,6 +31,7 @@ def load_config():
         "GEMINI_ROTATION_CONFIRMED": _boolean("GEMINI_ROTATION_CONFIRMED", False),
         "OCR_ENABLED": _boolean("OCR_ENABLED", not production),
         "OCR_REQUIRE_CONSENT": _boolean("OCR_REQUIRE_CONSENT", production),
+        "OCR_PROVIDER_REQUESTS_PER_DAY": int(os.getenv("OCR_PROVIDER_REQUESTS_PER_DAY", "10")),
         "RATE_LIMIT_ENABLED": _boolean("RATE_LIMIT_ENABLED", production),
         "API_REQUESTS_PER_MINUTE": int(os.getenv("API_REQUESTS_PER_MINUTE", "120")),
         "API_WRITES_PER_MINUTE": int(os.getenv("API_WRITES_PER_MINUTE", "30")),

@@ -166,6 +166,9 @@ def run_sqs_worker():
             # quota or increment receive counts and redrive retained messages.
             time.sleep(20)
             continue
+        if os.getenv("APP_ENV", "").strip().lower() == "production" and not queue_url.rstrip("/").endswith("production-ocr-queue"):
+            # Never receive from the retained legacy queue.
+            raise ValueError("Production OCR requires its isolated queue")
         poll_once(sqs, queue_url)
 
 

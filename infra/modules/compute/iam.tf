@@ -27,7 +27,7 @@ data "aws_iam_policy_document" "api_s3" {
   statement {
     sid       = "PutUploads"
     actions   = ["s3:PutObject"]
-    resources = ["${var.receipts_bucket_arn}/receipts/uploads/*"]
+    resources = ["${var.receipts_bucket_arn}/receipts/uploads/*", "${var.receipts_bucket_arn}/receipts/production/*"]
   }
   statement {
     sid       = "ReadReceipts"
@@ -42,13 +42,13 @@ data "aws_iam_policy_document" "api_s3" {
     condition {
       test     = "StringLike"
       variable = "s3:prefix"
-      values   = ["receipts/uploads/*"]
+      values   = ["receipts/uploads/*", "receipts/production/*"]
     }
   }
   statement {
     sid       = "DeleteReceiptUploadVersions"
     actions   = ["s3:DeleteObject", "s3:DeleteObjectVersion"]
-    resources = ["${var.receipts_bucket_arn}/receipts/uploads/*"]
+    resources = ["${var.receipts_bucket_arn}/receipts/uploads/*", "${var.receipts_bucket_arn}/receipts/production/*"]
   }
 }
 

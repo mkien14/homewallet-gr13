@@ -163,7 +163,7 @@ def extract_invoice_textract(image_bytes, mime_type, category_names, *, client=N
     }
 
 
-def extract_invoice(image_bytes, mime_type, category_names, *, client=None, sleep=None):
+def extract_invoice(image_bytes, mime_type, category_names, *, client=None, sleep=None, before_attempt=None):
     default = "false" if os.getenv("APP_ENV", "").strip().lower() == "production" else "true"
     if os.getenv("GEMINI_ENABLED", default).strip().lower() not in {"true", "1"}:
         if _should_fallback():
@@ -181,6 +181,8 @@ def extract_invoice(image_bytes, mime_type, category_names, *, client=None, slee
         raise ValueError("Set GEMINI_API_KEY to process a receipt")
     if not model:
         raise ValueError("Set GEMINI_MODEL to process a receipt")
+    if os.getenv("APP_ENV", "").strip().lower() == "production" and before_attempt is None:
+        raise ValueError("Production receipt processing requires a shared quota reservation")
 
     client = client or genai.Client(
         api_key=api_key,
@@ -205,6 +207,8 @@ def extract_invoice(image_bytes, mime_type, category_names, *, client=None, slee
             if remaining > 0:
                 sleep(remaining)
         _last_request_at = time.monotonic()
+        if before_attempt is not None:
+            before_attempt()
         try:
             response = client.models.generate_content(
                 model=model,
@@ -215,6 +219,7 @@ def extract_invoice(image_bytes, mime_type, category_names, *, client=None, slee
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
                     temperature=0,
+                    max_output_tokens=4096,
                 ),
             )
             if not response.text:

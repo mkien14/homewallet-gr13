@@ -1,0 +1,24 @@
+{
+  "at_utc": "2026-11-13T16:21:16.352270+00:00",
+  "google_project_owner_reported": "HWAPI",
+  "revocation_confirmed_by": "Kien, project owner, user message on 2026-11-13 Asia/Bangkok",
+  "revocation_evidence_type": "owner_attestation_not_independent_google_audit",
+  "provider_revocation_confirmed": true,
+  "secret_name": "hw/dev/gemini-api-key",
+  "secret_version_id": "134ab65d-79de-48d9-b27c-73300828943c",
+  "model_requested": "gemini-3.6-flash",
+  "generation_calls": 0,
+  "images_sent": 0,
+  "ocr_enabled": false,
+  "gemini_enabled": false,
+  "secret_value_printed_or_persisted": false,
+  "model_metadata_status": "PASS",
+  "model_returned": "models/gemini-3.6-flash",
+  "supported_actions": [
+    "generateContent",
+    "countTokens",
+    "createCachedContent",
+    "batchGenerateContent"
+  ],
+  "production_activation": "NO_GO_PENDING_WORKER_AND_OCR_ACCEPTANCE"
+}

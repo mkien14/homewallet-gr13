@@ -58,9 +58,12 @@ Stack này đã dùng cho production core; phát triển dùng local/mock. Khôn
 
 Đợt release này đăng ký/triển khai revision qua ECS API từ baseline production.
 Terraform plan local timeout khi đọc metadata Secrets Manager; không apply,
-import hay push state. Input vận hành đã cập nhật; state/output có thể còn
-revision cũ. Trước apply hạ tầng tiếp theo phải xử lý kết nối và review saved
-plan production; không coi đã có kết quả Terraform “No changes”.
+import hay push state trong đợt release. Lần
+[đối chiếu tiếp theo ngày 13/11](acceptance/production-terraform-reconcile-20261113.md)
+đã đọc metadata/TLS và chạy plan thành công bằng input production đã lưu.
+Cấu hình dự kiến của ba task khớp AWS live; plan còn đăng ký lại task do revision
+state cũ và tính lại policy Scheduler (ngữ nghĩa khớp live). Chưa apply/rebind
+state; không coi đã có kết quả Terraform “No changes”.
 
 Ngưỡng kiểm tra restore là RPO 15 phút/RTO một giờ cho phép thử có kiểm soát;
 đây chưa phải SLA. Chưa diễn tập mất cả AZ, chưa chạy tải kéo dài để công bố năng
@@ -69,9 +72,13 @@ sử dụng cùng candidate, chưa hạ về frontend release khác.
 
 ## Tính năng chủ động giữ tắt
 
-- **Gemini/OCR:** `false`, không nạp Gemini key vào API/worker. Khóa đã lộ vẫn
-  cần chủ Google project HWAPI xác nhận thu hồi. Đổi secret AWS không thu hồi
-  khóa Google. Chưa coi #34/provider benchmark là đạt production.
+- **Gemini/OCR:** `false`, không nạp Gemini key vào API/worker. Đã xác nhận metadata
+  version khóa mới AWSCURRENT `134ab65d-79de-48d9-b27c-73300828943c`; Kiên đã xác
+  nhận thu hồi khóa cũ ở Google. [Probe metadata model](acceptance/gemini-rotation-20261113.json)
+  bằng khóa mới đạt, chưa gọi generate/gửi ảnh hoặc chứng minh quota OCR.
+  Chưa coi #34/provider benchmark là đạt production. Worker phải
+  kiểm tra lại phạm vi hộ/consent trước đọc ảnh và tránh consume thông điệp cũ;
+  chưa bật chỉ bằng đổi flag. Xem [hướng dẫn khóa và mở OCR](gemini-ocr-production-enablement.md).
 - **Scheduler:** ba lịch DISABLED và trỏ jobs production. Chỉ bật sau review
   người nhận, opt-out, bounce/complaint, delivery, idempotency và stop procedure.
   Không dùng dữ liệu hộ 1 để thử gửi hoặc OCR.

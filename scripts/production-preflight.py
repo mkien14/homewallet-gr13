@@ -116,6 +116,15 @@ def evaluate(settings, session):
         gate("worker_matches_production_release", worker.get("image") == expected_image and
              worker_env.get("APP_RELEASE") == expected_release and worker_env.get("APP_ENV") == "production")
         container_security("worker", worker)
+        if worker_env.get("OCR_ENABLED", "false").lower() in {"true", "1"}:
+            worker_secrets = {x["name"]: x["valueFrom"] for x in worker.get("secrets", [])}
+            gate("ocr_worker_rotation_and_secret", worker_env.get("GEMINI_ENABLED") == "true" and
+                 worker_env.get("GEMINI_ROTATION_CONFIRMED") == "true" and
+                 settings.get("gemini_provider_revocation_confirmed") is True and bool(worker_secrets.get("GEMINI_API_KEY")))
+            gate("ocr_worker_isolated_queue", worker_env.get("SQS_QUEUE_URL", "").rstrip("/").endswith("production-ocr-queue"))
+            gate("ocr_worker_provider_budget", 1 <= int(worker_env.get("OCR_PROVIDER_REQUESTS_PER_DAY", "0")) <= 15 and
+                 1 <= int(worker_env.get("GEMINI_MAX_TRIES", "0")) <= 2 and
+                 worker_env.get("TEXTRACT_FALLBACK_ENABLED", "false").lower() == "false")
     jobs_task = ecs.describe_task_definition(taskDefinition=settings["jobs_task_family"])["taskDefinition"]
     jobs = next((x for x in jobs_task["containerDefinitions"] if x["name"] == "jobs"), {})
     jobs_env = {x["name"]: x["value"] for x in jobs.get("environment", [])}

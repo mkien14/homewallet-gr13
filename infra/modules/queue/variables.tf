@@ -9,3 +9,8 @@ variable "name_prefix" {
 variable "bucket_arn" {
   type = string
 }
+
+variable "production_ocr_enabled" {
+  type    = bool
+  default = false
+}

@@ -17,3 +17,6 @@ output "dlq_arn" {
 output "dlq_name" {
   value = aws_sqs_queue.dlq.name
 }
+
+output "production_queue_url" { value = try(aws_sqs_queue.production[0].id, null) }
+output "production_queue_arn" { value = try(aws_sqs_queue.production[0].arn, null) }

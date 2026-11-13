@@ -44,10 +44,14 @@ def verify_artifact(root, release):
     actual_paths = {path.resolve() for path in root.rglob("*") if path.is_file() and path != root / "SHA256SUMS"}
     if set(expected) != actual_paths or any(path.is_symlink() for path in root.rglob("*")):
         raise ValueError("Artifact file set mismatch or symlink")
+    profiles = []
     for name in ("manifest.json", "frontend/release.json"):
         manifest = json.loads((root / name).read_text(encoding="utf-8"))
-        if manifest.get("release") != release or manifest.get("ocr_enabled") is not False or manifest.get("channel") != "production-candidate":
+        if manifest.get("release") != release or type(manifest.get("ocr_enabled")) is not bool or manifest.get("channel") != "production-candidate":
             raise ValueError("Wrong candidate release or feature profile")
+        profiles.append(manifest["ocr_enabled"])
+    if profiles[0] != profiles[1]:
+        raise ValueError("Candidate OCR profiles differ")
     if not (root / "frontend/index.html").is_file() or not (root / "backend.tar").is_file():
         raise ValueError("Incomplete release candidate")
     spec = importlib.util.spec_from_file_location("release_security", Path(__file__).with_name("release-security.py"))
@@ -62,6 +66,11 @@ def verify_running_image(session, settings, root):
     service = ecs.describe_services(cluster=settings["cluster"], services=[settings["api_service"]])["services"][0]
     task = ecs.describe_task_definition(taskDefinition=service["taskDefinition"])["taskDefinition"]
     image = next(x["image"] for x in task["containerDefinitions"] if x["name"] == "api")
+    container = next(x for x in task["containerDefinitions"] if x["name"] == "api")
+    env = {x["name"]: x["value"] for x in container.get("environment", [])}
+    manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+    if manifest["ocr_enabled"] != (env.get("OCR_ENABLED", "false").lower() in {"true", "1"}):
+        raise ValueError("Candidate OCR profile differs from the running API")
     prefix = settings["account"] + ".dkr.ecr." + settings["region"] + ".amazonaws.com/"
     if not image.startswith(prefix) or "@sha256:" not in image:
         raise ValueError("Expected immutable image in the reviewed account")

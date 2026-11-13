@@ -9,6 +9,29 @@ variable "gemini_model" {
   type        = string
 }
 
+variable "production_ocr_enabled" {
+  description = "Opt-in reviewed Gemini OCR on isolated new uploads; old queue/DLQ remain retained"
+  type        = bool
+  default     = false
+  validation {
+    condition     = !var.production_ocr_enabled || (var.application_hardening_enabled && var.gemini_rotation_confirmed)
+    error_message = "Production OCR requires the production profile and confirmed key rotation."
+  }
+}
+
+variable "gemini_rotation_confirmed" {
+  description = "Owner confirmation of provider-side key revocation"
+  type        = bool
+  default     = false
+}
+
+check "production_ocr_rotation" {
+  assert {
+    condition     = !var.production_ocr_enabled || (var.application_hardening_enabled && var.gemini_rotation_confirmed)
+    error_message = "Production OCR requires the production profile and confirmed key rotation."
+  }
+}
+
 variable "api_image_tag" {
   description = "Image tag for the Terraform-managed API task definition"
   type        = string
