@@ -80,7 +80,7 @@ jobs:
       - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: '1.10.5'
-      - uses: aws-actions/configure-aws-credentials@v5
+      - uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ vars.AWS_PROD_PLAN_ROLE_ARN }}
           aws-region: ap-southeast-1
@@ -160,7 +160,7 @@ jobs:
           RELEASE_DIGEST: ${{ inputs.image_digest }}
         run: |
           python scripts/production-plan-summary.py --commit "$RELEASE_COMMIT" --digest "$RELEASE_DIGEST" --check production-plan-actions.json
-      - uses: aws-actions/configure-aws-credentials@v5
+      - uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ vars.AWS_PROD_DEPLOY_ROLE_ARN }}
           aws-region: ap-southeast-1
