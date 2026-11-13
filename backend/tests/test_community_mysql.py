@@ -15,6 +15,7 @@ import pytest
 from app import community, users
 from app.db import connect, get_db
 from jobs.migrate import MIG, statements
+from jobs import receipt_policy
 
 
 @pytest.fixture
@@ -57,6 +58,29 @@ def rows(connection, sql, params=()):
     with connection.cursor() as cursor:
         cursor.execute(sql, params)
         return cursor.fetchall()
+
+
+def test_ocr_consent_and_quota_use_migrated_audit_schema(community_mysql):
+    _, db = community_mysql
+    with db.cursor() as cursor:
+        cursor.execute("INSERT INTO users(cognito_sub,email,display_name) VALUES('ocr-probe','ocr@example.test','OCR probe')")
+        uid = cursor.lastrowid
+        cursor.execute("INSERT INTO households(id,name,owner_user_id,invite_code) VALUES(29,'Synthetic OCR',%s,'ocr-only')", (uid,))
+        cursor.execute("INSERT INTO household_members(household_id,user_id,role) VALUES(29,%s,'owner')", (uid,))
+        key = 'receipts/production/29/synthetic.png'
+        cursor.execute("INSERT INTO receipts(household_id,uploader_id,s3_key,status) VALUES(29,%s,%s,'UPLOADED')", (uid, key))
+        rid = cursor.lastrowid
+        cursor.execute("INSERT INTO audit_logs(actor_id,action,entity,entity_id) VALUES(%s,'RECEIPT_PROCESSING_CONSENT_V1','receipt',%s)", (uid, rid))
+    db.commit()
+    receipt = dict(id=rid, household_id=29, uploader_id=uid, s3_key=key)
+    config = dict(APP_ENV='production', OCR_ENABLED=True, GEMINI_ENABLED=True,
+                  PRODUCTION_ALLOWED_HOUSEHOLD_IDS={29}, S3_BUCKET='synthetic',
+                  OCR_PROVIDER_REQUESTS_PER_DAY=1)
+    receipt_policy.reserve_attempt(db, receipt, config)
+    with pytest.raises(receipt_policy.ReceiptQuotaExceeded, match='PROVIDER_DAILY_LIMIT'):
+        receipt_policy.reserve_attempt(db, receipt, config)
+    attempts = rows(db, "SELECT `at` FROM audit_logs WHERE action='OCR_PROVIDER_ATTEMPT_V1'")
+    assert len(attempts) == 1 and attempts[0]['at'] is not None
 
 
 def create(client, header, **overrides):

@@ -47,7 +47,8 @@ ON homewallet.notifications TO 'hw_runtime'@'%';
 GRANT SELECT, INSERT, UPDATE, DELETE
 ON homewallet.push_subscriptions TO 'hw_runtime'@'%';
 
-GRANT INSERT
+-- OCR authorization reads persisted consent and counts provider reservations.
+GRANT SELECT, INSERT
 ON homewallet.audit_logs TO 'hw_runtime'@'%';
 
 GRANT SELECT, INSERT, UPDATE

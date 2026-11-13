@@ -56,8 +56,8 @@ def reserve_attempt(db, receipt, config):
         try:
             authorize(cursor, receipt, config, bucket=config.get("S3_BUCKET"))
             cursor.execute(
-                "SELECT COUNT(*) AS used, MAX(created_at) AS latest FROM audit_logs "
-                "WHERE action = 'OCR_PROVIDER_ATTEMPT_V1' AND created_at >= UTC_DATE()"
+                "SELECT COUNT(*) AS used, MAX(`at`) AS latest FROM audit_logs "
+                "WHERE action = 'OCR_PROVIDER_ATTEMPT_V1' AND `at` >= UTC_DATE()"
             )
             row = cursor.fetchone()
             cap = config.get("OCR_PROVIDER_REQUESTS_PER_DAY", 10)
