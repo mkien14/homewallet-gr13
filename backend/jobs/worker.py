@@ -2,6 +2,7 @@ import argparse
 import json
 import os
 import sys
+import time
 from pathlib import Path
 
 import boto3
@@ -16,6 +17,11 @@ MAX_RECEIVE_COUNT = 3
 
 
 def log_json(event):
+    if os.getenv("APP_ENV", "").strip().lower() == "production":
+        # OCR results contain merchant names, items, amounts and private S3
+        # keys. Operational logs need outcomes, not the receipt contents.
+        fields = {"event", "message_id", "receive_count", "error", "receipt_mark_attempts", "left_for_redrive"}
+        event = {name: value for name, value in event.items() if name in fields}
     print(json.dumps(event, ensure_ascii=False, separators=(",", ":")), flush=True)
 
 
@@ -154,6 +160,12 @@ def run_sqs_worker():
     sqs = boto3.client("sqs", region_name=region)
 
     while True:
+        default = "false" if os.getenv("APP_ENV", "").strip().lower() == "production" else "true"
+        if os.getenv("OCR_ENABLED", default).strip().lower() not in {"true", "1"}:
+            # Pause before ReceiveMessage: disabled OCR must not spend provider
+            # quota or increment receive counts and redrive retained messages.
+            time.sleep(20)
+            continue
         poll_once(sqs, queue_url)
 
 

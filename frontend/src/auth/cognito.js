@@ -13,6 +13,8 @@ import {
   updateUserAttribute,
   setUpTOTP,
   verifyTOTPSetup,
+  fetchMFAPreference,
+  updateMFAPreference,
 } from "aws-amplify/auth";
 import { cognitoUserPoolsTokenProvider } from "aws-amplify/auth/cognito";
 import { config } from "../config";
@@ -102,6 +104,16 @@ export async function reactSetUpTOTP() {
 export async function reactVerifyTOTP(code) {
   configureCognito();
   return verifyTOTPSetup({ code });
+}
+
+export async function reactMfaPreference() {
+  configureCognito();
+  return fetchMFAPreference();
+}
+
+export async function reactPreferTOTP() {
+  configureCognito();
+  return updateMFAPreference({ totp: "PREFERRED" });
 }
 
 export async function saveReactAuthSession() {

@@ -59,3 +59,11 @@ output "cloudfront_distribution_id" {
   value = module.edge.distribution_id
 }
 
+output "api_https_origin" {
+  value = var.enable_api_https_gateway ? module.api_https[0].origin_domain_name : null
+}
+
+output "api_task_definition_arn" {
+  value = module.compute.api_task_definition_arn
+}
+

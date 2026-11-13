@@ -1,4 +1,8 @@
 variable "name" { type = string }
+variable "self_signup_enabled" {
+  type    = bool
+  default = true
+}
 variable "log_retention_days" {
   type    = number
   default = 14

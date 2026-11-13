@@ -1,0 +1,7 @@
+.processing-consent{display:flex;align-items:flex-start;gap:12px;margin:16px 0;padding:16px;border:1px solid var(--border-color,#91a2b833);border-radius:12px;line-height:1.6}
+.processing-consent input{flex:0 0 auto;width:20px;min-height:20px;margin-top:3px}
+.processing-consent span{flex:1}
+.site-footer{padding:18px 28px;text-align:center;font-size:.875rem}
+.privacy-page{max-width:900px;margin:24px auto;line-height:1.75}
+.privacy-page h2{margin-top:1.5em;font-size:1.2rem}
+.totp-secret { display: block; overflow-wrap: anywhere; margin-block: 1rem; }

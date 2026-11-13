@@ -47,12 +47,18 @@ data "aws_ec2_managed_prefix_list" "cloudfront" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "alb_from_cloudfront" {
+  count             = (var.origin_https || var.allow_cloudfront_http_origin) ? 1 : 0
   security_group_id = aws_security_group.alb.id
   prefix_list_id    = data.aws_ec2_managed_prefix_list.cloudfront.id
 
   ip_protocol = "tcp"
   from_port   = var.origin_https ? 443 : 80
   to_port     = var.origin_https ? 443 : 80
+}
+
+moved {
+  from = aws_vpc_security_group_ingress_rule.alb_from_cloudfront
+  to   = aws_vpc_security_group_ingress_rule.alb_from_cloudfront[0]
 }
 
 resource "aws_vpc_security_group_egress_rule" "alb_to_app" {

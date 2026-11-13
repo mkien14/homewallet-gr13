@@ -16,6 +16,7 @@ Terraform for the AWS development environment.
 - [Deploy](#deploy)
 - [Configuration and security](#configuration-and-security)
 - [Costs and limits](#costs-and-limits)
+- [Production readiness](docs/production-readiness.md)
 - [Project status and runbooks](#project-status-and-runbooks)
 
 ## Architecture
@@ -61,6 +62,13 @@ The dev environment is in `ap-southeast-1` (Singapore). Terraform lives in
 receipt worker use the backend Docker image. Scheduled jobs use the same image
 with a job-specific command. The Terraform default keeps recurring schedules
 disabled.
+
+The live AWS deployment is still **development**. The production hardening
+profile is opt-in and has not been applied. The selected rollout keeps the
+existing AWS account and CloudFront URL, with an HTTPS API Gateway origin and
+private VPC Link to the ALB; a purchased domain is optional. See the
+[readiness status](docs/production-readiness.md) and
+[release runbook](docs/production-rollout.md) before promoting this stack.
 
 ## Prerequisites
 

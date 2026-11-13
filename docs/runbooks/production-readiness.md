@@ -1,5 +1,12 @@
 # Production readiness and release gates
 
+> **Scope clarification, 2026-11-13:** this runbook describes the optional isolated
+> stack introduced by PR #103. The administrator-selected path retains the
+> existing CloudFront URL and does not purchase a domain or create another stack.
+> Follow [the existing-stack decision](../production-readiness.md) and
+> [its rollout](../production-rollout.md) for that path. Do not run this workflow
+> against legacy resources or treat merged isolated-stack code as live HA evidence.
+
 Status: code prepared only. No AWS resources applied and no production deployment performed.
 All runtime acceptance gates remain open until evidence is attached to a change ticket.
 
@@ -66,8 +73,12 @@ Apply is a separate, approved operator action; no workflow performs it. Review a
 staged infrastructure change: create dedicated ECR and secret containers before
 starting ECS workloads. Do not apply the entire environment with empty secrets or
 a nonexistent image digest. Promote the reviewed image into the new repository.
-Populate `hw/prod/gemini-api-key`, `hw/prod/vapid-private-key` and
+Populate `hw/prod/vapid-private-key` and
 `hw/prod/db-runtime` through an approved secret-management session, never tfvars.
+The origin-verification secret is populated by Terraform in protected state.
+The merged application profile sets APP_ENV=production, admission/consent on,
+and AI/OCR off; it does not inject the exposed Gemini key. Populate a rotated
+Gemini key only for a separately accepted AI/OCR release.
 The runtime JSON must contain `username: hw_runtime` and a generated `password`.
 Run the reviewed migration and runtime-bootstrap tasks manually, in private app
 subnets with the app SG, before enabling application traffic. Verify the limited
@@ -100,9 +111,23 @@ IAM policy review must account for ECS APIs that lack resource-level scoping.
 
 Environment variables: `AWS_PROD_ACCOUNT_ID`, `AWS_PROD_PLAN_ROLE_ARN` (plan),
 `AWS_PROD_DEPLOY_ROLE_ARN` (production), `PROD_TFVARS_JSON` (non-secret required
-variables; omit release_digest), `PROD_URL`, `PROD_QUEUE_URL`,
+variables; omit release_digest and release_commit), `PROD_URL`, `PROD_QUEUE_URL`,
 `PROD_CLOUDFRONT_DISTRIBUTION_ID`. Secret: `PROD_SMOKE_TOKEN`, a fresh short-lived
 token for an approved synthetic Cognito principal. Never archive tokens.
+
+Set `release_commit` and `release_digest` to the reviewed application identity.
+Keep `migration_image_digest` pinned to the separately applied migration/bootstrap
+image. Updating migrations, roles, environment, secrets, CPU/memory or any other
+non-release configuration requires a separate infrastructure plan/apply and then
+a fresh application plan; the application workflow cannot apply those changes.
+It never runs a migration or bootstrap and cannot silently accept their changes.
+
+The redacted plan artifact contains only resource addresses/actions, release
+identity, release-only decisions and existing API/worker/jobs task revision ARNs.
+It contains no container configuration or secret/environment values. Unknown
+configuration fails closed. Both approval gate and deploy script check the same
+artifact. Deploy clones these exact reviewed revisions and changes only image
+and APP_RELEASE; the running revision is recorded as the rollback target.
 
 Promote an attested image from the exact reviewed 40-character main ancestor,
 verify build provenance/source commit, then tag it `sha-<commit>` in the dedicated

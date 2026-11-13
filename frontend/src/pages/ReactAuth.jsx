@@ -14,6 +14,8 @@ import {
   saveReactAuthSession,
 } from "../auth/cognito";
 import { login } from "../auth/auth";
+import { config } from "../config";
+import { passwordMeetsPolicy, PASSWORD_POLICY_MESSAGE } from "../auth/passwordPolicy";
 import { usePreferences } from "../preferences";
 
 const ERROR_TEXT = {
@@ -78,7 +80,8 @@ export default function ReactAuth() {
 
     if (flow === "signIn") return run(async () => finishOrContinue(await reactSignIn(username, password)));
     if (flow === "signUp") {
-      if (password.length < 8) { setError("Mật khẩu cần ít nhất 8 ký tự."); return; }
+      if (!config.selfSignupEnabled) return;
+      if (!passwordMeetsPolicy(password)) { setError(PASSWORD_POLICY_MESSAGE); return; }
       if (password !== passwordAgain) { setError("Hai mật khẩu chưa khớp."); return; }
       return run(async () => {
         const result = await reactSignUp(username, password, locale);
@@ -97,7 +100,7 @@ export default function ReactAuth() {
       await finishOrContinue(await reactConfirmSignIn(code.trim()));
     });
     if (flow === "newPassword") {
-      if (password.length < 8 || password !== passwordAgain) { setError(password.length < 8 ? "Mật khẩu cần ít nhất 8 ký tự." : "Hai mật khẩu chưa khớp."); return; }
+      if (!passwordMeetsPolicy(password) || password !== passwordAgain) { setError(!passwordMeetsPolicy(password) ? PASSWORD_POLICY_MESSAGE : "Hai mật khẩu chưa khớp."); return; }
       return run(async () => finishOrContinue(await reactConfirmSignIn(password)));
     }
     if (flow === "forgot") return run(async () => {
@@ -111,7 +114,7 @@ export default function ReactAuth() {
       }
     });
     if (flow === "confirmReset") {
-      if (password.length < 8 || password !== passwordAgain) { setError(password.length < 8 ? "Mật khẩu cần ít nhất 8 ký tự." : "Hai mật khẩu chưa khớp."); return; }
+      if (!passwordMeetsPolicy(password) || password !== passwordAgain) { setError(!passwordMeetsPolicy(password) ? PASSWORD_POLICY_MESSAGE : "Hai mật khẩu chưa khớp."); return; }
       return run(async () => {
         await reactConfirmResetPassword(username, code.trim(), password);
         setFlow("signIn");
@@ -142,21 +145,21 @@ export default function ReactAuth() {
         <form onSubmit={submit}>
           <label className="field">{t("Email")}<input type="email" autoComplete="email" placeholder="name@example.com" value={email} onChange={(event) => setEmail(event.target.value)} required disabled={busy} /></label>
           {needsPassword && <label className="field">{t(flow === "newPassword" || flow === "confirmReset" ? "Mật khẩu mới" : "Mật khẩu")}<input type="password" autoComplete={flow === "signIn" ? "current-password" : "new-password"} placeholder={t("Nhập mật khẩu")} value={password} onChange={(event) => setPassword(event.target.value)} required disabled={busy} /></label>}
-          {(flow === "signUp" || flow === "newPassword" || flow === "confirmReset") && <label className="field">{t("Xác nhận mật khẩu")}<input type="password" autoComplete="new-password" placeholder={t("Nhập lại mật khẩu")} value={passwordAgain} onChange={(event) => setPasswordAgain(event.target.value)} required disabled={busy} /></label>}
+          {(flow === "signUp" || flow === "newPassword" || flow === "confirmReset") && <><p className="muted">{t(PASSWORD_POLICY_MESSAGE)}</p><label className="field">{t("Xác nhận mật khẩu")}<input type="password" autoComplete="new-password" placeholder={t("Nhập lại mật khẩu")} value={passwordAgain} onChange={(event) => setPasswordAgain(event.target.value)} required disabled={busy} /></label></>}
           {needsCode && <label className="field">{t(flow === "mfa" ? "Mã xác thực MFA" : "Mã xác minh")}<input inputMode="numeric" autoComplete="one-time-code" placeholder={t("Nhập mã được gửi cho bạn")} value={code} onChange={(event) => setCode(event.target.value)} required disabled={busy} /></label>}
           {flow === "mfa" && challenge.includes("SELECTION") && <label className="field">{t("Chọn phương thức xác minh")}<select value={code} onChange={(event) => setCode(event.target.value)} required><option value="">{t("Chọn phương thức")}</option><option value="SMS">SMS</option><option value="EMAIL">Email</option><option value="TOTP">TOTP</option></select></label>}
           {flow === "totpSetup" && <p className="notice">{t("Thêm khóa này vào ứng dụng xác thực của bạn:")} <code>{totpSecret}</code></p>}
           <button type="submit" disabled={busy || !hasReactAuthConfig()}>{busy ? t("Đang xử lý…") : t(flow === "signIn" ? "Đăng nhập" : flow === "signUp" ? "Tạo tài khoản" : flow === "confirmSignUp" || flow === "mfa" || flow === "totpSetup" ? "Xác nhận" : flow === "forgot" ? "Gửi mã" : flow === "newPassword" ? "Đổi mật khẩu" : "Đặt lại mật khẩu")}</button>
         </form>
         <div className="auth-links">
-          {flow === "signIn" && <><button type="button" className="link-button" onClick={() => { setFlow("signUp"); setError(""); setMessage(""); }}>{t("Tạo tài khoản")}</button><button type="button" className="link-button" onClick={() => { setFlow("forgot"); setError(""); setMessage(""); }}>{t("Quên mật khẩu?")}</button></>}
+          {flow === "signIn" && <>{config.selfSignupEnabled && <button type="button" className="link-button" onClick={() => { setFlow("signUp"); setError(""); setMessage(""); }}>{t("Tạo tài khoản")}</button>}<button type="button" className="link-button" onClick={() => { setFlow("forgot"); setError(""); setMessage(""); }}>{t("Quên mật khẩu?")}</button></>}
           {flow === "signUp" && <button type="button" className="link-button" onClick={() => setFlow("signIn")}>{t("Quay lại đăng nhập")}</button>}
           {flow === "confirmSignUp" && <button type="button" className="link-button" disabled={busy} onClick={() => run(async () => { await reactResendSignUpCode(email.trim()); setMessage(t("Mã đã được gửi lại.")); })}>{t("Gửi lại mã")}</button>}
           {(flow === "forgot" || flow === "confirmReset") && <button type="button" className="link-button" onClick={() => setFlow("signIn")}>{t("Quay lại đăng nhập")}</button>}
           {flow === "mfa" && <button type="button" className="link-button" onClick={() => setFlow("signIn")}>{t("Hủy xác minh")}</button>}
         </div>
-        <div className="auth-footer"><button type="button" className="link-button" onClick={login}>{t("Dùng đăng nhập Cognito hiện tại (PKCE)")}</button><Link to="/">{t("Quay về trang chủ")}</Link></div>
-        <small className="auth-security-note">{t("Mật khẩu được gửi trực tiếp tới Cognito bằng SRP, không qua API HomeWallet.")}</small>
+        <div className="auth-footer"><button type="button" className="link-button" onClick={login}>{t("Dùng trang đăng nhập dự phòng")}</button><Link to="/">{t("Quay về trang chủ")}</Link></div>
+        <small className="auth-security-note">{t("Thông tin đăng nhập được xác thực trực tiếp bởi Amazon Cognito.")}</small>
       </div>
     </div>
   </section>;

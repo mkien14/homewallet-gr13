@@ -106,19 +106,38 @@ jobs:
         env:
           TFVARS: ${{ vars.PROD_TFVARS_JSON }}
           TF_VAR_release_digest: ${{ inputs.image_digest }}
+          TF_VAR_release_commit: ${{ inputs.commit_sha }}
+          RELEASE_COMMIT: ${{ inputs.commit_sha }}
+          RELEASE_DIGEST: ${{ inputs.image_digest }}
         run: |
           set -euo pipefail
           umask 077
           printf '%s' "$TFVARS" > infra/envs/prod/review.auto.tfvars.json
+          # auto.tfvars has higher precedence than TF_VAR; remove release keys
+          # so the dispatch inputs exclusively identify this release.
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path('infra/envs/prod/review.auto.tfvars.json')
+          values = json.loads(path.read_text())
+          values.pop('release_digest', None)
+          values.pop('release_commit', None)
+          path.write_text(json.dumps(values))
+          PY
           trap 'rm -f infra/envs/prod/review.auto.tfvars.json infra/envs/prod/release.tfplan' EXIT
           terraform -chdir=infra/envs/prod init -input=false
           terraform -chdir=infra/envs/prod plan -input=false -lock=false -out=release.tfplan > /dev/null
-          terraform -chdir=infra/envs/prod show -json release.tfplan | python scripts/production-plan-summary.py > production-plan-actions.json
+          terraform -chdir=infra/envs/prod show -json release.tfplan | python scripts/production-plan-summary.py --commit "$RELEASE_COMMIT" --digest "$RELEASE_DIGEST" > production-plan-actions.json
       - uses: actions/upload-artifact@v4
         with:
           name: production-plan-actions
           path: production-plan-actions.json
           retention-days: 7
+      - name: Require an application-only plan before requesting deployment approval
+        env:
+          RELEASE_COMMIT: ${{ inputs.commit_sha }}
+          RELEASE_DIGEST: ${{ inputs.image_digest }}
+        run: python scripts/production-plan-summary.py --commit "$RELEASE_COMMIT" --digest "$RELEASE_DIGEST" --check production-plan-actions.json
   deploy:
     needs: plan
     runs-on: ubuntu-latest
@@ -136,19 +155,11 @@ jobs:
         with:
           name: production-plan-actions
       - name: Require infrastructure changes to be separately applied and reviewed
+        env:
+          RELEASE_COMMIT: ${{ inputs.commit_sha }}
+          RELEASE_DIGEST: ${{ inputs.image_digest }}
         run: |
-          python - <<'PY'
-          import json
-          changes = json.load(open('production-plan-actions.json'))['changes']
-          allowed = {
-              'module.compute.aws_ecs_task_definition.api',
-              'module.compute.aws_ecs_task_definition.worker',
-              'module.compute.aws_ecs_task_definition.jobs',
-              'module.migrate.aws_ecs_task_definition.migrate',
-              'module.migrate.aws_ecs_task_definition.runtime_bootstrap[0]',
-          }
-          assert all(c['address'] in allowed for c in changes), 'Resolve infrastructure plan before release'
-          PY
+          python scripts/production-plan-summary.py --commit "$RELEASE_COMMIT" --digest "$RELEASE_DIGEST" --check production-plan-actions.json
       - uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ vars.AWS_PROD_DEPLOY_ROLE_ARN }}

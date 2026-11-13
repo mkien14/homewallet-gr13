@@ -54,6 +54,21 @@ jobs:
           echo "tag=${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
           echo "uri=${IMAGE_URI}" >> "$GITHUB_OUTPUT"
 
+      - name: Refuse Deploy Dev after the existing stack is promoted
+        # Check running and Terraform-prepared revisions before AWS mutations.
+        shell: bash
+        run: |
+          set -euo pipefail
+          RUNNING_TASK="$(aws ecs describe-services --cluster "$ECS_CLUSTER" --services "$ECS_SERVICE" --query 'services[0].taskDefinition' --output text)"
+          test -n "$RUNNING_TASK" && test "$RUNNING_TASK" != None
+          for TASK in "$RUNNING_TASK" hw-api; do
+            PROFILE="$(aws ecs describe-task-definition --task-definition "$TASK" --query "taskDefinition.containerDefinitions[?name=='api'].environment | [0] | [?name=='APP_ENV'].value | [0]" --output text)"
+            if [ "$PROFILE" = production ]; then
+              echo 'This stack uses the production profile; use its reviewed release runbook.' >&2
+              exit 1
+            fi
+          done
+
       - name: Sign in to Amazon ECR
         env:
           ECR_REGISTRY: ${{ steps.image.outputs.registry }}

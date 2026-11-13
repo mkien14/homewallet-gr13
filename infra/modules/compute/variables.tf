@@ -11,6 +11,11 @@ variable "autoscaling_enabled" {
   type    = bool
   default = false
 }
+variable "container_hardening_enabled" {
+  description = "Run reviewed production images as UID/GID 10001, drop Linux capabilities, and reap child processes."
+  type        = bool
+  default     = false
+}
 variable "autoscaling_min" {
   type    = number
   default = 2

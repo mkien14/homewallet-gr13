@@ -1,6 +1,8 @@
 # Examples only: replace every placeholder after review. Contains no credentials.
 expected_account_id = "123456789012"
+release_commit = "0000000000000000000000000000000000000000"
 release_digest = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+migration_image_digest = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
 origin_hostname = "origin.wallet.example.com"
 origin_zone_id = "REPLACE_WITH_REVIEWED_ZONE"
 origin_certificate_arn = "arn:aws:acm:ap-southeast-1:123456789012:certificate/REPLACE"
@@ -14,3 +16,4 @@ operations_emails = ["operations@example.com"]
 monthly_budget_usd = 500 # Planning placeholder; replace with approved estimate.
 waf_count_mode = false
 waf_validation_reference = "REPLACE_WITH_FALSE_POSITIVE_REVIEW"
+production_allowed_household_ids = [2] # Replace with the reviewed actual current IDs; exclude household 1.

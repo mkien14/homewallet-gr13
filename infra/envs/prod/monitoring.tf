@@ -56,8 +56,19 @@ resource "aws_cloudwatch_dashboard" "operations" {
   }] })
 }
 resource "aws_cloudwatch_event_rule" "deployment_failure" {
-  name          = "homewallet-prod-deployment-failure"
-  event_pattern = jsonencode({ source = ["aws.ecs"], "detail-type" = ["ECS Deployment State Change"], detail = { eventName = ["SERVICE_DEPLOYMENT_FAILED"], clusterArn = ["arn:aws:ecs:ap-southeast-1:${var.expected_account_id}:cluster/homewallet-prod"] } })
+  name = "homewallet-prod-deployment-failure"
+  # Deployment events identify the service in resources, not detail.clusterArn.
+  event_pattern = jsonencode({
+    source        = ["aws.ecs"]
+    "detail-type" = ["ECS Deployment State Change"]
+    account       = [var.expected_account_id]
+    region        = ["ap-southeast-1"]
+    resources = [
+      "arn:aws:ecs:ap-southeast-1:${var.expected_account_id}:service/homewallet-prod/api",
+      "arn:aws:ecs:ap-southeast-1:${var.expected_account_id}:service/homewallet-prod/worker"
+    ]
+    detail = { eventName = ["SERVICE_DEPLOYMENT_FAILED"] }
+  })
 }
 resource "aws_cloudwatch_event_target" "deployment_failure" {
   rule       = aws_cloudwatch_event_rule.deployment_failure.name
@@ -85,6 +96,10 @@ resource "aws_sns_topic_policy" "events" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
+      { Sid = "CloudWatchOperationsAlarms", Effect = "Allow", Principal = { Service = "cloudwatch.amazonaws.com" }, Action = "sns:Publish", Resource = aws_sns_topic.operations.arn, Condition = {
+        StringEquals = { "aws:SourceAccount" = var.expected_account_id }
+        ArnLike      = { "aws:SourceArn" = "arn:aws:cloudwatch:ap-southeast-1:${var.expected_account_id}:alarm:homewallet-prod-*" }
+      } },
       { Effect = "Allow", Principal = { Service = "events.rds.amazonaws.com" }, Action = "sns:Publish", Resource = aws_sns_topic.operations.arn, Condition = {
         StringEquals = { "aws:SourceAccount" = var.expected_account_id }
         ArnEquals    = { "aws:SourceArn" = "arn:aws:rds:ap-southeast-1:${var.expected_account_id}:db:${module.data.identifier}" }

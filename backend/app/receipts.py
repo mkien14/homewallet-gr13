@@ -10,6 +10,7 @@ from .auth import require_auth
 from .cache import invalidate_dashboard
 from .db import get_db
 from .errors import ApiError
+from .limits import admit_costly_operation
 from .households import json_body, membership
 
 bp = Blueprint("receipts", __name__, url_prefix="/api")
@@ -146,6 +147,8 @@ def _serialize_items(items):
 @require_auth
 def create_receipt():
     cfg = current_app.config
+    if not cfg.get("OCR_ENABLED", True):
+        raise ApiError(503, "FEATURE_UNAVAILABLE", "Tải và đọc hóa đơn đang tạm tắt. Bạn vẫn có thể nhập chi tiêu.")
     db = get_db()
     m = membership(db, g.user["id"])
     if not m:
@@ -160,6 +163,11 @@ def create_receipt():
         mb = cfg["MAX_RECEIPT_BYTES"] // (1024 * 1024)
         raise ApiError(422, "VALIDATION", f"Kích thước tệp phải từ 1 byte đến {mb} MB")
 
+    consent = data.get("external_processing_consent") is True
+    if cfg.get("OCR_REQUIRE_CONSENT") and not consent:
+        raise ApiError(422, "CONSENT_REQUIRED", "Bạn cần đồng ý xử lý hóa đơn trước khi tải lên.")
+    admit_costly_operation("receipt", m["household_id"])
+
     key = f"receipts/uploads/{m['household_id']}/{uuid.uuid4().hex}.{ALLOWED_TYPES[ctype]}"
     upload = storage.presign_upload(key, ctype)  
 
@@ -170,6 +178,12 @@ def create_receipt():
             (m["household_id"], g.user["id"], key),
         )
         rid = cur.lastrowid
+        if consent:
+            cur.execute(
+                "INSERT INTO audit_logs (actor_id, action, entity, entity_id) "
+                "VALUES (%s, 'RECEIPT_PROCESSING_CONSENT_V1', 'receipt', %s)",
+                (g.user["id"], rid),
+            )
     db.commit()
     return jsonify(receipt={"id": rid, "status": "UPLOADING"}, upload=upload), 201
 

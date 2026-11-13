@@ -1,0 +1,117 @@
+name: Build release candidate
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-candidate-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  candidate:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      VITE_RELEASE_CHANNEL: production
+      VITE_USE_MOCK: "0"
+      VITE_ENABLE_REACT_AUTH_UI: "true"
+      VITE_ENABLE_OCR: "false"
+      VITE_SELF_SIGN_UP: "false"
+      VITE_COGNITO_DOMAIN: ${{ vars.PRODUCTION_COGNITO_DOMAIN }}
+      VITE_COGNITO_CLIENT_ID: ${{ vars.PRODUCTION_COGNITO_CLIENT_ID }}
+      VITE_COGNITO_USER_POOL_ID: ${{ vars.PRODUCTION_COGNITO_USER_POOL_ID }}
+      VITE_VAPID_PUBLIC_KEY: ${{ vars.PRODUCTION_VAPID_PUBLIC_KEY }}
+      VITE_SUPPORT_EMAIL: ${{ vars.PRODUCTION_SUPPORT_EMAIL }}
+
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+
+      - name: Audit frontend dependencies
+        working-directory: frontend
+        run: |
+          npm ci
+          npm audit --audit-level=high
+          npm run lint
+
+      - name: Audit backend dependencies
+        run: |
+          python -m pip install pip-audit
+          python -m pip_audit -r backend/requirements.lock --require-hashes --strict
+
+      - name: Scan source, Git history, and container
+        # Official GHCR 0.76.2 multi-platform manifest, resolved 2026-11-12.
+        env:
+          SCANNER: ghcr.io/aquasecurity/trivy@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release-artifact/security
+          docker run --rm -v "$PWD:/work:ro" "$SCANNER" fs --scanners secret --exit-code 1 /work
+          git rev-list --all > /tmp/release-revisions.txt
+          while read -r revision; do
+            git show --format= --no-ext-diff "$revision"
+          done < /tmp/release-revisions.txt > /tmp/release-history.txt
+          docker run --rm -v /tmp/release-history.txt:/scan/history.txt:ro "$SCANNER" fs --scanners secret --exit-code 1 /scan
+          docker build --pull --platform linux/amd64 --provenance=false --build-arg APP_RELEASE="$GITHUB_SHA" -t homewallet-release:"$GITHUB_SHA" backend
+          scan_exit=0
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$PWD/release-artifact/security:/evidence" "$SCANNER" image \
+            --scanners vuln,secret --severity HIGH,CRITICAL --ignore-unfixed=false --ignorefile /dev/null \
+            --exit-on-eol 1 --exit-code 1 --format json --output /evidence/container-scan.json homewallet-release:"$GITHUB_SHA" || scan_exit=$?
+          python - <<'PY'
+          import collections, json, pathlib
+          report = json.loads(pathlib.Path("release-artifact/security/container-scan.json").read_text())
+          results = report.get("Results", [])
+          findings = [v for item in results for v in item.get("Vulnerabilities", [])]
+          print(json.dumps({"container_findings": dict(collections.Counter(v.get("Severity") for v in findings)),
+                            "secret_findings": sum(len(item.get("Secrets", [])) for item in results),
+                            "affected_packages": sorted({v.get("PkgName", "") for v in findings})}))
+          PY
+          if [ "$scan_exit" -ne 0 ]; then exit "$scan_exit"; fi
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$PWD/release-artifact/security:/evidence" "$SCANNER" image \
+            --scanners vuln --format cyclonedx --output /evidence/sbom.cdx.json homewallet-release:"$GITHUB_SHA"
+
+      - name: Build frontend from the same commit
+        working-directory: frontend
+        run: npm run build
+
+      - name: Package immutable release artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker save homewallet-release:"$GITHUB_SHA" -o release-artifact/backend.tar
+          cp -r frontend/dist release-artifact/frontend
+          python - <<'PY'
+          import json, os, pathlib, runpy
+          payload = {"release": os.environ["GITHUB_SHA"], "ocr_enabled": False, "channel": "production-candidate"}
+          pathlib.Path("release-artifact/frontend/release.json").write_text(json.dumps(payload) + "\n")
+          security = runpy.run_path("scripts/release-security.py")
+          payload["security"] = security["security_metadata"](pathlib.Path("release-artifact"), os.environ["GITHUB_SHA"])
+          pathlib.Path("release-artifact/manifest.json").write_text(json.dumps(payload, indent=2) + "\n")
+          PY
+          (cd release-artifact && find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS)
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: homewallet-release-${{ github.sha }}
+          path: release-artifact/
+          retention-days: 3
+          if-no-files-found: error
+          compression-level: 1
+
+      - name: Candidate status
+        run: |
+          echo "Candidate $GITHUB_SHA built with a hash-locked Python dependency set. OS/Python HIGH+CRITICAL (including unfixed), secret, and end-of-life gates passed. Scan and CycloneDX SBOM are in the checksummed artifact. Deploy within 72 hours or rebuild/rescan. No AWS deployment or production approval was performed." >> "$GITHUB_STEP_SUMMARY"

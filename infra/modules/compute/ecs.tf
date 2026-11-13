@@ -1,5 +1,17 @@
 data "aws_region" "current" {}
 
+locals {
+  container_security = merge(
+    var.container_hardening_enabled ? { user = "10001:10001" } : {},
+    var.container_hardening_enabled ? {
+      linuxParameters = {
+        initProcessEnabled = true
+        capabilities       = { drop = ["ALL"] }
+      }
+    } : {},
+  )
+}
+
 resource "aws_cloudwatch_log_group" "api" {
   name              = "${local.log_prefix}api"
   retention_in_days = var.log_retention_days
@@ -17,6 +29,7 @@ resource "aws_ecs_cluster" "this" {
 }
 
 resource "aws_ecs_task_definition" "api" {
+  skip_destroy             = true # Keep prior revisions available for reviewed rollback.
   family                   = "${local.prefix}-api"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
@@ -30,7 +43,7 @@ resource "aws_ecs_task_definition" "api" {
     cpu_architecture        = "X86_64"
   }
 
-  container_definitions = jsonencode([{
+  container_definitions = jsonencode([merge({
     name         = "api"
     image        = var.image
     essential    = true
@@ -46,7 +59,7 @@ resource "aws_ecs_task_definition" "api" {
         "awslogs-stream-prefix" = "api"
       }
     }
-  }])
+  }, local.container_security)])
 }
 
 resource "aws_ecs_service" "api" {

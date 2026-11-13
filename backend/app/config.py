@@ -7,10 +7,40 @@ except ImportError:
     pass
 
 
+def _boolean(name, default=False):
+    value = os.getenv(name)
+    if value is None:
+        return default
+    if value.strip().lower() not in {"true", "false", "1", "0"}:
+        raise ValueError(f"{name} must be true or false")
+    return value.strip().lower() in {"true", "1"}
+
+
 def load_config():
     ids = [x.strip() for x in os.getenv("COGNITO_CLIENT_IDS", "").split(",") if x.strip()]
     ses_from_address = os.getenv("SES_FROM_ADDRESS")
+    production = os.getenv("APP_ENV", "dev").strip().lower() == "production"
     return {
+        "APP_ENV": os.getenv("APP_ENV", "dev").strip().lower(),
+        "APP_RELEASE": os.getenv("APP_RELEASE", "local"),
+        "PRODUCTION_ALLOWED_HOUSEHOLD_IDS": {
+            int(value.strip()) for value in os.getenv("PRODUCTION_ALLOWED_HOUSEHOLD_IDS", "").split(",") if value.strip()
+        },
+        "ORIGIN_VERIFY_HEADER": os.getenv("ORIGIN_VERIFY_HEADER"),
+        "GEMINI_ENABLED": _boolean("GEMINI_ENABLED", not production),
+        "GEMINI_ROTATION_CONFIRMED": _boolean("GEMINI_ROTATION_CONFIRMED", False),
+        "OCR_ENABLED": _boolean("OCR_ENABLED", not production),
+        "OCR_REQUIRE_CONSENT": _boolean("OCR_REQUIRE_CONSENT", production),
+        "RATE_LIMIT_ENABLED": _boolean("RATE_LIMIT_ENABLED", production),
+        "API_REQUESTS_PER_MINUTE": int(os.getenv("API_REQUESTS_PER_MINUTE", "120")),
+        "API_WRITES_PER_MINUTE": int(os.getenv("API_WRITES_PER_MINUTE", "30")),
+        "RECEIPTS_PER_USER_DAY": int(os.getenv("RECEIPTS_PER_USER_DAY", "10")),
+        "RECEIPTS_PER_HOUSEHOLD_DAY": int(os.getenv("RECEIPTS_PER_HOUSEHOLD_DAY", "30")),
+        "RECEIPTS_GLOBAL_DAY": int(os.getenv("RECEIPTS_GLOBAL_DAY", "200")),
+        "AI_SUGGESTIONS_PER_USER_DAY": int(os.getenv("AI_SUGGESTIONS_PER_USER_DAY", "10")),
+        "AI_SUGGESTIONS_PER_HOUSEHOLD_DAY": int(os.getenv("AI_SUGGESTIONS_PER_HOUSEHOLD_DAY", "20")),
+        "AI_SUGGESTIONS_GLOBAL_DAY": int(os.getenv("AI_SUGGESTIONS_GLOBAL_DAY", "100")),
+        "MAX_CONTENT_LENGTH": 1024 * 1024,
         "COGNITO_ISSUER": os.getenv("COGNITO_ISSUER"),
         "COGNITO_JWKS_URI": os.getenv("COGNITO_JWKS_URI"),
         "COGNITO_CLIENT_IDS": ids,

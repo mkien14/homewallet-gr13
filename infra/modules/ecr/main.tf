@@ -6,10 +6,16 @@ variable "production" {
   default = false
 }
 
+variable "preserve_tagged_images" {
+  description = "Keep release digests available for task restarts and controlled rollback."
+  type        = bool
+  default     = false
+}
+
 resource "aws_ecr_repository" "this" {
   name                 = var.name
-  image_tag_mutability = var.production ? "IMMUTABLE" : "MUTABLE"
-  force_delete         = !var.production
+  image_tag_mutability = (var.production || var.preserve_tagged_images) ? "IMMUTABLE" : "MUTABLE"
+  force_delete         = !(var.production || var.preserve_tagged_images)
 
   image_scanning_configuration {
     scan_on_push = true
@@ -22,7 +28,21 @@ resource "aws_ecr_repository" "this" {
 
 resource "aws_ecr_lifecycle_policy" "this" {
   repository = aws_ecr_repository.this.name
-  policy = var.production ? jsonencode({ rules = [{ rulePriority = 1, description = "Expire only untagged images; keep releases", selection = { tagStatus = "untagged", countType = "sinceImagePushed", countUnit = "days", countNumber = 30 }, action = { type = "expire" } }] }) : jsonencode({
+  policy = (var.production || var.preserve_tagged_images) ? jsonencode({
+    rules = [
+      {
+        rulePriority = 1
+        description  = "Expire only untagged images; keep tagged release artifacts"
+        selection = {
+          tagStatus   = "untagged"
+          countType   = "sinceImagePushed"
+          countUnit   = "days"
+          countNumber = var.production ? 30 : 14
+        }
+        action = { type = "expire" }
+      }
+    ]
+    }) : jsonencode({
     rules = [
       {
         rulePriority = 1

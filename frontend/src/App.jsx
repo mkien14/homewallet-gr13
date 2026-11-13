@@ -8,6 +8,7 @@ import { PreferenceProvider, usePreferences } from "./preferences";
 import { api } from "./api";
 import { readCognitoPreferredLocale, writeCognitoPreferredLocale } from "./auth/locale";
 import { config } from "./config";
+import "./legal.css";
 import Callback from "./pages/Callback";
 import Home from "./pages/Home";
 import Upload from "./pages/Upload";
@@ -21,6 +22,8 @@ const Budgets = lazy(() => import("./pages/Budgets"));
 const RecurringBills = lazy(() => import("./pages/RecurringBills"));
 const MockFinanceTools = lazy(() => import("./components/MockFinanceTools"));
 const ReactAuth = lazy(() => import("./pages/ReactAuth"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const AccountSecurity = lazy(() => import("./pages/AccountSecurity"));
 const Notifications = lazy(() => import("./pages/Notifications"));
 const Community = lazy(() => import("./pages/Community"));
 const LOCALE_PENDING_KEY = "hw.locale.pending";
@@ -276,6 +279,7 @@ function AppContent() {
                 <NavLink onClick={() => setToolsOpen(false)} to="/upload">{t("Tải ảnh")}</NavLink>
                 <NavLink onClick={() => setToolsOpen(false)} to="/notifications">{t("Thông báo")}</NavLink>
                 <NavLink onClick={() => setToolsOpen(false)} to="/community">{t("Cộng đồng")}</NavLink>
+                <NavLink onClick={() => setToolsOpen(false)} to="/security">{t("Bảo mật tài khoản")}</NavLink>
                 <NavLink onClick={() => setToolsOpen(false)} to="/" end>{t("Hộ gia đình")}</NavLink>
               </div>}
             </div>
@@ -296,6 +300,7 @@ function AppContent() {
       <main id="main-content">
         <Suspense fallback={<p role="status">{translate("Đang tải trang…")}</p>}>
         <Routes>
+          <Route path="/privacy" element={<Privacy />} />
           <Route path="/auth/callback" element={<Callback />} />
           <Route path="/auth/react" element={<ReactAuth />} />
           <Route path="/" element={<Protected><Home /></Protected>} />
@@ -308,10 +313,12 @@ function AppContent() {
           <Route path="/transactions/new" element={<Protected><TransactionNew /></Protected>} />
           <Route path="/notifications" element={<Protected><Notifications /></Protected>} />
           <Route path="/community" element={<Protected><Community /></Protected>} />
+          <Route path="/security" element={<Protected><AccountSecurity /></Protected>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         </Suspense>
       </main>
+      <footer className="site-footer"><Link to="/privacy">{t("Quyền riêng tư và dữ liệu")}</Link></footer>
     </div>
   );
 }

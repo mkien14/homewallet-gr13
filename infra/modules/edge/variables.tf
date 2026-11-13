@@ -31,3 +31,20 @@ variable "web_acl_arn" {
   type        = string
   default     = null
 }
+
+variable "api_origin_domain_name" {
+  description = "Optional AWS HTTPS origin hostname, without scheme/path. Null preserves the ALB origin."
+  type        = string
+  default     = null
+}
+
+variable "api_origin_https" {
+  type    = bool
+  default = false
+}
+
+variable "content_security_policy" {
+  description = "Reviewed CSP; null preserves existing headers. Must include the exact Cognito and receipt S3 origins."
+  type        = string
+  default     = null
+}

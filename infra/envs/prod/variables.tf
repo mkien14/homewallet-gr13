@@ -1,3 +1,19 @@
+variable "release_commit" {
+  description = "Reviewed 40-character main commit shared by backend/frontend artifacts."
+  type        = string
+  validation {
+    condition     = can(regex("^[0-9a-f]{40}$", var.release_commit))
+    error_message = "Use the exact reviewed Git commit SHA."
+  }
+}
+variable "migration_image_digest" {
+  description = "Separately applied migration/bootstrap image; keep fixed during application-only releases."
+  type        = string
+  validation {
+    condition     = can(regex("^sha256:[0-9a-f]{64}$", var.migration_image_digest))
+    error_message = "Use the reviewed migration image digest."
+  }
+}
 variable "release_digest" {
   description = "Reviewed image digest in the dedicated homewallet-prod-backend repository."
   type        = string
@@ -83,5 +99,14 @@ variable "waf_validation_reference" {
   validation {
     condition     = length(trimspace(var.waf_validation_reference)) > 5
     error_message = "Record the WAF review evidence."
+  }
+}
+variable "production_allowed_household_ids" {
+  type = set(number)
+  validation {
+    condition = length(var.production_allowed_household_ids) > 0 && alltrue([
+      for id in var.production_allowed_household_ids : id > 1 && floor(id) == id
+    ])
+    error_message = "Explicit approved household IDs are required; household 1 is retained and excluded."
   }
 }
