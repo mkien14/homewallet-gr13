@@ -1,0 +1,732 @@
+{
+  "status": "PASS_CLOSED_PRODUCTION_OCR_RELEASE",
+  "at_utc": "2026-11-13T17:54:21.712853+00:00",
+  "account": "179923444714",
+  "region": "ap-southeast-1",
+  "release": "a5097aa3fd941c53a9cc9a3961f205d9e55d1553",
+  "previous_release": "26a0645709af3acb123768bb21a6a788d4252373",
+  "candidate_run": 43471247102,
+  "candidate_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43471247102",
+  "artifact_id": 14061021492,
+  "archive_sha256": "73a285c6c1168cf353a6d658ca16eafe45e77358655326d3c5d67c4c0065a83e",
+  "image_digest": "sha256:4e6af786b86b595f9526010848e52d023bc027030260910edfcd91f02d41ca4a",
+  "scanned_image_matches_live": true,
+  "container_scan": {
+    "high": 0,
+    "critical": 0,
+    "secret_findings": 0
+  },
+  "services": {
+    "api": {
+      "definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-api:34",
+      "running": 2,
+      "desired": 2,
+      "azs": [
+        "ap-southeast-1a",
+        "ap-southeast-1b"
+      ],
+      "stable": true,
+      "image": "179923444714.dkr.ecr.ap-southeast-1.amazonaws.com/homewallet-backend@sha256:4e6af786b86b595f9526010848e52d023bc027030260910edfcd91f02d41ca4a",
+      "production_profile": true,
+      "allowed_households": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        11,
+        12,
+        13,
+        22,
+        23,
+        24,
+        25,
+        26
+      ]
+    },
+    "worker": {
+      "definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-worker:10",
+      "running": 1,
+      "desired": 1,
+      "azs": [
+        "ap-southeast-1a"
+      ],
+      "stable": true,
+      "image": "179923444714.dkr.ecr.ap-southeast-1.amazonaws.com/homewallet-backend@sha256:4e6af786b86b595f9526010848e52d023bc027030260910edfcd91f02d41ca4a",
+      "production_profile": true,
+      "allowed_households": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        11,
+        12,
+        13,
+        22,
+        23,
+        24,
+        25,
+        26
+      ]
+    }
+  },
+  "jobs_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:9",
+  "schedules": [
+    {
+      "name": "hw-recurring-reminders",
+      "state": "DISABLED",
+      "definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:9"
+    },
+    {
+      "name": "hw-budget-alerts",
+      "state": "DISABLED",
+      "definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:9"
+    },
+    {
+      "name": "hw-weekly-report",
+      "state": "DISABLED",
+      "definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:9"
+    }
+  ],
+  "features": {
+    "ocr": true,
+    "gemini_worker": true,
+    "gemini_api_budget": false,
+    "textract_fallback": false,
+    "self_signup": false
+  },
+  "public": {
+    "/release.json": {
+      "status": 200,
+      "body": {
+        "release": "a5097aa3fd941c53a9cc9a3961f205d9e55d1553",
+        "ocr_enabled": true,
+        "channel": "production-candidate"
+      }
+    },
+    "/api/release": {
+      "status": 200,
+      "body": {
+        "release": "a5097aa3fd941c53a9cc9a3961f205d9e55d1553"
+      }
+    },
+    "/api/ready": {
+      "status": 200,
+      "body": {
+        "status": "ready"
+      }
+    }
+  },
+  "frontend": {
+    "release": "a5097aa3fd941c53a9cc9a3961f205d9e55d1553",
+    "invalidations": [
+      "I75OJCWMYDK1TCMDAO22HBHZCI"
+    ],
+    "artifact_id": 14061021492,
+    "at_utc": "2026-11-13T17:41:49.609485+00:00",
+    "invalidation_completed": true,
+    "index_matches_candidate": true,
+    "index_sha256": "c922db1b6bf564b9defd140fd4851e8efd950c3d020f7f728a116c9654a1f7ab"
+  },
+  "frontend_versions": {
+    "index.html": {
+      "VersionId": "Jc2meLgXq5b9QZLJrzpcmKWxqJREoFM7",
+      "CacheControl": "no-store",
+      "ContentType": "text/html; charset=utf-8"
+    },
+    "release.json": {
+      "VersionId": "BA3guiH0v.HyKwRy2bGUKpOD_YQNOh2B",
+      "CacheControl": "no-store",
+      "ContentType": "application/json"
+    },
+    "sw.js": {
+      "VersionId": "rexEOJWHVB1zDOSI4nuxcsNfeRNf_2f0",
+      "CacheControl": "no-store",
+      "ContentType": "text/javascript"
+    },
+    "manifest.webmanifest": {
+      "VersionId": "vs9FisvKlIAa3IfX9NJ4n2wqoB4SXiPh",
+      "CacheControl": "no-store",
+      "ContentType": "application/manifest+json"
+    }
+  },
+  "preflight": {
+    "status": "GO",
+    "checks": [
+      {
+        "gate": "settings_complete",
+        "pass": true
+      },
+      {
+        "gate": "data_boundary_reviewed",
+        "pass": true
+      },
+      {
+        "gate": "operations_owner_named",
+        "pass": true
+      },
+      {
+        "gate": "monthly_budget_chosen",
+        "pass": true
+      },
+      {
+        "gate": "expected_aws_account",
+        "pass": true
+      },
+      {
+        "gate": "public_cloudfront_url",
+        "pass": true
+      },
+      {
+        "gate": "public_api_origin_https",
+        "pass": true
+      },
+      {
+        "gate": "cloudfront_deployed",
+        "pass": true
+      },
+      {
+        "gate": "api_viewer_https",
+        "pass": true
+      },
+      {
+        "gate": "api_cache_policy_present",
+        "pass": true
+      },
+      {
+        "gate": "authenticated_api_not_cached",
+        "pass": true
+      },
+      {
+        "gate": "frontend_bucket_matches_distribution",
+        "pass": true
+      },
+      {
+        "gate": "cloudfront_waf_present",
+        "pass": true
+      },
+      {
+        "gate": "waf_common_rules_enforced",
+        "pass": true
+      },
+      {
+        "gate": "waf_rate_rule_enforced",
+        "pass": true
+      },
+      {
+        "gate": "origin_header_present",
+        "pass": true
+      },
+      {
+        "gate": "api_service_exists",
+        "pass": true
+      },
+      {
+        "gate": "resilience_inventory_complete",
+        "pass": true
+      },
+      {
+        "gate": "api_running_in_two_azs",
+        "pass": true
+      },
+      {
+        "gate": "api_circuit_breaker_enabled",
+        "pass": true
+      },
+      {
+        "gate": "api_scaling_limits",
+        "pass": true
+      },
+      {
+        "gate": "api_cpu_target_tracking",
+        "pass": true
+      },
+      {
+        "gate": "database_multi_az_available",
+        "pass": true
+      },
+      {
+        "gate": "database_private_encrypted_protected",
+        "pass": true
+      },
+      {
+        "gate": "database_recent_restore_point",
+        "pass": true
+      },
+      {
+        "gate": "redis_multi_az_failover_available",
+        "pass": true
+      },
+      {
+        "gate": "redis_tls_auth_backups",
+        "pass": true
+      },
+      {
+        "gate": "legacy_public_origin_ingress_closed",
+        "pass": true
+      },
+      {
+        "gate": "private_subnet_nat_in_each_az",
+        "pass": true
+      },
+      {
+        "gate": "retention_inventory_recorded",
+        "pass": true
+      },
+      {
+        "gate": "operational_log_retention",
+        "pass": true
+      },
+      {
+        "gate": "operational_log_retention",
+        "pass": true
+      },
+      {
+        "gate": "operational_log_retention",
+        "pass": true
+      },
+      {
+        "gate": "operational_log_retention",
+        "pass": true
+      },
+      {
+        "gate": "operational_log_retention",
+        "pass": true
+      },
+      {
+        "gate": "public_api_alarms_enabled",
+        "pass": true
+      },
+      {
+        "gate": "operations_email_subscription_confirmed",
+        "pass": true
+      },
+      {
+        "gate": "dated_scoped_recovery_drills",
+        "pass": true
+      },
+      {
+        "gate": "api_service_stable",
+        "pass": true
+      },
+      {
+        "gate": "production_runtime_profile",
+        "pass": true
+      },
+      {
+        "gate": "immutable_api_image",
+        "pass": true
+      },
+      {
+        "gate": "identified_release",
+        "pass": true
+      },
+      {
+        "gate": "reviewed_release_matches_runtime",
+        "pass": true
+      },
+      {
+        "gate": "reviewed_image_matches_runtime",
+        "pass": true
+      },
+      {
+        "gate": "approved_household_scope_enforced",
+        "pass": true
+      },
+      {
+        "gate": "api_image_in_expected_private_registry",
+        "pass": true
+      },
+      {
+        "gate": "release_tags_immutable",
+        "pass": true
+      },
+      {
+        "gate": "api_unprivileged_runtime",
+        "pass": true
+      },
+      {
+        "gate": "api_private_network",
+        "pass": true
+      },
+      {
+        "gate": "worker_service_exists",
+        "pass": true
+      },
+      {
+        "gate": "worker_service_stable",
+        "pass": true
+      },
+      {
+        "gate": "worker_private_network",
+        "pass": true
+      },
+      {
+        "gate": "worker_matches_production_release",
+        "pass": true
+      },
+      {
+        "gate": "worker_unprivileged_runtime",
+        "pass": true
+      },
+      {
+        "gate": "ocr_worker_rotation_and_secret",
+        "pass": true
+      },
+      {
+        "gate": "ocr_worker_isolated_queue",
+        "pass": true
+      },
+      {
+        "gate": "ocr_worker_provider_budget",
+        "pass": true
+      },
+      {
+        "gate": "jobs_match_production_release",
+        "pass": true
+      },
+      {
+        "gate": "jobs_unprivileged_runtime",
+        "pass": true
+      },
+      {
+        "gate": "admin_mfa_challenge_verified",
+        "pass": true
+      },
+      {
+        "gate": "admission_and_consent",
+        "pass": true
+      },
+      {
+        "gate": "runtime_credentials_tls",
+        "pass": true
+      },
+      {
+        "gate": "gemini_rotation_or_disabled",
+        "pass": true
+      },
+      {
+        "gate": "ocr_acceptance_or_disabled",
+        "pass": true
+      },
+      {
+        "gate": "cognito_pool_configured",
+        "pass": true
+      },
+      {
+        "gate": "closed_rollout_no_self_signup",
+        "pass": true
+      },
+      {
+        "gate": "one_spa_client_only",
+        "pass": true
+      },
+      {
+        "gate": "srp_client_without_password_flow",
+        "pass": true
+      },
+      {
+        "gate": "no_localhost_production_callbacks",
+        "pass": true
+      },
+      {
+        "gate": "admin_totp_enrolled_and_preferred",
+        "pass": true
+      },
+      {
+        "gate": "ses_transactional_sending_available",
+        "pass": true
+      },
+      {
+        "gate": "frontend_bucket_configured",
+        "pass": true
+      },
+      {
+        "gate": "frontend_bucket_private",
+        "pass": true
+      },
+      {
+        "gate": "frontend_bucket_encrypted",
+        "pass": true
+      },
+      {
+        "gate": "frontend_release_history_versioned",
+        "pass": true
+      },
+      {
+        "gate": "receipts_bucket_configured",
+        "pass": true
+      },
+      {
+        "gate": "receipts_bucket_private",
+        "pass": true
+      },
+      {
+        "gate": "receipts_bucket_encrypted",
+        "pass": true
+      },
+      {
+        "gate": "scheduler_inventory_recorded",
+        "pass": true
+      },
+      {
+        "gate": "schedule_disabled",
+        "pass": true
+      },
+      {
+        "gate": "schedule_targets_reviewed_jobs_revision",
+        "pass": true
+      },
+      {
+        "gate": "schedule_disabled",
+        "pass": true
+      },
+      {
+        "gate": "schedule_targets_reviewed_jobs_revision",
+        "pass": true
+      },
+      {
+        "gate": "schedule_disabled",
+        "pass": true
+      },
+      {
+        "gate": "schedule_targets_reviewed_jobs_revision",
+        "pass": true
+      },
+      {
+        "gate": "budget_name_configured",
+        "pass": true
+      },
+      {
+        "gate": "monthly_cost_budget_exists",
+        "pass": true
+      },
+      {
+        "gate": "cost_budget_notifications_configured",
+        "pass": true
+      },
+      {
+        "gate": "cost_notification_has_subscriber",
+        "pass": true
+      },
+      {
+        "gate": "cost_notification_has_subscriber",
+        "pass": true
+      },
+      {
+        "gate": "cost_notification_has_subscriber",
+        "pass": true
+      },
+      {
+        "gate": "cost_notification_has_subscriber",
+        "pass": true
+      },
+      {
+        "gate": "external_resilience_signoff",
+        "pass": true
+      }
+    ]
+  },
+  "ocr_evidence": "production-ocr-a5097aa-20261114.json",
+  "resilience_evidence": "production-resilience-a5097aa-20261114.json",
+  "browser": {
+    "status": "PASS",
+    "at_utc": "2026-11-13T17:44:51.360Z",
+    "release": "a5097aa3fd941c53a9cc9a3961f205d9e55d1553",
+    "browser": "Microsoft Edge headless",
+    "react_srp_login": true,
+    "totp_login": true,
+    "self_signup_hidden": true,
+    "ocr_upload_enabled": true,
+    "page_errors": 0,
+    "api_5xx": 0,
+    "checks": [
+      {
+        "route": "/",
+        "signed_in": true,
+        "synthetic_household": true
+      },
+      {
+        "route": "/dashboard",
+        "heading": "Spending in 11",
+        "loaded": true
+      },
+      {
+        "route": "/budgets",
+        "heading": "Monthly budget",
+        "loaded": true
+      },
+      {
+        "route": "/receipts",
+        "heading": "Receipts",
+        "loaded": true
+      },
+      {
+        "route": "/recurring-bills",
+        "heading": "Recurring bills",
+        "loaded": true
+      },
+      {
+        "route": "/transactions/new",
+        "heading": "Enter an expense manually",
+        "loaded": true
+      },
+      {
+        "route": "/notifications",
+        "heading": "Notifications",
+        "loaded": true
+      },
+      {
+        "route": "/community",
+        "heading": "Household savings tips",
+        "loaded": true
+      },
+      {
+        "route": "/security",
+        "heading": "Account security",
+        "loaded": true
+      },
+      {
+        "route": "/upload",
+        "heading": "Upload receipt",
+        "loaded": true
+      },
+      {
+        "route": "/privacy",
+        "heading": "Privacy and data",
+        "loaded": true
+      },
+      {
+        "route": "/budgets",
+        "viewport": "390x844",
+        "horizontal_overflow": false
+      }
+    ]
+  },
+  "runtime_probe": {
+    "event": "RUNTIME_COMPATIBILITY_PASS",
+    "mysql_tls": true,
+    "redis_tls_resp2_auth": true,
+    "redis_8_client_atomic_lua": true,
+    "test_keys_removed": true,
+    "approved_household_ids": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      11,
+      12,
+      13,
+      22,
+      23,
+      24,
+      25,
+      26,
+      29
+    ],
+    "household_1_retained": true
+  },
+  "rollback": {
+    "pass": true,
+    "events": [
+      {
+        "phase": "candidate-stage",
+        "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-api:35",
+        "release": "a5097aa3fd941c53a9cc9a3961f205d9e55d1553",
+        "seconds": 160.36782980000135,
+        "pass": true,
+        "at_utc": "2026-11-13T17:29:24.872071+00:00"
+      },
+      {
+        "phase": "rollback-previous-production",
+        "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-api:29",
+        "release": "26a0645709af3acb123768bb21a6a788d4252373",
+        "seconds": 159.79913130000932,
+        "pass": true,
+        "at_utc": "2026-11-13T17:38:09.812714+00:00"
+      },
+      {
+        "phase": "candidate-after-rollback",
+        "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-api:35",
+        "release": "a5097aa3fd941c53a9cc9a3961f205d9e55d1553",
+        "seconds": 149.67280729999766,
+        "pass": true,
+        "at_utc": "2026-11-13T17:40:39.487060+00:00"
+      },
+      {
+        "phase": "final-approved-scope",
+        "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-api:34",
+        "release": "a5097aa3fd941c53a9cc9a3961f205d9e55d1553",
+        "seconds": 157.49376899999334,
+        "pass": true,
+        "at_utc": "2026-11-13T17:48:46.167542+00:00"
+      }
+    ],
+    "stage_revision_deregistered": true
+  },
+  "inactive_test_and_rejected_definitions": [
+    "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-worker:11",
+    "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-api:32",
+    "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-api:33",
+    "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-worker:8",
+    "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-worker:9",
+    "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:8"
+  ],
+  "cleanup": {
+    "synthetic_household_removed": true,
+    "synthetic_cognito_users_removed": true,
+    "synthetic_s3_versions_removed": true,
+    "synthetic_db_user_removed": true,
+    "provider_audit_preserved": true
+  },
+  "terraform": {
+    "saved_plans_applied": true,
+    "final_plan_exit_code": 0,
+    "final_plan": "No changes",
+    "state_import_or_push_performed": false,
+    "original_database_network_services_preserved": true,
+    "operator_inputs_updated": true
+  },
+  "data_boundary": {
+    "allowed_household_ids": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      11,
+      12,
+      13,
+      22,
+      23,
+      24,
+      25,
+      26
+    ],
+    "household_1_retained": true,
+    "legacy_queues_not_received_purged_or_replayed": true
+  },
+  "docs_branch": "release/production-a5097aa",
+  "committed_by_agent": false,
+  "pushed_by_agent": false,
+  "limits": [
+    "One synthetic receipt establishes this release canary only; it is not a broad accuracy benchmark or provider SLA.",
+    "A real generate request was accepted; the remaining Google project quota was not independently measured.",
+    "API Gemini budget suggestions and Textract fallback remain disabled; scheduled delivery stays disabled.",
+    "Household 1 and legacy queue/DLQ/object data are retained."
+  ]
+}

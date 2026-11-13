@@ -1,14 +1,22 @@
 # Gemini đọc hóa đơn: thay khóa và mở production có kiểm soát
 
-Cập nhật 13/11/2026. **Quyết định hiện tại: giữ Gemini/OCR tắt.** Version khóa
-mới đã được lưu vào AWS và metadata AWSCURRENT xác nhận là
-`134ab65d-79de-48d9-b27c-73300828943c`. Kiên đã xác nhận thu hồi khóa cũ ở Google
-project HWAPI; đây là xác nhận của chủ project, không phải audit Google độc lập.
-Khóa mới truy cập được metadata `models/gemini-3.6-flash`, có action
-`generateContent`. Chưa gọi generate hoặc gửi ảnh; metadata không nghiệm thu
-quota, chất lượng hay luồng OCR. Xem [bằng chứng rotation](acceptance/gemini-rotation-20261113.json).
-Core production tiếp tục hoạt động trong
-phạm vi hộ đã duyệt; không bật Scheduler cùng đợt OCR.
+Cập nhật **14/11/2026: đã bật OCR tại worker** bằng `gemini-3.5-flash-lite`,
+candidate `a5097aa`. Đã đạt upload-consent → S3 → queue riêng → worker → Gemini
+→ draft → xác nhận, policy/quota/replay và rollback. Chỉ dùng ảnh tổng hợp;
+không gửi ảnh hộ thật trong nghiệm thu. [Biên bản](acceptance/production-release-a5097aa-20261114.md).
+
+Version khóa AWSCURRENT: `134ab65d-79de-48d9-b27c-73300828943c`. Kiên xác nhận
+thu hồi khóa cũ ở HWAPI; đây là attestation của chủ project, không phải audit
+Google độc lập. [Bằng chứng rotation](acceptance/gemini-rotation-20261113.json).
+Model 3.6 đã trả 503 trong hai smoke ảnh; chọn 3.5 Flash Lite sau smoke và E2E
+đạt. Metadata GET không thay nghiệm thu generate.
+
+Phạm vi: 16 hộ đã duyệt, loại hộ 1; ảnh mới có consent ở prefix
+`receipts/production/`, queue/DLQ mới. Cap app 10 attempts/ngày UTC, cách nhau
+30 giây, tối đa hai attempts/receipt và 4096 output token. Một lần generate đạt
+không xác nhận quota Google còn lại hoặc benchmark chất lượng rộng #34.
+Chỉ worker nhận key; API Gemini ngân sách, Textract fallback và Scheduler tắt.
+Các mục dưới đây là runbook rotation và tiêu chí cho lần thay đổi tiếp theo.
 
 ## 1. Kiên thu hồi khóa cũ ở Google
 
@@ -62,8 +70,8 @@ vì Windows PowerShell trên máy Kiên báo `Value cannot be null`. Nếu đã 
 chỉ chạy riêng lệnh ghi đè clipboard, không chạy lại helper để sửa lỗi này.
 
 Lệnh này chỉ thêm version vào secret **đã có**, không tạo secret mới, không tự
-restart task hoặc bật Gemini. Production hiện không inject secret này vào
-API/worker. Sau thành công, thông báo lại: “Đã thu hồi khóa cũ ở HWAPI và lưu
+restart task hoặc bật Gemini. Production chỉ inject secret này vào worker OCR,
+không vào API. Sau lần rotation tiếp theo, ghi nhận: “Đã thu hồi khóa cũ ở HWAPI và lưu
 khóa mới vào Secrets Manager”, kèm Version ID nếu cần; không gửi key.
 
 Tài liệu tham chiếu: [quản lý Gemini API key](https://aistudio.google.com/docs/api-key).
@@ -87,10 +95,10 @@ Tài liệu tham chiếu: [quản lý Gemini API key](https://aistudio.google.co
 
 ### Quota, chất lượng và chi phí
 
-- Sau khi có key mới, kiểm tra model bằng quyền của project HWAPI; giữ model
-  `gemini-3.6-flash` nếu quyền/quota và benchmark phù hợp. Model hỗ trợ ảnh/PDF
-  đầu vào và text/JSON đầu ra theo
-  [tài liệu chính thức](https://aistudio.google.com/docs/models/gemini-3.6-flash).
+- Khi thay key/model, kiểm tra generate bằng quyền project HWAPI. Model đang
+  chạy là `gemini-3.5-flash-lite`; không quay lại 3.6 chỉ vì metadata GET đạt.
+  Xem [tài liệu model](https://aistudio.google.com/docs/models/gemini-3.5-flash-lite).
+  Canary release đã thử PNG; không suy ra đã nghiệm thu mọi định dạng/loại ảnh.
 - Xem quota hiện tại ở [AI Studio](https://aistudio.google.com/rate-limit), gồm
   RPM/TPM/RPD. Không dựa vào ảnh quota cũ hoặc coi đổi key là được quota mới.
   Quota áp dụng theo project theo
@@ -109,9 +117,9 @@ Tài liệu tham chiếu: [quản lý Gemini API key](https://aistudio.google.co
 
 - Sửa production profile có cờ mở OCR rõ ràng và điều kiện kiểm chứng rotation/
   benchmark, secret worker đúng phạm vi, giữ mặc định tắt.
-- Workflow candidate hiện đặt `VITE_ENABLE_OCR=false` và manifest OCR false.
-  Muốn mở UI phải thay cấu hình theo change được review, build/scan candidate
-  mới từ main; frontend/backend vẫn cùng release. Không sửa tay file JS trên S3.
+- Workflow candidate có input `enable_ocr`, mặc định false; bản đang chạy build
+  với input true. Giữ lựa chọn này tường minh và khớp manifest/profile API khi
+  release tiếp theo; frontend/backend cùng artifact. Không sửa tay JS trên S3.
 - Giữ AI gợi ý ngân sách bằng rule nếu chỉ mở Gemini cho đọc ảnh; không tự cấp
   key cho API để mở thêm tính năng khác. Consent UI phải nêu rõ xử lý ngoài AWS,
   kết quả là draft và người dùng kiểm tra trước khi xác nhận.

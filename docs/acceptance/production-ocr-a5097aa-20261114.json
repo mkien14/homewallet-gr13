@@ -1,0 +1,82 @@
+{
+  "status": "PASS",
+  "at_utc": "2026-11-13T17:36:11.450934+00:00",
+  "account": "179923444714",
+  "region": "ap-southeast-1",
+  "release": "a5097aa3fd941c53a9cc9a3961f205d9e55d1553",
+  "image_digest": "sha256:4e6af786b86b595f9526010848e52d023bc027030260910edfcd91f02d41ca4a",
+  "candidate_run": 43471247102,
+  "candidate_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43471247102",
+  "artifact_id": 14061021492,
+  "archive_sha256": "73a285c6c1168cf353a6d658ca16eafe45e77358655326d3c5d67c4c0065a83e",
+  "security": {
+    "high": 0,
+    "critical": 0,
+    "secret_findings": 0
+  },
+  "model": "gemini-3.5-flash-lite",
+  "synthetic_only": true,
+  "real_household_images_sent": false,
+  "expected": {
+    "merchant": "HOMEWALLET TEST STORE",
+    "date": "2026-11-13",
+    "total_vnd": 78000,
+    "item_amounts_vnd": [
+      33000,
+      45000
+    ]
+  },
+  "checks": {
+    "consent_rejected": true,
+    "new_prefix": true,
+    "real_s3_queue_worker_gemini_draft": true,
+    "merchant": true,
+    "date": true,
+    "total": true,
+    "items": true,
+    "draft_confirmed": true,
+    "excluded_household": true,
+    "missing_consent": true,
+    "non_member": true,
+    "legacy_prefix": true,
+    "persisted_daily_cap": true,
+    "finished_replay_skipped": true
+  },
+  "quota": {
+    "configured_worker_attempts_per_utc_day": 10,
+    "minimum_interval_seconds": 30,
+    "maximum_attempts_per_receipt": 2,
+    "maximum_output_tokens": 4096,
+    "observed_worker_provider_attempts": 1,
+    "blocked_test_cap": 1,
+    "counter_unchanged_after_rejected_call_and_replay": true,
+    "extra_google_calls_during_quota_test": 0
+  },
+  "local_tests": {
+    "backend": {
+      "passed": 234,
+      "skipped": 60,
+      "seconds": 185.1,
+      "warnings": 1
+    },
+    "mysql_schema_and_policy": {
+      "passed": 15,
+      "seconds": 9.98,
+      "warnings": 1
+    },
+    "git_diff_check": "PASS"
+  },
+  "limits": [
+    "One synthetic receipt establishes this release canary only; it is not a broad accuracy benchmark or provider SLA.",
+    "A real generate request was accepted; the remaining Google project quota was not independently measured.",
+    "API Gemini budget suggestions and Textract fallback remain disabled; scheduled delivery stays disabled.",
+    "Household 1 and legacy queue/DLQ/object data are retained."
+  ],
+  "cleanup": {
+    "synthetic_household_removed": true,
+    "synthetic_cognito_users_removed": true,
+    "synthetic_s3_versions_removed": true,
+    "synthetic_db_user_removed": true,
+    "provider_audit_preserved": true
+  }
+}

@@ -1,0 +1,10 @@
+docs/acceptance/production-release-a5097aa-20261114.md
+docs/production-readiness.md
+docs/runbooks/current-stack-production.md
+docs/production-rollout.md
+docs/gemini-ocr-production-enablement.md
+docs/acceptance/ocr-enablement-20261113.md
+docs/acceptance/production-release-a5097aa-20261114.json
+docs/acceptance/production-ocr-a5097aa-20261114.json
+docs/acceptance/production-resilience-a5097aa-20261114.json
+deploy/release-evidence-paths-a5097aa.txt
