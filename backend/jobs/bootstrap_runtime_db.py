@@ -131,7 +131,7 @@ def main():
                 for table in sorted(required):
                     cursor.execute(
                         f"SELECT 1 FROM `homewallet`.`{table}` LIMIT 0"
-                    ) if table != "audit_logs" else None
+                    )
         finally:
             probe.close()
 
