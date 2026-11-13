@@ -1,0 +1,173 @@
+{
+  "status": "PASS",
+  "at_utc": "2026-11-13T17:40:49.384957+00:00",
+  "account": "179923444714",
+  "region": "ap-southeast-1",
+  "release": "a5097aa3fd941c53a9cc9a3961f205d9e55d1553",
+  "image_digest": "sha256:4e6af786b86b595f9526010848e52d023bc027030260910edfcd91f02d41ca4a",
+  "database_id": "homewallet-dev-mysql",
+  "source_overwritten": false,
+  "backup_lag_seconds": 254.391741,
+  "restore": {
+    "pitr": {
+      "instance": "hw-recovery-20261113-df1fc11e-pitr",
+      "seconds": 874.435366,
+      "application_ready": true,
+      "tls_verified": true,
+      "schema_cleaned": true,
+      "application_auth_gate": true,
+      "migration_006": true,
+      "task": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/aa78d585386f422097d2b20c8b41cd33",
+      "isolated_startup_profile": "dev",
+      "candidate_image": "sha256:4e6af786b86b595f9526010848e52d023bc027030260910edfcd91f02d41ca4a"
+    },
+    "snapshot": {
+      "instance": "hw-recovery-20261113-df1fc11e-snapshot",
+      "seconds": 671.786934,
+      "application_ready": true,
+      "tls_verified": true,
+      "schema_cleaned": true,
+      "application_auth_gate": true,
+      "migration_006": true,
+      "task": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/03b0eded6bed43848f538ca7c23e24fa",
+      "isolated_startup_profile": "dev",
+      "candidate_image": "sha256:4e6af786b86b595f9526010848e52d023bc027030260910edfcd91f02d41ca4a"
+    }
+  },
+  "drills": {
+    "api_task_replacement": {
+      "started_at_utc": "2026-11-13T17:30:33.773195+00:00",
+      "stopped_task": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/a5cf9f24790d48c5821f9a98c1de7282",
+      "old_tasks": [
+        "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/a5cf9f24790d48c5821f9a98c1de7282",
+        "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/c1cf2884d89f49ef95d0ea7c4f26fcd2"
+      ],
+      "baseline_azs": [
+        "ap-southeast-1a",
+        "ap-southeast-1b"
+      ],
+      "samples": [
+        {
+          "at_utc": "2026-11-13T17:31:08.789829+00:00",
+          "readiness": 200,
+          "healthy_tasks": 1
+        },
+        {
+          "at_utc": "2026-11-13T17:31:42.946354+00:00",
+          "readiness": 200,
+          "healthy_tasks": 1
+        },
+        {
+          "at_utc": "2026-11-13T17:32:11.509242+00:00",
+          "readiness": 200,
+          "healthy_tasks": 2
+        }
+      ],
+      "pass": true,
+      "finished_at_utc": "2026-11-13T17:32:11.509242+00:00",
+      "seconds": 97.736047
+    },
+    "redis_failover": {
+      "started_at_utc": "2026-11-13T17:32:25.520642+00:00",
+      "old_primary": "homewallet-dev-redis-002",
+      "samples": [
+        {
+          "at_utc": "2026-11-13T17:33:13.773850+00:00",
+          "readiness": 200,
+          "status": "available",
+          "primary": "homewallet-dev-redis-001"
+        }
+      ],
+      "new_primary": "homewallet-dev-redis-001",
+      "pass": true,
+      "finished_at_utc": "2026-11-13T17:33:13.773850+00:00",
+      "seconds": 48.253208
+    },
+    "database_failover": {
+      "started_at_utc": "2026-11-13T17:33:26.854835+00:00",
+      "old_az": "ap-southeast-1b",
+      "samples": [
+        {
+          "at_utc": "2026-11-13T17:34:26.979610+00:00",
+          "readiness": 200,
+          "status": "rebooting",
+          "az": "ap-southeast-1b"
+        },
+        {
+          "at_utc": "2026-11-13T17:35:17.377206+00:00",
+          "readiness": 200,
+          "status": "available",
+          "az": "ap-southeast-1b"
+        }
+      ],
+      "new_az": "ap-southeast-1b",
+      "availability_zone_changed": false,
+      "aws_failover_started_at_utc": "2026-11-13T17:33:33.637000+00:00",
+      "aws_failover_completed_at_utc": "2026-11-13T17:34:08.525000+00:00",
+      "aws_failover_seconds": 34.888,
+      "pass": true,
+      "finished_at_utc": "2026-11-13T17:35:17.377206+00:00",
+      "seconds": 110.522371
+    },
+    "api_rollback": {
+      "pass": true,
+      "events": [
+        {
+          "phase": "rollback-previous-production",
+          "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-api:29",
+          "release": "26a0645709af3acb123768bb21a6a788d4252373",
+          "seconds": 159.79913130000932,
+          "pass": true,
+          "at_utc": "2026-11-13T17:38:09.812714+00:00"
+        },
+        {
+          "phase": "candidate-after-rollback",
+          "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-api:35",
+          "release": "a5097aa3fd941c53a9cc9a3961f205d9e55d1553",
+          "seconds": 149.67280729999766,
+          "pass": true,
+          "at_utc": "2026-11-13T17:40:39.487060+00:00"
+        }
+      ],
+      "old_revision": "hw-api:29",
+      "new_revision": "hw-api:35",
+      "production_guards_preserved": true,
+      "schema_changed": false
+    }
+  },
+  "snapshot_id": "hw-prod-before-core-20261113-df1fc11e",
+  "snapshot_retain_until": "2026-11-27",
+  "temporary_resources_cleaned": true,
+  "runtime_after_failover": {
+    "event": "RUNTIME_COMPATIBILITY_PASS",
+    "mysql_tls": true,
+    "redis_tls_resp2_auth": true,
+    "redis_8_client_atomic_lua": true,
+    "test_keys_removed": true,
+    "approved_household_ids": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      11,
+      12,
+      13,
+      22,
+      23,
+      24,
+      25,
+      26,
+      29
+    ],
+    "household_1_retained": true
+  },
+  "limits": [
+    "Isolated restores tested application startup/auth/readiness using the candidate under dev probe profile; production profile exercised separately on live synthetic household.",
+    "No primary endpoint cutover or whole-AZ outage was performed.",
+    "Observed timings are drill results, not an SLA."
+  ]
+}

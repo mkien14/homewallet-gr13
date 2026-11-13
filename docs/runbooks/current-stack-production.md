@@ -1,33 +1,28 @@
-# Bàn giao production core — stack hiện tại
+# Bàn giao production — stack hiện tại
 
-Ngày: 13/11/2026. Chủ vận hành và quyết định dữ liệu: **Kiên**.
-Hạ tầng/dependency đã merge main. Biên bản phát hành mới ở nhánh
-`release/production-26a0645`. Agent chưa stage, commit hoặc push thay người dùng.
+Cập nhật **14/11/2026**. Chủ vận hành/dữ liệu: **Kiên**.
+Biên bản ở nhánh `release/production-a5097aa`; Kiên commit/push/merge.
 
-## 1. Điểm chuẩn đang chạy
+## 1. Điểm chuẩn
 
-| Thành phần | Điểm chuẩn |
+| Thành phần | Giá trị |
 | --- | --- |
-| App release | `26a0645709af3acb123768bb21a6a788d4252373`, candidate [43408857810](https://github.com/mkien14/homewallet-gr13/actions/runs/43408857810) |
-| API | `hw-api:29`, hai task ở hai AZ |
-| Worker / jobs | `hw-worker:6` / `hw-jobs:6`; OCR tắt, ba lịch DISABLED |
-| Image | `homewallet-backend@sha256:dfef1a60b3fee7e1733563a3aa040ebfc1cb0d92021b154b16f00eb788d74348` trong ECR account 179923444714/Singapore |
-| URL / CloudFront | https://daoedidcrnf1f.cloudfront.net / `E1FBDSJYV9WAKM` |
-| HTTPS API / discovery | `4o95mvff40`, VPC Link, Cloud Map SRV `api.homewallet-api.internal` |
-| Database | `homewallet-dev-mysql`, MySQL 8.4, db.t4g.micro, Multi-AZ, TLS/private/encrypted |
-| Redis | `homewallet-dev-redis`, hai node/TLS/AUTH/failover; snapshot 7 ngày |
-| State | S3 `hw-tfstate-homewallet-gr13`, key `dev/terraform.tfstate`; encrypted/private/versioned, S3 lockfile |
-| Frontend bucket | `hw-frontend-dev-179923444714`, private/OAC/versioning; noncurrent version 30 ngày |
-| Restore checkpoint | `hw-prod-before-core-20261113-d8aca388`; giữ đến 27/11/2026 theo tag quản lý; checkpoint cũ `…ad8e7e2a` vẫn giữ |
+| Website | https://daoedidcrnf1f.cloudfront.net |
+| Main / candidate | `a5097aa3fd941c53a9cc9a3961f205d9e55d1553` / [43471247102](https://github.com/mkien14/homewallet-gr13/actions/runs/43471247102) |
+| API / worker / jobs | `hw-api:34` / `hw-worker:10` / `hw-jobs:9` |
+| ECR image | `homewallet-backend@sha256:4e6af786b86b595f9526010848e52d023bc027030260910edfcd91f02d41ca4a` |
+| Account / Region | `179923444714` / `ap-southeast-1` |
+| CloudFront / HTTP API | `E1FBDSJYV9WAKM` / `4o95mvff40` |
+| RDS / Redis | `homewallet-dev-mysql` / `homewallet-dev-redis` |
+| Frontend bucket | `hw-frontend-dev-179923444714`, private/OAC/versioned |
+| State | Bucket `hw-tfstate-homewallet-gr13`, key `dev/terraform.tfstate`, encrypted/private/versioned, S3 lockfile |
+| Restore checkpoint | `hw-prod-before-core-20261113-df1fc11e`, review giữ/dọn ngày 27/11/2026 |
+| Gate / Terraform | 93/93 GO; plan cuối No changes |
 
-Tag giữ snapshot không tự xóa khi đến hạn. Ngày 27/11, Kiên review snapshot mới,
-restore point và thời hạn giữ dữ liệu trước khi quyết định dọn bản cũ.
-Tên/tag `dev` không còn biểu thị môi trường phát triển độc lập. Không rename
-resource/state hay apply `infra/envs/prod` vào stack này.
+Tên/tag `dev` là tên cũ của stack production hiện tại. Không rename tài nguyên,
+không chạy Deploy Dev hoặc apply `infra/envs/prod` vào đây. Phát triển dùng local/mock.
 
-## 2. File vận hành ngoài Git
-
-Trên máy đã triển khai:
+## 2. Cấu hình vận hành ngoài Git
 
 ```powershell
 $ops = Join-Path $env:LOCALAPPDATA 'HomeWallet\production\20261113'
@@ -35,219 +30,117 @@ $productionVars = Join-Path $ops 'production.tfvars.json'
 $productionSettings = Join-Path $ops 'operator-settings.json'
 ```
 
-Thư mục được giới hạn ACL cho operator hiện tại, SYSTEM và Administrators.
-Có tfvars cuối, settings preflight, backup state, bản ghi state move, checkpoint
-frontend và revision rollback. Không upload thư mục này lên GitHub hoặc gửi qua
-chat: state có thể chứa secret; tfvars có email nhận budget.
-Hồ sơ release mới nằm trong `releases\26a0645`; `production.tfvars.json`,
-`operator-settings.json`, active release và checkpoint frontend ở thư mục trên
-đã cập nhật theo điểm chuẩn cuối. Credential/TOTP seed của fixture thử đã bỏ.
-Không trông cậy vào các bản TEMP cũ. Nếu đổi máy, bàn giao qua kênh bảo mật và
-kiểm tra account/Region/quyền, không copy access key vào repo.
+Thư mục giới hạn ACL cho operator, SYSTEM và Administrators. Bản ghi mới nằm
+trong `ocr-final`; root tfvars/settings, active release, checkpoint frontend và
+rollback đã cập nhật. Bản cũ giữ để truy vết. Không upload thư mục này: state
+có thể chứa secret, tfvars chứa email nhận budget. Bàn giao sang máy khác bằng
+kênh bảo mật, cấp AWS identity/MFA phù hợp; không đưa access key vào repo/chat.
 
 ## 3. Kiểm tra chỉ đọc
-
-Chạy từ thư mục repo, bằng AWS profile đã được cấp quyền hợp lệ:
 
 ```powershell
 $actualAccount = aws sts get-caller-identity --query Account --output text
 if ($LASTEXITCODE -ne 0 -or $actualAccount -ne '179923444714') { throw 'Sai account' }
 .\backend\.venv\Scripts\python.exe .\scripts\production-preflight.py --settings $productionSettings
-if ($LASTEXITCODE -ne 0) { throw 'NO_GO: xem gate lỗi, không sửa attestation để vượt gate' }
+if ($LASTEXITCODE -ne 0) { throw 'NO_GO: xử lý gate lỗi, không sửa attestation để vượt gate' }
 aws ecs describe-services --region ap-southeast-1 --cluster homewallet --services api worker --query 'services[*].{name:serviceName,running:runningCount,desired:desiredCount,pending:pendingCount,task:taskDefinition}'
 ```
 
-Preflight kiểm tra topology, image/profile, allowlist, WAF/HTTPS, MFA, bucket,
-retention, alarm/SNS, budget, lịch và bằng chứng restore/rollback đúng release.
-Bằng chứng quá 30 ngày hoặc khác image/release phải được chạy lại phù hợp.
-MFA của Kiên đã có attestation challenge; admin mới phải tự bật TOTP và thử lại.
-Metadata thiết bị MFA AWS không thay cho kiểm tra chính sách IAM của từng người.
+Preflight kiểm image/profile, allowlist, HTTPS/WAF, MFA, topology, budget, lịch
+và bằng chứng cùng release/image không quá 30 ngày. Admin mới phải tự đăng ký
+TOTP và thử đăng nhập lại. Kiên đã xác nhận challenge; bản mới thử SRP/TOTP thực
+tế trên Edge bằng danh tính tổng hợp, sau đó xóa danh tính đó.
 
-## 4. Thay đổi Terraform tiếp theo
+## 4. Thay đổi và release tiếp theo
 
-Ngày 13/11, kết nối Secrets Manager đã hoạt động lại: TLS và DescribeSecret đạt,
-plan đầy đủ bằng input production hoàn tất. Xem
-[biên bản đối chiếu](../acceptance/production-terraform-reconcile-20261113.md).
-Chưa apply/rebind state; revision state còn cũ dù cấu hình dự kiến khớp task live.
-Kiểm tra kết nối trước lần plan tiếp theo để lỗi mạng dừng sớm:
+1. Review/merge source vào main; chạy **Build release candidate**. Muốn giữ OCR
+   bật thì chọn **enable_ocr=true**; mặc định của workflow vẫn false.
+2. CI/scan/checksum phải đạt. Dùng cùng artifact và immutable image cho frontend,
+   API, worker, jobs. Không build riêng frontend hoặc dùng image working-tree.
+3. Dùng tfvars production đã lưu. Kết nối Secrets Manager đã khắc phục; các saved
+   plan đã review/apply. Plan cuối của bản bàn giao không còn drift cần apply.
 
 ```powershell
-$metadataArn = aws secretsmanager describe-secret `
-    --secret-id 'hw/dev/vapid-private-key' `
-    --region ap-southeast-1 `
-    --cli-connect-timeout 5 --cli-read-timeout 10 `
-    --query ARN --output text
-if ($LASTEXITCODE -ne 0) {
-    throw 'Không đọc được metadata Secrets Manager. Kiểm tra mạng/phiên AWS trước plan; không tắt TLS.'
-}
-
 $nextPlan = Join-Path $ops 'next-change.tfplan'
 terraform '-chdir=infra/envs/dev' plan "-var-file=$productionVars" "-out=$nextPlan" -input=false -lock-timeout=60s -detailed-exitcode
 $nextPlanExit = $LASTEXITCODE
 if ($nextPlanExit -notin @(0, 2)) { throw 'Plan lỗi. Không apply.' }
-# 0: không thay đổi; 2: plan thành công và có thay đổi cần review.
+# 0: No changes. 2: có thay đổi, phải review saved plan trước khi apply.
 ```
 
-Review saved plan, ARN/revision và chi phí trước bước apply dưới đây. Plan có
-replacement task definition khác với replacement service/DB; phải đọc đúng
-address và `skip_destroy`. Không dùng trực tiếp plan cũ sau khi input/AWS thay đổi.
+Giữ HA, HTTPS/discovery, WAF, app hardening, allowlist và guard chống xóa. Không
+dùng default dev, `-target`, import/state push để chữa drift. Năm state move
+trước đây đã hoàn tất, không lặp lại. Task definition replacement khác với xóa
+ECS service/DB; đọc đúng address và skip_destroy.
 
-```powershell
-terraform '-chdir=infra/envs/dev' apply $nextPlan
-if ($LASTEXITCODE -ne 0) { throw 'Apply lỗi; xem log và trạng thái thật trước khi chạy tiếp' }
-```
+Terraform đăng ký revision; service/target lịch có ignore_changes nên còn bước
+cập nhật release thực tế. API rolling 100/200%, worker stop-first 0/100%. Cập nhật
+ba target Scheduler sang jobs mới, giữ DISABLED và giữ expression/timezone/input/
+role/network/retry. Chỉ publish bằng `publish-frontend-release.py` sau gate GO;
+assets trước index, không sync --delete, chờ invalidation và nghiệm thu phiên bản.
 
-Không apply default dev, không dùng `-target`, không tái tạo service/bucket/DB.
-Giữ `resilience_hardening_enabled`, discovery, HTTPS, WAF và app hardening bật;
-`resilience_apply_immediately=false`, lịch tắt. Guard `prevent_destroy` trên
-service/schedule production cố ý chặn cấu hình dev gây xóa tài nguyên.
-Năm state move đã hoàn tất; không lặp lại. State backup ở ngoài Git và S3 có
-version history; phục hồi state cần review riêng, không ghi đè state để chữa drift.
+## 5. OCR, dữ liệu và quota
 
-## 5. Phát hành ứng dụng tiếp theo
+Allowlist: `2,3,4,5,6,7,8,9,11,12,13,22,23,24,25,26`. Hộ 1, ảnh/dữ liệu và
+queue/DLQ cũ giữ nguyên. Hộ 29 và danh tính/ảnh/user DB thử đã dọn; không tự thêm
+hộ tương lai. Audit provider thử giữ để không reset số lần đã gọi trong ngày.
 
-1. Kiên review/merge source, chạy **Build release candidate** từ đúng main.
-2. Audit, lock, security scan và checksum phải đạt; không build lại riêng frontend.
-3. ECR dùng immutable digest. Cập nhật release/digest trong tfvars đã review và
-   settings; giữ allowlist. Không nạp Gemini key hoặc bật lịch như tác dụng phụ.
-4. Saved plan/apply đăng ký revision; API/worker/Scheduler target có ignore_changes
-   nên còn bước cập nhật release. API min 100%/max 200%; worker stop-first 0/100%.
-5. Triển khai API, smoke, rồi worker. Cập nhật cả ba Scheduler target sang jobs mới
-   với **State=DISABLED**, giữ expression/timezone/input/role/network/retry.
-6. Có bằng chứng cùng candidate, gate GO, dùng `publish-frontend-release.py`.
-   Script upload assets trước index, không xóa assets cũ; chờ invalidation xong.
-7. Đối chiếu `/release.json`, `/api/release`; đăng nhập/SRP/MFA, chức năng, lỗi,
-   scope dữ liệu, mobile và rollback trước khi ghi điểm chuẩn mới.
+Chỉ nhận ảnh mới ở `receipts/production/<household>/` qua
+`production-ocr-queue` và `production-ocr-dlq`. Không receive/purge/replay queue
+cũ trong một đợt deploy. SQS có giới hạn retention; giữ DLQ không phải lưu vô hạn.
 
-Không dùng **Deploy Dev** hoặc workflow **Reviewed production release** dành cho
-stack `homewallet-prod`. Merge source không tự đổi APP_RELEASE đang chạy.
+Worker kiểm lại membership/allowlist/consent trước S3/provider. Model đang dùng
+`gemini-3.5-flash-lite`; cap **10 attempts/ngày UTC**, cách nhau ít nhất 30 giây,
+hai attempts/receipt kể cả retry, output tối đa 4096 token. Cap app không thay
+quota/billing của Google project. Không xóa audit attempts để lấy quota mới.
+Kết quả là draft; người dùng đối chiếu ảnh rồi mới xác nhận giao dịch.
 
-### Phương thức thực tế của release 26a0645
+`hw_runtime` cần **SELECT, INSERT trên homewallet.audit_logs**; SQL quota dùng
+cột `at`. Grant đã áp dụng và kiểm trên bản phục hồi. Khi bootstrap môi trường
+mới, dùng file bootstrap/image của candidate đã sửa; không dùng image migrate
+cũ để suy ra grant mới đã có. Không đổi mật khẩu runtime hoặc thêm quyền DDL.
 
-Plan local bị timeout khi đọc metadata Secrets Manager Singapore; đã dừng tiến
-trình và giải phóng đúng lock của plan. Không Terraform apply/import/state push.
-Đăng ký revision qua ECS API bằng cấu hình baseline production đã đối chiếu:
-container chỉ đổi image và `APP_RELEASE`, tag được giữ. Cập nhật API/worker và
-target ba lịch, giữ lịch DISABLED; frontend dùng chính artifact đã quét.
+Chỉ worker nhận Gemini secret. Kiên xác nhận thu hồi khóa cũ ở Google HWAPI;
+rotation sau dùng helper nhập ẩn trong [runbook khóa](../gemini-ocr-production-enablement.md).
+API gợi ý ngân sách dùng rule; Textract fallback và ba lịch gửi tự động giữ tắt.
+Onboarding là thao tác admin có kiểm soát, không mở signup để lách allowlist.
 
-Input tfvars/settings ngoài Git đã cập nhật nhưng state/output Terraform có thể
-còn revision cũ. Trước apply tiếp theo cần khắc phục kết nối metadata, tạo saved
-plan với input production và review chênh lệch đăng ký task definition. Không
-tuyên bố “No changes”, không dùng output revision cũ để deploy lại. Dừng nếu plan
-đề xuất hạ profile hoặc thay/xóa DB, network, service ngoài phạm vi đã duyệt.
-Chi tiết trong [biên bản release](../acceptance/production-release-26a0645-20261113.md).
+## 6. Dừng, rollback và phục hồi
 
-## 6. Rollback và khôi phục
+- Rollback API **:35 → :29 → :35** đã đạt, điểm chuẩn cuối là **:34**. Fallback
+  production trước là API **:29**, worker **:6** (OCR paused), jobs **:6** (lịch
+  tắt), frontend candidate `26a0645`. Bản ghi rollback/checkpoint ở thư mục ops.
+  Không dùng :22/:25 có profile dev hoặc candidate OCR lỗi `727f929`.
+- Khi dừng OCR: chặn upload mới ở API/UI và pause worker trước ReceiveMessage;
+  queue riêng và ảnh được giữ. Thực hiện bằng profile/candidate đã review, không
+  sửa JS trên S3 hay purge queue. Rollback đầy đủ phải ghép frontend/backend/
+  worker tương thích, chờ stable rồi kiểm readiness, SRP/MFA và phiên bản.
+- Frontend: dùng VersionId trong checkpoint để phục hồi entry point và kiểm
+  hashed assets, sau đó invalidation. Không xóa assets cũ. Restore cùng candidate
+  đã được thử ở đợt trước; không coi đó là nghiệm thu frontend khác release.
+- DB: PITR/snapshot sang instance **mới**, private/encrypted/SG riêng. Kiểm TLS,
+  schema, runtime/audit grants, giao dịch thử và ứng dụng trước quyết định đổi
+  endpoint. Secret/password của clone xử lý riêng; không restore đè primary.
+- Candidate này đạt PITR/snapshot khoảng **14,6/11,2 phút**, restore point trễ
+  **254 giây**; clone/SG/role tạm đã dọn. Task replacement, Redis/RDS failover,
+  TLS/Lua sau failover và rollback đạt. RDS metadata AZ không đổi. Không tuyên
+  bố thử mất cả AZ, cutover DB endpoint hoặc SLA từ các thời gian này.
 
-- API rollback mới đã diễn tập `hw-api:30 → :28 → :30` giữa candidate `26a0645`
-  và production cũ `1bba075`, giữ guard production. Sau cleanup chạy `:29` với
-  allowlist cuối; revision thử `:30` đã deregister. `:28` là fallback production
-  đã thử cho đợt này; không dùng :22/:25 có profile dev để rollback.
-- Với release tương lai, lấy revision ổn định đã lưu, đối chiếu production profile,
-  allowlist, image và tương thích schema. `aws ecs update-service` sang revision
-  đó, chờ services-stable, kiểm tra hai AZ/readiness/release và token. Worker/jobs
-  phải rollback theo bộ tương thích; lịch tiếp tục tắt.
-- Migration 006 là additive; đợt này không chạy down migration hoặc ghi đè DB.
-- RDS: ưu tiên PITR hoặc snapshot **sang instance mới**, private/encrypted/SG riêng.
-  Kiểm tra TLS, schema/grants, dữ liệu, giao dịch thử và ứng dụng trước quyết định
-  đổi endpoint. Không restore đè primary. Secret/master password của bản phục hồi
-  cần được xử lý riêng. Dọn clone, SG, role, grants/schema thử sau nghiệm thu.
-- [Bằng chứng restore/failover cùng candidate](../acceptance/production-resilience-26a0645-20261113.json):
-  độ trễ restore point khoảng 66 giây, thời gian đến kiểm tra ứng dụng PITR/
-  snapshot khoảng 14,3/10,3 phút. Startup probe dùng profile dev cô lập; profile
-  production thử riêng trên ứng dụng đang chạy. Chưa chuyển endpoint người dùng
-  sang DB phục hồi hoặc thử mất toàn bộ AZ. Thời gian quan sát gồm polling,
-  không phải SLA. [Đợt chuyển stack đầu](../acceptance/production-resilience-20261113.json)
-  được giữ làm lịch sử.
-- Frontend: chọn VersionId đã lưu cho index/release/sw/manifest từ checkpoint
-  ngoài Git, kiểm tra cùng release và hashed asset còn tồn tại, copy version đó
-  về key tương ứng rồi invalidation. Đã thử phục hồi version cùng candidate;
-  chưa nghiệm thu frontend khác release. Không xóa asset cũ hoặc dùng sync --delete.
+Snapshot có tag giữ đến 27/11, không tự xóa. Kiên review checkpoint mới và chính
+sách dữ liệu trước quyết định dọn. RDS backup 14 ngày, Redis 7, log 30 và frontend
+noncurrent version 30 ngày. Dữ liệu hộ ngoài phạm vi tiếp tục giữ có kiểm soát.
 
-## 7. Ranh giới dữ liệu, email và tính năng tắt
+## 7. Chi phí, bằng chứng và Git
 
-16 hộ được duyệt: `2,3,4,5,6,7,8,9,11,12,13,22,23,24,25,26`.
-Hộ 1 và ảnh/dữ liệu giữ nguyên; không purge/redrive DLQ, không gửi thử cho họ.
-SQS có thời hạn lưu tối đa của dịch vụ; giữ DLQ không phải lưu trữ vô thời hạn.
-Nếu cần giữ payload lâu hơn phải có kế hoạch lưu trữ/retention riêng được review,
-không tự ReceiveMessage để xem nội dung trong một đợt deploy.
+Budget **100 USD/tháng** cảnh báo toàn account, không tự ngắt tài nguyên; cấu
+hình HA có chi phí liên tục. SNS subscription đã confirm; chưa kiểm inbox alarm
+trong đợt này. CloudWatch dashboard: `homewallet-dev-operations`.
 
-Hộ thử 27 của đợt đầu và hộ 28 của release mới đã xóa qua API; các Cognito user
-thử tương ứng đã xóa. ID 27/28 không nằm trong allowlist cuối. TOTP của phép thử
-browser mới dùng danh tính tổng hợp đã xóa, không thay thiết bị MFA của Kiên.
-Một số hàng user/history tổng hợp có thể được giữ làm audit; chúng không cấp
-quyền đăng nhập hoặc là dữ liệu khách hàng.
+[Biên bản bàn giao](../acceptance/production-release-a5097aa-20261114.md) liên kết
+JSON release/OCR/resilience. Một ảnh tổng hợp là canary release, không thay bộ
+benchmark rộng #34 hoặc đo tải kéo dài.
 
-Onboarding mới là thao tác admin có kiểm soát: tạo danh tính, chuẩn bị membership
-cho hộ đã duyệt và cập nhật allowlist theo change được review. Profile hiện tại
-cố ý chặn user chưa có membership trước bước tạo user; không mở signup để lách.
-
-AI/OCR và ba lịch tiếp tục tắt. Trước bật lại phải xác nhận thu hồi khóa Google
-cũ tại HWAPI, quota/benchmark, consent, lỗi/chi phí và phạm vi worker/job/recipient.
-Không chỉ đổi biến enabled: cần chứng minh worker/job không xử lý hộ đang giữ,
-opt-out, bounce/complaint, chống trùng, delivery và stop procedure.
-Đã lưu version khóa mới, kiểm tra AWSCURRENT và truy cập metadata model thành
-công; Kiên đã xác nhận thu hồi khóa cũ ở Google. Attestation trong settings vận
-hành đã cập nhật, `ocr_benchmark_accepted` vẫn false và tính năng vẫn tắt. Xem
-[cách thay khóa bằng nhập ẩn và điều kiện bật đọc ảnh](../gemini-ocr-production-enablement.md).
-Worker hiện chưa kiểm tra lại allowlist/consent trước đọc ảnh/provider; phải khắc
-phục và nghiệm thu thông điệp mới trước khi bật consumer.
-
-## 8. Theo dõi vận hành và chi phí
-
-- CloudWatch dashboard `homewallet-dev-operations`; HTTP API alarms 5xx/latency
-  phủ luồng mới qua Cloud Map. Log không chứa token/origin secret/nội dung hóa đơn.
-- SNS email đã confirm; chưa xác nhận inbox nhận alarm trong đợt này. Không giả
-  kết quả delivery từ trạng thái subscription.
-- Budget 100 USD/tháng là cảnh báo account-wide, không tự ngắt hay giới hạn tiền.
-  Hai NAT, Multi-AZ, replica, endpoints, ALB, log và traffic đều có phí. Forecast
-  có độ trễ, không dùng số hiện tại làm dự toán cấu hình HA trọn tháng.
-- Snapshot trước chuyển đổi giữ đến 27/11 cần review thủ công; backup RDS 14 ngày,
-  Redis 7 ngày, log 30 ngày và noncurrent frontend 30 ngày.
-- Chưa có benchmark tải kéo dài/SLA. CPU scaling policy đã kiểm tra cấu hình,
-  còn phép dừng task/failover là kiểm tra phục hồi riêng.
-
-## 9. Commit/push do Kiên thực hiện
-
-Review `git diff --stat`, `git diff --check`, file bằng chứng và nhánh
-`release/production-26a0645`. Add rõ tám file tài liệu của đợt này; không dùng `git add .`
-nếu còn việc khác. Kiểm tra staged file trước commit, không stage state/tfvars,
-artifact image, file operator riêng hoặc DOCX hướng dẫn các tuần.
-
-Sau commit/push mở PR, chờ CI đạt rồi merge theo quy trình nhóm. Ứng dụng đã triển
-khai; PR này ghi nhận nghiệm thu và bàn giao, không chạy lại deploy/apply khi pull.
-
-### Lệnh commit/push cho các thay đổi đã rà soát
-
-Chạy trong thư mục repo hiện tại, trên nhánh `release/production-26a0645`.
-Nếu có thay đổi ngoài phạm vi đợt này, kiểm tra trước khi tiếp tục; rà soát danh sách
-file đã stage trước khi commit.
-
-```powershell
-if ((git branch --show-current) -ne 'release/production-26a0645') {
-    throw 'Sai nhánh. Chưa stage hoặc commit.'
-}
-git status --short
-git diff --check
-if ($LASTEXITCODE -ne 0) { throw 'Cần sửa lỗi diff trước khi commit.' }
-git add -- `
-  docs/acceptance/production-browser-26a0645-20261113.json `
-  docs/acceptance/production-preflight-26a0645-20261113.json `
-  docs/acceptance/production-release-26a0645-20261113.json `
-  docs/acceptance/production-release-26a0645-20261113.md `
-  docs/acceptance/production-resilience-26a0645-20261113.json `
-  docs/production-readiness.md `
-  docs/production-rollout.md `
-  docs/runbooks/current-stack-production.md
-if ($LASTEXITCODE -ne 0) { throw 'Stage chưa thành công. Chưa commit.' }
-git diff --cached --name-only
-git diff --cached --stat
-git commit -m "docs: record production release 26a0645 acceptance"
-if ($LASTEXITCODE -ne 0) { throw 'Commit chưa thành công. Chưa push.' }
-git push -u origin release/production-26a0645
-if ($LASTEXITCODE -ne 0) { throw 'Push chưa thành công. Kiểm tra thông báo Git.' }
-```
-
-Sau khi push, mở PR `release/production-26a0645` vào `main`, chờ CI đạt rồi
-Squash and merge. Kiểm tra danh sách staged chỉ có tám tài liệu trên; không đưa
-file vận hành ngoài Git hay DOCX hướng dẫn các tuần vào PR.
+Kiên stage theo `deploy/release-evidence-paths-a5097aa.txt`, kiểm staged diff,
+commit/push nhánh `release/production-a5097aa` và merge sau CI. Không stage
+state/tfvars, artifact, key/token hoặc DOCX hướng dẫn các tuần. PR tài liệu này
+ghi nhận hệ thống đã deploy; pull/merge tài liệu không yêu cầu deploy lại.

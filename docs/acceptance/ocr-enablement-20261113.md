@@ -1,6 +1,11 @@
 # OCR production: bản sửa chuẩn bị candidate — 13/11/2026
 
-**Chưa bật trên AWS.** Nhánh `fix/production-reconcile-gemini`; Kiên giữ quyền
+**Bản ghi kế hoạch trước triển khai, giữ làm lịch sử.** OCR đã được bật và
+nghiệm thu ngày 14/11 trong candidate `a5097aa`; xem
+[biên bản hiện tại](production-release-a5097aa-20261114.md). Canary đầu phát hiện
+grant audit và cột thời gian sai; PR #132 đã sửa trước candidate cuối.
+
+Kế hoạch ban đầu ở nhánh `fix/production-reconcile-gemini`; Kiên giữ quyền
 commit/push/merge. Candidate phải build từ main sau khi merge, chọn input
 `enable_ocr=true` của workflow Build release candidate.
 

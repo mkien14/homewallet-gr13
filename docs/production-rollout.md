@@ -3,28 +3,22 @@
 Kiên thực hiện commit/push. Đã chốt cảnh báo 100 USD/tháng; HA/restore đã nghiệm thu trên stack hiện tại; xem biên bản ngày 13/11/2026. Thay đổi Terraform cần saved plan riêng, không dùng `-target`. Không gửi
 plan/state/token/secret vào báo cáo. Không có bước bật lịch hay xóa dữ liệu.
 
-**Điểm chuẩn mới:** main `26a0645709af3acb123768bb21a6a788d4252373`, API
-`hw-api:29`, worker/jobs `:6`, frontend cùng candidate; gate cuối 90/90 GO.
-Xem [biên bản và giới hạn nghiệm thu](acceptance/production-release-26a0645-20261113.md).
-Đợt này triển khai revision từ baseline bằng ECS API vì plan local timeout khi
-đọc metadata Secrets Manager; không Terraform apply. Input vận hành đã cập nhật,
-state/output task revision có thể còn cũ: xử lý kết nối và review saved plan
-trước lần apply sau. Các bước plan/apply bên dưới là quy trình cho thay đổi tiếp
-theo, không phải ghi nhận một apply đã thành công cho release này.
+**Điểm chuẩn ngày 14/11/2026:** main `a5097aa3fd941c53a9cc9a3961f205d9e55d1553`,
+API `hw-api:34`, worker `hw-worker:10`, jobs `hw-jobs:9`, frontend cùng candidate;
+gate cuối **93/93 GO**. Xem [biên bản](acceptance/production-release-a5097aa-20261114.md).
+Kết nối Secrets Manager đã khắc phục; saved plan đã review/apply, plan cuối
+**No changes**. Không import hoặc push state. Biên bản timeout/state cũ ngày
+13/11 được giữ làm lịch sử, không còn mô tả điểm chuẩn hiện tại.
 
-**Rà soát tiếp theo cùng ngày:** kết nối metadata/TLS đã hoạt động và saved plan
-production hoàn tất; cấu hình ba task khớp AWS live. State vẫn giữ revision cũ,
-chưa apply/rebind. Chi tiết và giới hạn ở
-[biên bản Terraform](acceptance/production-terraform-reconcile-20261113.md).
-Version khóa mới đã lưu vào AWS; Kiên đã xác nhận thu hồi khóa cũ ở Google và
-probe metadata model bằng khóa mới đạt. Chưa gọi generate hoặc nghiệm thu OCR;
-giữ OCR/Gemini tắt theo
-[phương án mở đọc ảnh](gemini-ocr-production-enablement.md).
+OCR đã nghiệm thu và bật với Gemini `gemini-3.5-flash-lite` tại worker, consent/
+membership/allowlist và queue riêng; cap 10 attempts/ngày UTC. Chỉ thử ảnh tổng
+hợp. API Gemini gợi ý ngân sách, Textract fallback và Scheduler vẫn tắt.
+Xem [phạm vi và vận hành OCR](gemini-ocr-production-enablement.md).
 
 ## 1. Source và candidate
 
-Các thay đổi hạ tầng/dependency đã merge main; candidate `26a0645` đã phát hành.
-Biên bản mới ở `release/production-26a0645`. Với lần phát hành sau, review và
+Các thay đổi hạ tầng/dependency/OCR đã merge main; candidate `a5097aa` đã phát hành.
+Biên bản mới ở `release/production-a5097aa`. Với lần phát hành sau, review và
 merge source mới theo quy trình nhóm. Không dùng `git add .` khi còn công việc
 khác; bỏ DOCX hướng dẫn các tuần.
 Không chạy workflow Deploy Dev sau chuyển production vì nó dùng tag dev.
@@ -51,7 +45,8 @@ sang musl cần nghiệm thu chức năng API/worker/jobs, bên cạnh build/sca
 Actions → **Build release candidate** → Run workflow từ main. Khắc phục nếu audit
 lỗi; không ignore hàng loạt. Tải artifact `homewallet-release-<SHA>` từ chính
 workflow của nhóm, giải nén vào thư mục tạm ngoài repo. Backend/frontend phải
-cùng SHA. Candidate tắt OCR. Chưa có AWS deployment ở bước này.
+cùng SHA. Muốn giữ OCR bật, chọn input **enable_ocr=true**; mặc định vẫn false.
+Manifest và profile API/worker phải khớp lựa chọn đó. Chưa deploy AWS ở bước build.
 Runtime chỉ dùng MySQL, không còn SQLite/binding Python sqlite3; verifier chặn
 SBOM có SQLite vì bản trong base từng còn nằm trong khoảng CVE dù feed không báo.
 Dependency mới cần SQLite phải được review lại, không bỏ guard để build qua.
@@ -182,9 +177,11 @@ production_allowed_household_ids = [<fixed-current-IDs-excluding-1>]
 
 Review plan rồi apply. Không xóa User Pool/user/household nhưng sẽ **bỏ client
 CLI dev và callback localhost**; script lấy token bằng password flow dev không
-còn dùng được. Profile bỏ nạp Gemini key cho API/worker, AI/OCR tắt, worker pause;
-origin header chuyển vào secret riêng; giữ tagged image trong ECR. Không thêm
-migration: consent dùng bảng audit_logs hiện có.
+còn dùng được. API không nhận Gemini key; worker chỉ nhận key khi OCR và rotation
+được bật có bằng chứng. Input hiện tại giữ `production_ocr_enabled=true`,
+`gemini_rotation_confirmed=true`, model `gemini-3.5-flash-lite`. Origin header
+ở secret riêng; giữ tagged image trong ECR. Consent/quota dùng bảng audit_logs
+hiện có, cột thời gian `at`; runtime cần SELECT và INSERT trên bảng này.
 API/worker/jobs trong profile này đều chạy UID/GID 10001:10001, drop ALL Linux
 capabilities và có init process. Task revision cũ không tự nhận cấu hình này.
 Chốt allowlist bằng snapshot chỉ đọc ID các hộ hiện có khác 1 theo quyết định
@@ -249,20 +246,21 @@ Cần bằng chứng release thật về auth/tenant isolation, hộ, CRUD chi t
 sách, cộng đồng, xóa/xuất và xử lý lỗi mạng/quota. Build/validate không thay thế
 regression, security scan, tải thực tế hoặc bàn giao resilience.
 
-## 8. Khóa Gemini và thông báo: release tiếp theo
+## 8. Rotation Gemini và thông báo
 
-Thu hồi key cũ trong Google project **HWAPI**; AWS không làm thay bước thu hồi
-Google key. Không gửi key mới trong chat. Helper ghi vào secret đã có, input ẩn:
+Kiên đã xác nhận thu hồi key cũ trong Google project **HWAPI**, key mới đã được
+worker dùng trong E2E đạt. AWS không làm thay thao tác thu hồi Google key.
+Với lần rotation sau, dùng helper nhập ẩn, không gửi key qua chat:
 
 ```powershell
 .\backend\.venv\Scripts\python.exe .\scripts\put-gemini-secret-version.py --secret-id '<explicit-reviewed-secret-name>' --expected-account 179923444714
 ```
 
-Helper không thu hồi key Google hay tự restart consumer. Profile vẫn tắt và bỏ
-nạp Gemini key. Mở AI/OCR sau benchmark #34, quota/cost, consent và failure
-acceptance. Bật Scheduler sau opt-out, bounce/complaint, review người nhận,
-chống gửi trùng, delivery và stop procedure. Không gắn hai bước đó vào release
-core hiện tại.
+Helper không thu hồi key Google hay tự restart consumer. Candidate hiện tại đã
+đạt canary ảnh/quota/consent/rollback; không dùng một ảnh để tự chốt benchmark
+rộng #34. Chỉ worker được nạp key; không mở thêm Gemini ngân sách như tác dụng
+phụ. Ba lịch vẫn DISABLED. Bật lịch là change riêng sau kiểm người nhận,
+opt-out, bounce/complaint, chống trùng, delivery và stop procedure.
 
 ## 9. Sau khi đã triển khai
 
