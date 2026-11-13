@@ -1,0 +1,40 @@
+{
+  "scope": "local dependency integration for PR118 and PR119",
+  "base_main": "c1f4e8c",
+  "branch": "fix/dependency-release-118-119",
+  "react": "19.3.1",
+  "react_dom": "19.3.1",
+  "redis_python": "8.1.0",
+  "test_python": "3.12",
+  "frontend_tests": {
+    "passed": 98,
+    "failed": 0
+  },
+  "backend_tests": {
+    "passed": 217,
+    "skipped": 59,
+    "failed": 0
+  },
+  "local_redis_tls_tests": {
+    "passed": 9,
+    "failed": 0,
+    "server": "7.2",
+    "aws_access": false
+  },
+  "release_script_tests": {
+    "passed": 9,
+    "failed": 0
+  },
+  "npm_audit_vulnerabilities": 0,
+  "image_id": "sha256:4733ad5f5d9d716502bf85a838405fc37402f3d242e130b736ac0073e42b8138",
+  "scan_at_utc": "2026-11-13T05:27:56.484226805Z",
+  "os": {
+    "Family": "alpine",
+    "Name": "3.24.4"
+  },
+  "high_critical_findings": 0,
+  "secret_findings": 0,
+  "full_scan_sha256": "5b7ceacd6871adddfe1e406a5b5dd2b735c1aaaac69bda04f9e8b9fc06807ba8",
+  "aws_deployed": false,
+  "user_commit_push_merge_pending": true
+}

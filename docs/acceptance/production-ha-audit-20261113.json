@@ -1,0 +1,104 @@
+{
+  "recorded_at_utc": "2026-11-13T05:26:46.596209+00:00",
+  "account": "179923444714",
+  "region": "ap-southeast-1",
+  "mode": "READ_ONLY",
+  "rds": {
+    "DBInstanceIdentifier": "homewallet-dev-mysql",
+    "DBInstanceStatus": "available",
+    "DBInstanceClass": "db.t4g.micro",
+    "EngineVersion": "8.4.11",
+    "MultiAZ": false,
+    "BackupRetentionPeriod": 7,
+    "DeletionProtection": false,
+    "PubliclyAccessible": false,
+    "StorageEncrypted": true,
+    "LatestRestorableTime": "2026-11-13 05:21:56+00:00",
+    "PreferredMaintenanceWindow": "sun:15:22-sun:15:52"
+  },
+  "services": [
+    {
+      "name": "api",
+      "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-api:22",
+      "running": 1,
+      "desired": 1,
+      "pending": 0,
+      "circuit_breaker": {
+        "enable": true,
+        "rollback": true,
+        "resetOnHealthyTask": true,
+        "thresholdConfiguration": {
+          "type": "BOUNDED_PERCENT",
+          "value": 50
+        }
+      },
+      "deployment_minimum_healthy_percent": 100,
+      "deployment_maximum_percent": 200,
+      "availability_zones": [
+        "ap-southeast-1a"
+      ],
+      "target_health": [
+        {
+          "path": "/health",
+          "healthy_targets": 1
+        }
+      ]
+    },
+    {
+      "name": "worker",
+      "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-worker:3",
+      "running": 1,
+      "desired": 1,
+      "pending": 0,
+      "circuit_breaker": {
+        "enable": true,
+        "rollback": true,
+        "resetOnHealthyTask": true,
+        "thresholdConfiguration": {
+          "type": "BOUNDED_PERCENT",
+          "value": 50
+        }
+      },
+      "deployment_minimum_healthy_percent": 0,
+      "deployment_maximum_percent": 100,
+      "availability_zones": [
+        "ap-southeast-1b"
+      ],
+      "target_health": []
+    }
+  ],
+  "autoscaling": [],
+  "log_groups": [
+    {
+      "name": "/ecs/hw-api",
+      "retention_days": 14
+    },
+    {
+      "name": "/ecs/hw-db-runtime-bootstrap",
+      "retention_days": 14
+    },
+    {
+      "name": "/ecs/hw-jobs",
+      "retention_days": 14
+    },
+    {
+      "name": "/ecs/hw-migrate",
+      "retention_days": 14
+    },
+    {
+      "name": "/ecs/hw-worker",
+      "retention_days": 14
+    }
+  ],
+  "latest_manual_snapshots": [
+    {
+      "id": "hwpr102backup20261112",
+      "status": "available",
+      "created_at": "2026-11-12 16:22:35.330000+00:00"
+    }
+  ],
+  "restore_drill_accepted": false,
+  "rollback_drill_accepted": false,
+  "resilience_signoff": false,
+  "scope": "existing homewallet stack; audit only, not operational acceptance"
+}

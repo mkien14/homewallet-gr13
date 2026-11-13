@@ -79,6 +79,9 @@ jobs:
       - name: Run tests
         run: python -m pytest -ra
 
+      - name: Verify Redis TLS, cache and atomic admission on an isolated local server
+        run: python ../scripts/run-redis-acceptance.py
+
       - name: Test production release safety gates
         run: python -m pytest ../scripts/tests -ra
 
