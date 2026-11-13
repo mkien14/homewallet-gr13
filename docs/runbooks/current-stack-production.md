@@ -1,23 +1,24 @@
 # Bàn giao production core — stack hiện tại
 
 Ngày: 13/11/2026. Chủ vận hành và quyết định dữ liệu: **Kiên**.
-Nhánh thay đổi: `fix/production-live-rollout`. Chưa commit/push thay người dùng.
+Hạ tầng/dependency đã merge main. Biên bản phát hành mới ở nhánh
+`release/production-26a0645`. Agent chưa stage, commit hoặc push thay người dùng.
 
 ## 1. Điểm chuẩn đang chạy
 
 | Thành phần | Điểm chuẩn |
 | --- | --- |
-| App release | `1bba075aa1a6dd609d180f4610fe4f55d527cbdf` từ PR #123 |
-| API | `hw-api:28`, hai task ở hai AZ |
-| Worker / jobs | `hw-worker:5` / `hw-jobs:5`; OCR tắt, ba lịch DISABLED |
-| Image | `homewallet-backend@sha256:74d74145723517d20330c9bd9d34cc58e8f41dbda96a8da8a1dfd629b6699527` trong ECR account 179923444714/Singapore |
+| App release | `26a0645709af3acb123768bb21a6a788d4252373`, candidate [43408857810](https://github.com/mkien14/homewallet-gr13/actions/runs/43408857810) |
+| API | `hw-api:29`, hai task ở hai AZ |
+| Worker / jobs | `hw-worker:6` / `hw-jobs:6`; OCR tắt, ba lịch DISABLED |
+| Image | `homewallet-backend@sha256:dfef1a60b3fee7e1733563a3aa040ebfc1cb0d92021b154b16f00eb788d74348` trong ECR account 179923444714/Singapore |
 | URL / CloudFront | https://daoedidcrnf1f.cloudfront.net / `E1FBDSJYV9WAKM` |
 | HTTPS API / discovery | `4o95mvff40`, VPC Link, Cloud Map SRV `api.homewallet-api.internal` |
 | Database | `homewallet-dev-mysql`, MySQL 8.4, db.t4g.micro, Multi-AZ, TLS/private/encrypted |
 | Redis | `homewallet-dev-redis`, hai node/TLS/AUTH/failover; snapshot 7 ngày |
 | State | S3 `hw-tfstate-homewallet-gr13`, key `dev/terraform.tfstate`; encrypted/private/versioned, S3 lockfile |
 | Frontend bucket | `hw-frontend-dev-179923444714`, private/OAC/versioning; noncurrent version 30 ngày |
-| Restore checkpoint | `hw-prod-before-core-20261113-ad8e7e2a`; giữ đến 27/11/2026 theo tag quản lý |
+| Restore checkpoint | `hw-prod-before-core-20261113-d8aca388`; giữ đến 27/11/2026 theo tag quản lý; checkpoint cũ `…ad8e7e2a` vẫn giữ |
 
 Tag giữ snapshot không tự xóa khi đến hạn. Ngày 27/11, Kiên review snapshot mới,
 restore point và thời hạn giữ dữ liệu trước khi quyết định dọn bản cũ.
@@ -38,6 +39,9 @@ Thư mục được giới hạn ACL cho operator hiện tại, SYSTEM và Admin
 Có tfvars cuối, settings preflight, backup state, bản ghi state move, checkpoint
 frontend và revision rollback. Không upload thư mục này lên GitHub hoặc gửi qua
 chat: state có thể chứa secret; tfvars có email nhận budget.
+Hồ sơ release mới nằm trong `releases\26a0645`; `production.tfvars.json`,
+`operator-settings.json`, active release và checkpoint frontend ở thư mục trên
+đã cập nhật theo điểm chuẩn cuối. Credential/TOTP seed của fixture thử đã bỏ.
 Không trông cậy vào các bản TEMP cũ. Nếu đổi máy, bàn giao qua kênh bảo mật và
 kiểm tra account/Region/quyền, không copy access key vào repo.
 
@@ -93,14 +97,29 @@ version history; phục hồi state cần review riêng, không ghi đè state �
    scope dữ liệu, mobile và rollback trước khi ghi điểm chuẩn mới.
 
 Không dùng **Deploy Dev** hoặc workflow **Reviewed production release** dành cho
-stack `homewallet-prod`. Trong đợt này có app release main đã xác định và thay đổi
-hạ tầng local trên nhánh review; merge hạ tầng không tự đổi APP_RELEASE đang chạy.
+stack `homewallet-prod`. Merge source không tự đổi APP_RELEASE đang chạy.
+
+### Phương thức thực tế của release 26a0645
+
+Plan local bị timeout khi đọc metadata Secrets Manager Singapore; đã dừng tiến
+trình và giải phóng đúng lock của plan. Không Terraform apply/import/state push.
+Đăng ký revision qua ECS API bằng cấu hình baseline production đã đối chiếu:
+container chỉ đổi image và `APP_RELEASE`, tag được giữ. Cập nhật API/worker và
+target ba lịch, giữ lịch DISABLED; frontend dùng chính artifact đã quét.
+
+Input tfvars/settings ngoài Git đã cập nhật nhưng state/output Terraform có thể
+còn revision cũ. Trước apply tiếp theo cần khắc phục kết nối metadata, tạo saved
+plan với input production và review chênh lệch đăng ký task definition. Không
+tuyên bố “No changes”, không dùng output revision cũ để deploy lại. Dừng nếu plan
+đề xuất hạ profile hoặc thay/xóa DB, network, service ngoài phạm vi đã duyệt.
+Chi tiết trong [biên bản release](../acceptance/production-release-26a0645-20261113.md).
 
 ## 6. Rollback và khôi phục
 
-- API rollback được diễn tập `hw-api:26 → :27 → :26`, cùng image/guard production.
-  Revision :27 thử đã deregister. API :28 là checkpoint cuối sau dọn allowlist.
-  Không dùng :22/:25 có profile dev để rollback production.
+- API rollback mới đã diễn tập `hw-api:30 → :28 → :30` giữa candidate `26a0645`
+  và production cũ `1bba075`, giữ guard production. Sau cleanup chạy `:29` với
+  allowlist cuối; revision thử `:30` đã deregister. `:28` là fallback production
+  đã thử cho đợt này; không dùng :22/:25 có profile dev để rollback.
 - Với release tương lai, lấy revision ổn định đã lưu, đối chiếu production profile,
   allowlist, image và tương thích schema. `aws ecs update-service` sang revision
   đó, chờ services-stable, kiểm tra hai AZ/readiness/release và token. Worker/jobs
@@ -110,9 +129,13 @@ hạ tầng local trên nhánh review; merge hạ tầng không tự đổi APP_
   Kiểm tra TLS, schema/grants, dữ liệu, giao dịch thử và ứng dụng trước quyết định
   đổi endpoint. Không restore đè primary. Secret/master password của bản phục hồi
   cần được xử lý riêng. Dọn clone, SG, role, grants/schema thử sau nghiệm thu.
-- [Bằng chứng restore/failover](../acceptance/production-resilience-20261113.json)
-  ghi RPO khoảng 118 giây, thời gian kiểm tra full app 24–28 phút; chưa diễn tập
-  chuyển endpoint người dùng sang DB phục hồi hoặc mất toàn bộ AZ.
+- [Bằng chứng restore/failover cùng candidate](../acceptance/production-resilience-26a0645-20261113.json):
+  độ trễ restore point khoảng 66 giây, thời gian đến kiểm tra ứng dụng PITR/
+  snapshot khoảng 14,3/10,3 phút. Startup probe dùng profile dev cô lập; profile
+  production thử riêng trên ứng dụng đang chạy. Chưa chuyển endpoint người dùng
+  sang DB phục hồi hoặc thử mất toàn bộ AZ. Thời gian quan sát gồm polling,
+  không phải SLA. [Đợt chuyển stack đầu](../acceptance/production-resilience-20261113.json)
+  được giữ làm lịch sử.
 - Frontend: chọn VersionId đã lưu cho index/release/sw/manifest từ checkpoint
   ngoài Git, kiểm tra cùng release và hashed asset còn tồn tại, copy version đó
   về key tương ứng rồi invalidation. Đã thử phục hồi version cùng candidate;
@@ -126,7 +149,9 @@ SQS có thời hạn lưu tối đa của dịch vụ; giữ DLQ không phải l
 Nếu cần giữ payload lâu hơn phải có kế hoạch lưu trữ/retention riêng được review,
 không tự ReceiveMessage để xem nội dung trong một đợt deploy.
 
-Hộ thử 27 đã xóa qua API; hai Cognito user thử đã xóa, ID 27 đã bỏ khỏi allowlist.
+Hộ thử 27 của đợt đầu và hộ 28 của release mới đã xóa qua API; các Cognito user
+thử tương ứng đã xóa. ID 27/28 không nằm trong allowlist cuối. TOTP của phép thử
+browser mới dùng danh tính tổng hợp đã xóa, không thay thiết bị MFA của Kiên.
 Một số hàng user/history tổng hợp có thể được giữ làm audit; chúng không cấp
 quyền đăng nhập hoặc là dữ liệu khách hàng.
 
@@ -156,65 +181,44 @@ opt-out, bounce/complaint, chống trùng, delivery và stop procedure.
 ## 9. Commit/push do Kiên thực hiện
 
 Review `git diff --stat`, `git diff --check`, file bằng chứng và nhánh
-`fix/production-live-rollout`. Add rõ các file của đợt này; không dùng `git add .`
+`release/production-26a0645`. Add rõ tám file tài liệu của đợt này; không dùng `git add .`
 nếu còn việc khác. Kiểm tra staged file trước commit, không stage state/tfvars,
 artifact image, file operator riêng hoặc DOCX hướng dẫn các tuần.
 
-Sau commit/push mở PR, chờ CI đạt rồi merge theo quy trình nhóm. Hạ tầng này đã
-được triển khai từ cấu hình local đã review; đừng chạy lại apply mặc định khi pull.
+Sau commit/push mở PR, chờ CI đạt rồi merge theo quy trình nhóm. Ứng dụng đã triển
+khai; PR này ghi nhận nghiệm thu và bàn giao, không chạy lại deploy/apply khi pull.
 
 ### Lệnh commit/push cho các thay đổi đã rà soát
 
-Chạy trong thư mục repo hiện tại, trên nhánh `fix/production-live-rollout`.
+Chạy trong thư mục repo hiện tại, trên nhánh `release/production-26a0645`.
 Nếu có thay đổi ngoài phạm vi đợt này, kiểm tra trước khi tiếp tục; rà soát danh sách
 file đã stage trước khi commit.
 
 ```powershell
-if ((git branch --show-current) -ne 'fix/production-live-rollout') {
+if ((git branch --show-current) -ne 'release/production-26a0645') {
     throw 'Sai nhánh. Chưa stage hoặc commit.'
 }
 git status --short
 git diff --check
 if ($LASTEXITCODE -ne 0) { throw 'Cần sửa lỗi diff trước khi commit.' }
 git add -- `
-  backend/requirements.txt `
-  backend/requirements.lock `
-  deploy/production.example.json `
-  docs/acceptance/dependency-pr-review-20261113.json `
-  docs/acceptance/dependency-pr-review-20261113.md `
-  docs/acceptance/production-browser-20261113.json `
-  docs/acceptance/production-default-guard-20261113.json `
-  docs/acceptance/production-live-20261113.json `
-  docs/acceptance/production-live-20261113.md `
-  docs/acceptance/production-preflight-20261113.json `
-  docs/acceptance/production-resilience-20261113.json `
+  docs/acceptance/production-browser-26a0645-20261113.json `
+  docs/acceptance/production-preflight-26a0645-20261113.json `
+  docs/acceptance/production-release-26a0645-20261113.json `
+  docs/acceptance/production-release-26a0645-20261113.md `
+  docs/acceptance/production-resilience-26a0645-20261113.json `
   docs/production-readiness.md `
   docs/production-rollout.md `
-  docs/runbooks/current-stack-production.md `
-  infra/envs/dev/application-hardening.tf `
-  infra/envs/dev/main.tf `
-  infra/envs/dev/monitoring.tf `
-  infra/envs/dev/resilience.tf `
-  infra/envs/dev/tests/compatibility.tftest.hcl `
-  infra/modules/api-https/main.tf `
-  infra/modules/api-https/variables.tf `
-  infra/modules/compute/ecs.tf `
-  infra/modules/compute/scheduled-jobs.tf `
-  infra/modules/compute/variables.tf `
-  infra/modules/compute/worker.tf `
-  infra/modules/frontend/main.tf `
-  scripts/production-preflight.py `
-  scripts/production-resilience-check.py `
-  scripts/tests/test_production_resilience.py
+  docs/runbooks/current-stack-production.md
 if ($LASTEXITCODE -ne 0) { throw 'Stage chưa thành công. Chưa commit.' }
 git diff --cached --name-only
 git diff --cached --stat
-git commit -m "feat: harden production stack and synchronize dependency lock"
+git commit -m "docs: record production release 26a0645 acceptance"
 if ($LASTEXITCODE -ne 0) { throw 'Commit chưa thành công. Chưa push.' }
-git push -u origin fix/production-live-rollout
+git push -u origin release/production-26a0645
 if ($LASTEXITCODE -ne 0) { throw 'Push chưa thành công. Kiểm tra thông báo Git.' }
 ```
 
-Sau khi push, mở PR `fix/production-live-rollout` vào `main`, chờ CI đạt rồi
-Squash and merge. Thứ tự xử lý 11 PR dependency và cách đóng hai PR đã được thay
-thế nằm trong [biên bản review](../acceptance/dependency-pr-review-20261113.md).
+Sau khi push, mở PR `release/production-26a0645` vào `main`, chờ CI đạt rồi
+Squash and merge. Kiểm tra danh sách staged chỉ có tám tài liệu trên; không đưa
+file vận hành ngoài Git hay DOCX hướng dẫn các tuần vào PR.

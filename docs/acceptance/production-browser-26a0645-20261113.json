@@ -1,0 +1,74 @@
+{
+  "status": "PASS",
+  "at_utc": "2026-11-13T11:06:46.196Z",
+  "release": "26a0645709af3acb123768bb21a6a788d4252373",
+  "browser": "Microsoft Edge headless",
+  "react_srp_login": true,
+  "totp_login": true,
+  "self_signup_hidden": true,
+  "ocr_upload_disabled": true,
+  "page_errors": 0,
+  "api_5xx": 0,
+  "checks": [
+    {
+      "route": "/",
+      "signed_in": true,
+      "synthetic_household": true
+    },
+    {
+      "route": "/dashboard",
+      "heading": "Spending in 11",
+      "loaded": true
+    },
+    {
+      "route": "/budgets",
+      "heading": "Monthly budget",
+      "loaded": true
+    },
+    {
+      "route": "/receipts",
+      "heading": "Receipts",
+      "loaded": true
+    },
+    {
+      "route": "/recurring-bills",
+      "heading": "Recurring bills",
+      "loaded": true
+    },
+    {
+      "route": "/transactions/new",
+      "heading": "Enter an expense manually",
+      "loaded": true
+    },
+    {
+      "route": "/notifications",
+      "heading": "Notifications",
+      "loaded": true
+    },
+    {
+      "route": "/community",
+      "heading": "Household savings tips",
+      "loaded": true
+    },
+    {
+      "route": "/security",
+      "heading": "Account security",
+      "loaded": true
+    },
+    {
+      "route": "/upload",
+      "heading": "Upload receipt",
+      "loaded": true
+    },
+    {
+      "route": "/privacy",
+      "heading": "Privacy and data",
+      "loaded": true
+    },
+    {
+      "route": "/budgets",
+      "viewport": "390x844",
+      "horizontal_overflow": false
+    }
+  ]
+}

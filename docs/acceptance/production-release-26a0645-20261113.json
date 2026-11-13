@@ -1,0 +1,771 @@
+{
+  "status": "PASS_CLOSED_CORE_RELEASE",
+  "at_utc": "2026-11-13T11:30:16.878719+00:00",
+  "account": "179923444714",
+  "region": "ap-southeast-1",
+  "release": "26a0645709af3acb123768bb21a6a788d4252373",
+  "previous_release": "1bba075aa1a6dd609d180f4610fe4f55d527cbdf",
+  "candidate_run": 43408857810,
+  "candidate_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43408857810",
+  "artifact_id": 14028223709,
+  "archive_sha256": "3551435f94a24d1208a305c06cef61b6aa7b4e49fd3f4b885a7ad62c8d54e91c",
+  "image_digest": "sha256:dfef1a60b3fee7e1733563a3aa040ebfc1cb0d92021b154b16f00eb788d74348",
+  "scanned_image_matches_live": true,
+  "container_scan": {
+    "high": 0,
+    "critical": 0,
+    "secrets": 0,
+    "unfixed_included": true
+  },
+  "services": {
+    "api": {
+      "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-api:29",
+      "running": 2,
+      "desired": 2,
+      "azs": [
+        "ap-southeast-1a",
+        "ap-southeast-1b"
+      ],
+      "stable": true,
+      "image": "179923444714.dkr.ecr.ap-southeast-1.amazonaws.com/homewallet-backend@sha256:dfef1a60b3fee7e1733563a3aa040ebfc1cb0d92021b154b16f00eb788d74348",
+      "production_profile": true,
+      "allowed_households": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        11,
+        12,
+        13,
+        22,
+        23,
+        24,
+        25,
+        26
+      ]
+    },
+    "worker": {
+      "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-worker:6",
+      "running": 1,
+      "desired": 1,
+      "azs": [
+        "ap-southeast-1a"
+      ],
+      "stable": true,
+      "image": "179923444714.dkr.ecr.ap-southeast-1.amazonaws.com/homewallet-backend@sha256:dfef1a60b3fee7e1733563a3aa040ebfc1cb0d92021b154b16f00eb788d74348",
+      "production_profile": true,
+      "allowed_households": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        11,
+        12,
+        13,
+        22,
+        23,
+        24,
+        25,
+        26
+      ]
+    }
+  },
+  "jobs_task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:6",
+  "schedules": [
+    {
+      "name": "hw-recurring-reminders",
+      "state": "DISABLED",
+      "jobs_task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:6"
+    },
+    {
+      "name": "hw-budget-alerts",
+      "state": "DISABLED",
+      "jobs_task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:6"
+    },
+    {
+      "name": "hw-weekly-report",
+      "state": "DISABLED",
+      "jobs_task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:6"
+    }
+  ],
+  "features": {
+    "ocr": false,
+    "gemini": false,
+    "self_signup": false
+  },
+  "public": {
+    "/release.json": {
+      "status": 200,
+      "body": {
+        "release": "26a0645709af3acb123768bb21a6a788d4252373",
+        "ocr_enabled": false,
+        "channel": "production-candidate"
+      }
+    },
+    "/api/release": {
+      "status": 200,
+      "body": {
+        "release": "26a0645709af3acb123768bb21a6a788d4252373"
+      }
+    },
+    "/api/ready": {
+      "status": 200,
+      "body": {
+        "status": "ready"
+      }
+    }
+  },
+  "frontend": {
+    "release": "26a0645709af3acb123768bb21a6a788d4252373",
+    "invalidations": [
+      "I9G1LFWAENJBLBCZVBMVJBEHPM"
+    ],
+    "artifact_id": 14028223709,
+    "at_utc": "2026-11-13T11:01:37.115777+00:00",
+    "invalidation_completed": true,
+    "index_matches_candidate": true,
+    "index_sha256": "216207e77bdfa77e23362d9a27d24724c0dd2c9173e7471138c56a6effa65b0c"
+  },
+  "frontend_versions": {
+    "index.html": {
+      "VersionId": "OwRFIa02jJhowez1o7RJRvZy5B6Q_FKU",
+      "CacheControl": "no-store",
+      "ContentType": "text/html; charset=utf-8"
+    },
+    "release.json": {
+      "VersionId": "B0IR2WTZ3PWjoU4Iq89ORQPo7WZe_bS7",
+      "CacheControl": "no-store",
+      "ContentType": "application/json"
+    },
+    "sw.js": {
+      "VersionId": "KT9BP397V1hQbMKMmGae1it8toF3qr_c",
+      "CacheControl": "no-store",
+      "ContentType": "text/javascript"
+    },
+    "manifest.webmanifest": {
+      "VersionId": "cl4k85QhITMuP9eDTa3l2zFELqIaYLCf",
+      "CacheControl": "no-store",
+      "ContentType": "application/manifest+json"
+    }
+  },
+  "preflight": {
+    "status": "GO",
+    "checks": 90,
+    "failed": 0
+  },
+  "api_acceptance": {
+    "checks": 44,
+    "exercise_pass": true,
+    "write_quota_31st_request_429": true,
+    "events": [
+      {
+        "method": "GET",
+        "path": "/api/me",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.431,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/me",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.289,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/categories",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.22,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/budgets/2026-11",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.224,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "PUT",
+        "path": "/api/budgets/2026-11",
+        "expected": 201,
+        "actual": 201,
+        "seconds": 0.369,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/budgets/2026-11/suggest",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.241,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/community/posts",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.373,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/community/posts",
+        "expected": 403,
+        "actual": 403,
+        "seconds": 0.219,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/recurring-bills",
+        "expected": 201,
+        "actual": 201,
+        "seconds": 0.229,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/recurring-bills/5",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.338,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/recurring-bills/5",
+        "expected": 204,
+        "actual": 204,
+        "seconds": 0.27,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/transactions",
+        "expected": 201,
+        "actual": 201,
+        "seconds": 0.271,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/transactions",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.202,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/transactions/61",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.273,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/transactions",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.239,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/dashboard?period=2026-11",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.31,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/households/28/export.csv",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.271,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/transactions/61",
+        "expected": 204,
+        "actual": 204,
+        "seconds": 0.285,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/households/1/members",
+        "expected": 404,
+        "actual": 404,
+        "seconds": 0.197,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/transactions",
+        "expected": 400,
+        "actual": 400,
+        "seconds": 0.274,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/receipts",
+        "expected": 503,
+        "actual": 503,
+        "seconds": 0.187,
+        "via": "gateway",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/me",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.81,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/categories",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.316,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/budgets/2026-11",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.244,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "PUT",
+        "path": "/api/budgets/2026-11",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.317,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/budgets/2026-11/suggest",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.28,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/community/posts",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.736,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/community/posts",
+        "expected": 403,
+        "actual": 403,
+        "seconds": 0.267,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/recurring-bills",
+        "expected": 201,
+        "actual": 201,
+        "seconds": 0.31,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/recurring-bills/6",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.779,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/recurring-bills/6",
+        "expected": 204,
+        "actual": 204,
+        "seconds": 0.808,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/transactions",
+        "expected": 201,
+        "actual": 201,
+        "seconds": 0.387,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/transactions",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.743,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/transactions/62",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.265,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/transactions",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.387,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/dashboard?period=2026-11",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.737,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/households/28/export.csv",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.772,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/transactions/62",
+        "expected": 204,
+        "actual": 204,
+        "seconds": 0.373,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/households/1/members",
+        "expected": 404,
+        "actual": 404,
+        "seconds": 0.322,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/transactions",
+        "expected": 400,
+        "actual": 400,
+        "seconds": 0.281,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/receipts",
+        "expected": 503,
+        "actual": 503,
+        "seconds": 0.257,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/me",
+        "expected": 403,
+        "actual": 403,
+        "seconds": 0.353,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/me",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.277,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      },
+      {
+        "method": "POST",
+        "path": "/api/households/28/delete",
+        "expected": 200,
+        "actual": 200,
+        "seconds": 0.269,
+        "via": "cloudfront",
+        "request_id_present": true,
+        "api_cache_hit": false
+      }
+    ],
+    "synthetic_household_id": 28,
+    "synthetic_household_removed": true,
+    "synthetic_cognito_users_removed": true,
+    "synthetic_totp_login_pass": true,
+    "messages_sent": 0
+  },
+  "browser": {
+    "status": "PASS",
+    "at_utc": "2026-11-13T11:06:46.196Z",
+    "release": "26a0645709af3acb123768bb21a6a788d4252373",
+    "browser": "Microsoft Edge headless",
+    "react_srp_login": true,
+    "totp_login": true,
+    "self_signup_hidden": true,
+    "ocr_upload_disabled": true,
+    "page_errors": 0,
+    "api_5xx": 0,
+    "checks": [
+      {
+        "route": "/",
+        "signed_in": true,
+        "synthetic_household": true
+      },
+      {
+        "route": "/dashboard",
+        "heading": "Spending in 11",
+        "loaded": true
+      },
+      {
+        "route": "/budgets",
+        "heading": "Monthly budget",
+        "loaded": true
+      },
+      {
+        "route": "/receipts",
+        "heading": "Receipts",
+        "loaded": true
+      },
+      {
+        "route": "/recurring-bills",
+        "heading": "Recurring bills",
+        "loaded": true
+      },
+      {
+        "route": "/transactions/new",
+        "heading": "Enter an expense manually",
+        "loaded": true
+      },
+      {
+        "route": "/notifications",
+        "heading": "Notifications",
+        "loaded": true
+      },
+      {
+        "route": "/community",
+        "heading": "Household savings tips",
+        "loaded": true
+      },
+      {
+        "route": "/security",
+        "heading": "Account security",
+        "loaded": true
+      },
+      {
+        "route": "/upload",
+        "heading": "Upload receipt",
+        "loaded": true
+      },
+      {
+        "route": "/privacy",
+        "heading": "Privacy and data",
+        "loaded": true
+      },
+      {
+        "route": "/budgets",
+        "viewport": "390x844",
+        "horizontal_overflow": false
+      }
+    ]
+  },
+  "runtime_probe": {
+    "event": "RUNTIME_COMPATIBILITY_PASS",
+    "mysql_tls": true,
+    "redis_tls_resp2_auth": true,
+    "redis_8_client_atomic_lua": true,
+    "test_keys_removed": true,
+    "approved_household_ids": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      11,
+      12,
+      13,
+      22,
+      23,
+      24,
+      25,
+      26,
+      28
+    ],
+    "household_1_retained": true
+  },
+  "rollback": {
+    "pass": true,
+    "events": [
+      {
+        "phase": "candidate-stage",
+        "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-api:30",
+        "release": "26a0645709af3acb123768bb21a6a788d4252373",
+        "seconds": 158.25578099999984,
+        "pass": true,
+        "at_utc": "2026-11-13T10:44:24.782362+00:00"
+      },
+      {
+        "phase": "rollback-previous-production",
+        "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-api:28",
+        "release": "1bba075aa1a6dd609d180f4610fe4f55d527cbdf",
+        "seconds": 156.96408489999885,
+        "pass": true,
+        "at_utc": "2026-11-13T10:54:27.187503+00:00"
+      },
+      {
+        "phase": "candidate-after-rollback",
+        "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-api:30",
+        "release": "26a0645709af3acb123768bb21a6a788d4252373",
+        "seconds": 157.00015259999782,
+        "pass": true,
+        "at_utc": "2026-11-13T10:57:04.189327+00:00"
+      },
+      {
+        "phase": "final-approved-scope",
+        "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-api:29",
+        "release": "26a0645709af3acb123768bb21a6a788d4252373",
+        "seconds": 158.90412979999383,
+        "pass": true,
+        "at_utc": "2026-11-13T11:29:19.680695+00:00"
+      }
+    ],
+    "stage_revision_deregistered": true
+  },
+  "deployment_method": "ECS task revisions cloned from production baseline; only image and APP_RELEASE changed. Revision tags preserved.",
+  "terraform": {
+    "applied": false,
+    "plan_completed": false,
+    "reason": "Local network connection timeout to Secrets Manager metadata endpoint. Plan stopped and its verified lock released; no Terraform resources changed.",
+    "operator_inputs_updated_to_release": true,
+    "state_import_or_push_performed": false,
+    "next_plan_must_review_task_revision_registration_only": true
+  },
+  "held_household_1": {
+    "excluded": true,
+    "no_mutation_or_receipt_processing_or_dlq_replay": true
+  },
+  "docs_branch": "release/production-26a0645",
+  "committed_by_agent": false,
+  "pushed_by_agent": false
+}
