@@ -1,5 +1,5 @@
 flask>=3.0,<4
-gunicorn>=22
+gunicorn>=26.2.0
 pymysql>=1.1
 redis>=5,<7
 cryptography>=42
