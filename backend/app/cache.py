@@ -4,6 +4,8 @@ import logging
 
 import redis
 from flask import current_app, has_app_context
+from redis.backoff import NoBackoff
+from redis.retry import Retry
 
 from .config import load_config
 
@@ -38,6 +40,10 @@ def _redis_client(config=None):
             "socket_connect_timeout": timeout,
             "socket_timeout": timeout,
             "decode_responses": True,
+            # Keep the existing wire protocol when upgrading redis-py to 8.x.
+            # Never replay INCR/EVAL after a lost reply: admission mutates counters.
+            "protocol": 2,
+            "retry": Retry(NoBackoff(), 0),
         }
         if ca_cert:
             options["ssl_ca_certs"] = ca_cert
@@ -107,10 +113,10 @@ def set_dashboard(
         current_generation = client.get(generation_key) or "0"
         if current_generation != generation:
             return
-        client.setex(
+        client.set(
             _dashboard_key(household_id, period, filters, generation),
-            ttl or cfg.get("DASHBOARD_CACHE_TTL", DEFAULT_TTL),
             json.dumps(payload, separators=(",", ":")),
+            ex=ttl or cfg.get("DASHBOARD_CACHE_TTL", DEFAULT_TTL),
         )
     except Exception:
         logger.warning("dashboard cache write failed; MySQL remains authoritative")
