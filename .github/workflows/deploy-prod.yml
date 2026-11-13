@@ -128,7 +128,7 @@ jobs:
           terraform -chdir=infra/envs/prod init -input=false
           terraform -chdir=infra/envs/prod plan -input=false -lock=false -out=release.tfplan > /dev/null
           terraform -chdir=infra/envs/prod show -json release.tfplan | python scripts/production-plan-summary.py --commit "$RELEASE_COMMIT" --digest "$RELEASE_DIGEST" > production-plan-actions.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: production-plan-actions
           path: production-plan-actions.json
@@ -181,7 +181,7 @@ jobs:
           CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.PROD_CLOUDFRONT_DISTRIBUTION_ID }}
           SMOKE_TOKEN: ${{ secrets.PROD_SMOKE_TOKEN }}
         run: python scripts/deploy-production.py
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: production-release-record
