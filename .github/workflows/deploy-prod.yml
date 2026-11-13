@@ -54,7 +54,7 @@ jobs:
           python -m pytest scripts/tests -ra
           (cd frontend && npm ci && npm run lint && npm test && npm run build)
           docker build -t homewallet-production-check backend
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: '1.10.5'
       - run: |
@@ -77,7 +77,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.commit_sha }}
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: '1.10.5'
       - uses: aws-actions/configure-aws-credentials@v5
