@@ -1,70 +1,38 @@
 # HomeWallet: production trên stack hiện tại
 
 Cập nhật **14/11/2026**. Chủ vận hành: **Kiên**.
-**Đã nghiệm thu bản bàn giao cho 16 hộ đã duyệt**, có OCR kiểm tra consent và quota.
-Không mở đăng ký công khai. Không phát sinh yêu cầu mua domain/account AWS khác.
+**Đã phát hành bản công khai** tại https://daoedidcrnf1f.cloudfront.net; người dùng mới có thể đăng ký, xác minh email, tạo hộ hoặc tham gia bằng mã mời. Đây là cùng AWS account/stack hiện hữu, không yêu cầu domain hay account AWS khác.
 
 ## Điểm chuẩn đang chạy
 
 | Phần | Trạng thái |
 | --- | --- |
-| Website | https://daoedidcrnf1f.cloudfront.net |
-| Source / candidate | Main `5f2308ce8dc1b03bf63f9c7f9d5747ea410a1c8d`; [run 43542308036](https://github.com/mkien14/homewallet-gr13/actions/runs/43542308036) |
-| Image | `sha256:7aebb61f9261145388427440ed53d4238ddf71d477293cb1a42e811af7ec4832`; scan 0 HIGH/CRITICAL/secret finding |
-| Runtime | API `hw-api:36`, worker `hw-worker:12`, jobs `hw-jobs:10`; cùng immutable image và SHA |
-| Lịch định kỳ | Ba lịch ENABLED; 07:45 hằng ngày, 20:00 hằng ngày, 08:00 thứ Hai; Asia/Ho_Chi_Minh; jobs lọc allowlist SQL |
-| Frontend | Cùng artifact; invalidation hoàn tất, hash index và phiên bản public khớp |
-| HTTPS | Browser → CloudFront → HTTP API `4o95mvff40` bằng HTTPS; VPC Link → Cloud Map → ECS dùng HTTP trong VPC |
-| Origin/WAF | Kiểm tra origin secret; đóng ingress ALB công khai cũ; CommonRuleSet và rate rule bật chặn |
-| API/HA | Hai task ở hai AZ; readiness/circuit breaker; scaling min 2/max 4, CPU target 60% |
-| RDS | `homewallet-dev-mysql`, MySQL 8.4/db.t4g.micro, private/encrypted/TLS/Multi-AZ; backup 14 ngày, bảo vệ xóa |
-| Redis/egress | Hai node/TLS/AUTH/failover, snapshot 7 ngày; NAT riêng mỗi AZ app |
-| Log/monitoring | Log giữ 30 ngày; alarm gateway 5xx/latency và SNS subscription đã confirm |
-| Đăng nhập | React/SRP chính, Hosted UI dự phòng; admin TOTP; khóa signup và callback localhost |
-| OCR | Worker Gemini `gemini-3.5-flash-lite`; consent audit, membership/allowlist, prefix/queue riêng; cap 10 attempts/ngày UTC |
-| Ngân sách | Cảnh báo AWS 100 USD/tháng; không tự ngắt tài nguyên hoặc giới hạn tiền Google |
-| Terraform | Kết nối Secrets Manager đã hoạt động; saved plan/apply hoàn tất; plan cuối **No changes** |
-| Gate cuối | **96/96 GO**, sau cập nhật jobs và bật ba lịch; Terraform No changes |
+| Source / candidate | Main `16f87ea10d4fc6c47afd198e3ee77274fa6c3013`; [candidate run 43567562979](https://github.com/mkien14/homewallet-gr13/actions/runs/43567562979) |
+| Candidate/image | Artifact `14102797171`; immutable backend image và scan được ghi trong [biên bản phát hành](acceptance/production-public-16f87ea-20261114.md) |
+| Runtime | API `hw-api:38` (2/2, hai AZ), worker `hw-worker:14` (1/1), jobs `hw-jobs:12` |
+| Public registration | Cognito self-signup và xác minh email bật; React/SRP là chính, Hosted UI/PKCE dự phòng trên HTTPS |
+| Người dùng mới | Admin xác nhận trực tiếp: signup, email verification, login, tạo hộ và tham gia hộ đã thành công |
+| Phạm vi dữ liệu | Quyền theo membership; household 1 và dữ liệu/ảnh/queue/DLQ cũ vẫn giữ riêng |
+| Lịch định kỳ | `hw-recurring-reminders`, `hw-budget-alerts`, `hw-weekly-report` ENABLED, target jobs :12, `Asia/Ho_Chi_Minh` |
+| HTTPS/WAF/HA | CloudFront HTTPS, WAF; API hai AZ, autoscaling/health checks; RDS Multi-AZ, Redis failover và NAT mỗi AZ |
+| Bảo mật dữ liệu | RDS private/encrypted/TLS, backup 14 ngày và deletion protection; Redis TLS/AUTH; logs 30 ngày |
+| OCR | Gemini 3.5 Flash Lite tại worker, consent/quota/household checks; live OCR của tài khoản công khai mới chưa được thử trong nghiệm thu này |
+| Chi phí | AWS Budget cảnh báo 100 USD/tháng; đây không phải số thực chi hay hard cap. Gemini được tính riêng, ngoài AWS Budget |
+| Gate / Terraform | Production preflight **99/99 GO**; saved plan đối chiếu AWS cuối **No changes** |
 
-Tên/tag `dev` và state key `dev/terraform.tfstate` là tên cũ của stack đang dùng.
-Phát triển dùng local/mock; không chạy Deploy Dev hoặc apply `infra/envs/prod`
-vào stack này. TLS không được tuyên bố trên mọi hop nội bộ.
+Tên/tag `dev` và state key `dev/terraform.tfstate` vẫn là tên cũ của stack production đang chạy. Không chạy Deploy Dev hoặc apply `infra/envs/prod` vào stack này. TLS được tuyên bố theo từng hop đã kiểm tra, không mặc định mọi kết nối nội bộ đều dùng TLS.
 
-## Nghiệm thu
+## Nghiệm thu hiện hành
 
-- [Bản cập nhật jobs/lịch](acceptance/production-schedules-5f2308c-20261114.md):
-  cùng candidate mới, scope SQL trên DB phục hồi, rollback :36→:34→:36,
-  hai clone khởi động bằng image mới và ba trạng thái ENABLED. Không gửi bù;
-  thư của kỳ tương lai cần log/nhận riêng. Các ca OCR/Edge/failover dưới đây
-  giữ đúng revision và thời điểm cũ; source API/OCR/UI/IaC/dependency không đổi.
-- [Biên bản release](acceptance/production-release-a5097aa-20261114.md): CI,
-  checksum/scan, cùng image/version, Edge SRP/TOTP, 12 kiểm tra trang/mobile,
-  không page error/API 5xx. Local 234 PASS/60 SKIP; MySQL/policy riêng 15 PASS.
-- [OCR](acceptance/production-ocr-a5097aa-20261114.json): upload có consent →
-  S3 → queue → worker → Gemini → draft đúng cửa hàng/ngày/tổng/dòng hàng →
-  xác nhận giao dịch. Kiểm tra policy, cap bằng audit thật và replay không gọi
-  thêm provider. Chỉ dùng ảnh tổng hợp. Runtime grant SELECT/INSERT audit đã áp dụng.
-- [Resilience](acceptance/production-resilience-a5097aa-20261114.json): PITR và
-  snapshot sang DB riêng, đúng candidate; khoảng 14,6/11,2 phút; restore point
-  trễ 254 giây. Thay task API, Redis/RDS failover, TLS/Lua và rollback API đạt.
-  Clone/SG/role thử đã dọn, không ghi đè primary. RDS metadata AZ không đổi.
+- [Bản phát hành công khai 16f87ea](acceptance/production-public-16f87ea-20261114.md): candidate, runtime, 99 gate, publish frontend, ba lịch và giới hạn nghiệm thu. Admin trực tiếp xác nhận signup, xác minh email, đăng nhập, tạo hộ và tham gia hộ.
+- [Bằng chứng máy đọc được](acceptance/production-public-16f87ea-20261114.json) và [preflight 99/99](acceptance/production-preflight-20261114.json).
+- [OCR canary lịch sử](acceptance/production-ocr-a5097aa-20261114.json): ảnh tổng hợp và release được nêu trong bản ghi; không dùng nó để tuyên bố live OCR của người dùng công khai mới đã được thử.
+- [Các diễn tập phục hồi lịch sử](acceptance/production-resilience-a5097aa-20261114.json) và biên bản hiện hành: restore, task replacement, RDS/Redis failover và rollback có ghi rõ release/thời điểm.
 
-## Phạm vi giữ nguyên
+## Phạm vi và giới hạn
 
-16 hộ: `2,3,4,5,6,7,8,9,11,12,13,22,23,24,25,26`. Hộ 1 và ảnh/dữ liệu/
-queue/DLQ cũ giữ theo quy trình có kiểm soát; không receive/purge/replay queue cũ.
-Hộ/tài khoản/ảnh thử đã dọn; audit provider giữ để không reset quota. Hộ tương lai
-không tự được đưa vào allowlist.
+Đăng ký công khai đã bật; hộ mới không cần allowlist. Mọi nghiệp vụ vẫn kiểm tra membership. Household 1 cùng dữ liệu, ảnh và queue/DLQ cũ không được đưa vào phạm vi công khai; không receive/purge/replay queue cũ. Việc kiểm tra truy cập hộ 1 dùng danh tính không thuộc hộ và trả 404.
 
-Chỉ worker nhận Gemini key mới. Kiên xác nhận thu hồi khóa cũ tại Google HWAPI;
-đây là attestation của chủ project. API gợi ý ngân sách dùng rule, Textract
-fallback tắt. Ba Scheduler **ENABLED** theo yêu cầu bật lại ngày 14/11/2026.
-Tắt lịch trước khi rollback jobs về revision :9 chưa có bộ lọc hộ.
+Các lịch đang ENABLED chỉ chứng minh cấu hình đã bật; biên nhận email/push phải được xác minh riêng theo từng kỳ. Báo cáo này không đưa ra số “chi phí thực tế”: chưa có kỳ Cost Explorer/hóa đơn phân bổ riêng cho project được chốt. Google Gemini nằm ngoài AWS Budget. Live OCR trên ảnh hóa đơn mới của người dùng công khai, benchmark OCR rộng và SLA dài hạn chưa được xác nhận bởi acceptance này.
 
-Một canary không thay benchmark chất lượng rộng #34, quota Google còn lại hay
-SLA. Chưa diễn tập mất cả AZ, chưa chuyển primary endpoint sang DB phục hồi,
-chưa kiểm inbox alarm trong đợt này. Đây là giới hạn bằng chứng đã ghi nhận.
-
-Xem [bàn giao vận hành](runbooks/current-stack-production.md) và
-[quy trình release](production-rollout.md). Không đưa state/tfvars, artifact,
-token/key, email subscriber riêng hoặc DOCX hướng dẫn các tuần vào Git.
+Xem [bàn giao vận hành](runbooks/current-stack-production.md), [runbook đăng ký công khai](runbooks/public-registration.md), [lịch định kỳ](runbooks/scheduled-notifications.md) và [quy trình release](production-rollout.md). Không đưa state/tfvars, artifact riêng, token/key, email subscriber riêng hoặc DOCX hướng dẫn tuần vào Git.

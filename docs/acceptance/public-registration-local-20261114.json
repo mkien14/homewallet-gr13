@@ -1,8 +1,89 @@
 {
-  "status": "LOCAL_ACCEPTANCE_PASS_AWS_DEPLOYMENT_PENDING",
+  "status": "PUBLIC_RELEASE_CONFIRMED_AWS_RUNTIME_ACCEPTANCE_PASS_WITH_LIMITS",
   "branch": "fix/auth-registration-and-challenges",
-  "base_release": "4b00901ea45cb321db8c38ae2f9e9fad5707c5d9",
+  "base_release": "16f87ea10d4fc6c47afd198e3ee77274fa6c3013",
   "decision": "Public signup and household onboarding; retained household 1 remains excluded",
+  "publication": {
+    "website_release": "PASS",
+    "api_release": "PASS",
+    "api_readiness": "PASS",
+    "release": "16f87ea10d4fc6c47afd198e3ee77274fa6c3013",
+    "runtime_services": ["hw-api:38", "hw-worker:14", "hw-jobs:12"],
+    "runtime_image_digest": "sha256:7c2a2473aabe3536d6dbca2dd509589f782955104b69438d2a9e7e8767b43b23"
+  },
+  "aws_runtime_acceptance": {
+    "production_preflight": {
+      "status": "GO",
+      "passed": 99,
+      "total": 99,
+      "failed_gates": [],
+      "report": "production-preflight-20261114.json"
+    },
+    "operator_settings": "Updated locally to match the observed live release and public-registration policy",
+    "cognito_public_registration": "PASS",
+    "cognito_email_verification_configuration": "PASS",
+    "cognito_software_token_mfa": "OPTIONAL_AND_ENABLED",
+    "public_signup_and_email_confirmation": "PASS",
+    "password_reset_flow": "PASS",
+    "cognito_admin_totp_enrolled_and_preferred": "PASS",
+    "admin_mfa_challenge": "PASS_OPERATOR_ATTESTATION",
+    "test_account_totp_enrollment_and_challenge": "PASS",
+    "synthetic_household_creation_and_owner_role": "PASS",
+    "second_user_invite_and_member_role": "PASS",
+    "retained_household_nonmember_access": "PASS_404_NOT_FOUND",
+    "live_ocr_submission": "NOT_TESTED",
+    "synthetic_test_resource_cleanup": "PASS",
+    "resilience_for_current_release": "PASS",
+    "resilience_drills": {
+      "pitr_restore": {
+        "status": "PASS",
+        "backup_lag_seconds": 349.995,
+        "restore_seconds": 754.733,
+        "application_readiness_status": 200,
+        "tls_verified": true,
+        "schema_cleaned": true,
+        "application_auth_gate_status": 401
+      },
+      "manual_snapshot_restore": {
+        "status": "PASS",
+        "restore_seconds": 452.77,
+        "application_readiness_status": 200,
+        "tls_verified": true,
+        "schema_cleaned": true,
+        "application_auth_gate_status": 401
+      },
+      "api_task_replacement": {
+        "status": "PASS",
+        "recovery_seconds": 75.184,
+        "running_desired": "2/2",
+        "healthy_targets": 2,
+        "public_api_health_status": 200
+      },
+      "database_failover": {
+        "status": "PASS",
+        "recovery_seconds": 169.252,
+        "primary_az_changed": "ap-southeast-1a -> ap-southeast-1b",
+        "public_readiness_status": 200,
+        "non_200_readiness_samples": 1
+      },
+      "redis_failover": {
+        "status": "PASS",
+        "recovery_seconds": 75.838,
+        "primary_node_changed": "homewallet-dev-redis-001 -> homewallet-dev-redis-002",
+        "tls_authenticated_ping": true,
+        "public_readiness_status": 200,
+        "non_200_readiness_samples": 0
+      },
+      "api_rollback": {
+        "status": "PASS",
+        "rollback_task_definition": "hw-api:37",
+        "restored_task_definition": "hw-api:38",
+        "restored_public_readiness_status": 200,
+        "public_registration_temporarily_disabled": true
+      },
+      "temporary_resources_cleaned": true
+    }
+  },
   "checks": {
     "frontend_lint": "PASS",
     "frontend_build": "PASS",
@@ -24,8 +105,14 @@
   "limits": [
     "Test groups overlap; counts are not a unique-test total.",
     "Initial DB tests skipped while local MySQL was stopped; rerun against a new isolated local MySQL 8.4 succeeded.",
-    "Cognito signup/confirmation/reset with real email and live TOTP still require candidate acceptance.",
-    "No AWS resources, live data, production schedules, or provider keys were changed by this task.",
-    "CI, security scan, candidate deployment and public runtime acceptance are pending user commit/push/merge."
+    "Website and ECS are confirmed on release 16f87ea; publication is distinct from end-to-end acceptance.",
+    "Public signup, email confirmation, password reset, and test-account TOTP enrollment/sign-in challenge passed for synthetic Cognito users.",
+    "The synthetic household owner/member flow passed; a nonmember request for retained household 1 returned 404 without data.",
+    "No live OCR document was submitted during this acceptance run.",
+    "Current-release PITR and snapshot restores, API task replacement, RDS and Redis failovers, and API rollback were performed and verified; recovery evidence is recorded outside the repository and the 99-gate preflight is GO.",
+    "An initial restore probe used a stale bootstrap image and returned 404 for the current readiness route; it was excluded, its resources were cleaned, and both restores passed when repeated with API release :38.",
+    "The API rollback temporarily used :37, which disables public registration; :38 was restored and verified healthy afterward.",
+    "Two synthetic Cognito users were created and confirmed, then deleted; their DB profiles/history and one synthetic household were cleaned. Four one-off bootstrap tasks were started and stopped: one by its environment guard, then read-only inspection, cleanup, and cleanup verification.",
+    "No pre-existing user, household, production schedule, or provider key was changed."
   ]
 }

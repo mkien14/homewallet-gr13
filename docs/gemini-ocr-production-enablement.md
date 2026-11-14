@@ -1,9 +1,9 @@
 # Gemini đọc hóa đơn: thay khóa và mở production có kiểm soát
 
-Cập nhật **14/11/2026: đã bật OCR tại worker** bằng `gemini-3.5-flash-lite`,
-candidate `a5097aa`. Đã đạt upload-consent → S3 → queue riêng → worker → Gemini
-→ draft → xác nhận, policy/quota/replay và rollback. Chỉ dùng ảnh tổng hợp;
-không gửi ảnh hộ thật trong nghiệm thu. [Biên bản](acceptance/production-release-a5097aa-20261114.md).
+Cập nhật **14/11/2026: OCR đang bật tại worker** bằng `gemini-3.5-flash-lite`;
+runtime public hiện tại là worker `hw-worker:14`, release `16f87ea`. Bản phát hành
+công khai chưa chạy live OCR trên ảnh mới của tài khoản công khai. Luồng OCR đã
+được nghiệm thu trước đó với ảnh tổng hợp tại release được ghi ở [biên bản canary](acceptance/production-release-a5097aa-20261114.md); không gán kết quả đó sang tài khoản public mới.
 
 Version khóa AWSCURRENT: `134ab65d-79de-48d9-b27c-73300828943c`. Kiên xác nhận
 thu hồi khóa cũ ở HWAPI; đây là attestation của chủ project, không phải audit
@@ -11,12 +11,13 @@ Google độc lập. [Bằng chứng rotation](acceptance/gemini-rotation-202611
 Model 3.6 đã trả 503 trong hai smoke ảnh; chọn 3.5 Flash Lite sau smoke và E2E
 đạt. Metadata GET không thay nghiệm thu generate.
 
-Phạm vi: 16 hộ đã duyệt, loại hộ 1; ảnh mới có consent ở prefix
+Phạm vi: người dùng đã xác minh email và có membership, loại household 1; ảnh mới có consent ở prefix
 `receipts/production/`, queue/DLQ mới. Cap app 10 attempts/ngày UTC, cách nhau
 30 giây, tối đa hai attempts/receipt và 4096 output token. Một lần generate đạt
 không xác nhận quota Google còn lại hoặc benchmark chất lượng rộng #34.
-Chỉ worker nhận key; API Gemini ngân sách, Textract fallback và Scheduler tắt.
-Các mục dưới đây là runbook rotation và tiêu chí cho lần thay đổi tiếp theo.
+Chỉ worker nhận key; API Gemini ngân sách dùng RULE, Textract fallback tắt.
+Ba Scheduler hiện ENABLED trên jobs `:12`. Các mục dưới đây là runbook rotation;
+phần acceptance mới phân biệt cấu hình public với OCR live chưa được thử.
 
 ## 1. Kiên thu hồi khóa cũ ở Google
 
@@ -80,7 +81,7 @@ Tài liệu tham chiếu: [quản lý Gemini API key](https://aistudio.google.co
 
 ### Worker và dữ liệu
 
-- Kiểm tra production allowlist và bản ghi audit
+- Kiểm tra household boundary, membership và bản ghi audit
   `RECEIPT_PROCESSING_CONSENT_V1` đúng receipt/uploader trước cập nhật trạng thái,
   đọc ảnh S3 và gọi provider. Kiểm tra cả nhánh CLI/local và nhánh đánh FAILED;
   không cho đường phụ vượt phạm vi.
