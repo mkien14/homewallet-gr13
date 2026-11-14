@@ -1,0 +1,169 @@
+{
+  "status": "PASS",
+  "at_utc": "2026-11-14T02:14:40.515791+00:00",
+  "account": "179923444714",
+  "region": "ap-southeast-1",
+  "release": "5f2308ce8dc1b03bf63f9c7f9d5747ea410a1c8d",
+  "image_digest": "sha256:7aebb61f9261145388427440ed53d4238ddf71d477293cb1a42e811af7ec4832",
+  "database_id": "homewallet-dev-mysql",
+  "source_overwritten": false,
+  "backup_lag_seconds": 354.1952,
+  "restore": {
+    "pitr": {
+      "instance": "hw-recovery-20261114-e81e1285-pitr",
+      "seconds": 900.071506,
+      "application_ready": true,
+      "tls_verified": true,
+      "schema_cleaned": true,
+      "application_auth_gate": true,
+      "migration_006": true,
+      "task": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/537084db4635441898eda0919b37b3a2",
+      "isolated_startup_profile": "dev",
+      "candidate_image": "sha256:7aebb61f9261145388427440ed53d4238ddf71d477293cb1a42e811af7ec4832",
+      "at_utc": "2026-11-14T02:04:36.904020+00:00"
+    },
+    "snapshot": {
+      "instance": "hw-recovery-20261114-e81e1285-snapshot",
+      "seconds": 901.571883,
+      "application_ready": true,
+      "tls_verified": true,
+      "schema_cleaned": true,
+      "application_auth_gate": true,
+      "migration_006": true,
+      "task": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/e22995e05d244aa49ae21b7d3ce89a8a",
+      "isolated_startup_profile": "dev",
+      "candidate_image": "sha256:7aebb61f9261145388427440ed53d4238ddf71d477293cb1a42e811af7ec4832",
+      "at_utc": "2026-11-14T02:04:42.213644+00:00"
+    }
+  },
+  "drills": {
+    "api_task_replacement": {
+      "started_at_utc": "2026-11-13T17:30:33.773195+00:00",
+      "stopped_task": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/a5cf9f24790d48c5821f9a98c1de7282",
+      "old_tasks": [
+        "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/a5cf9f24790d48c5821f9a98c1de7282",
+        "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/c1cf2884d89f49ef95d0ea7c4f26fcd2"
+      ],
+      "baseline_azs": [
+        "ap-southeast-1a",
+        "ap-southeast-1b"
+      ],
+      "samples": [
+        {
+          "at_utc": "2026-11-13T17:31:08.789829+00:00",
+          "readiness": 200,
+          "healthy_tasks": 1
+        },
+        {
+          "at_utc": "2026-11-13T17:31:42.946354+00:00",
+          "readiness": 200,
+          "healthy_tasks": 1
+        },
+        {
+          "at_utc": "2026-11-13T17:32:11.509242+00:00",
+          "readiness": 200,
+          "healthy_tasks": 2
+        }
+      ],
+      "pass": true,
+      "finished_at_utc": "2026-11-13T17:32:11.509242+00:00",
+      "seconds": 97.736047,
+      "evidence_release": "a5097aa3fd941c53a9cc9a3961f205d9e55d1553",
+      "evidence_source": "docs\\acceptance\\production-resilience-a5097aa-20261114.json",
+      "current_release_rerun": false
+    },
+    "redis_failover": {
+      "started_at_utc": "2026-11-13T17:32:25.520642+00:00",
+      "old_primary": "homewallet-dev-redis-002",
+      "samples": [
+        {
+          "at_utc": "2026-11-13T17:33:13.773850+00:00",
+          "readiness": 200,
+          "status": "available",
+          "primary": "homewallet-dev-redis-001"
+        }
+      ],
+      "new_primary": "homewallet-dev-redis-001",
+      "pass": true,
+      "finished_at_utc": "2026-11-13T17:33:13.773850+00:00",
+      "seconds": 48.253208,
+      "evidence_release": "a5097aa3fd941c53a9cc9a3961f205d9e55d1553",
+      "evidence_source": "docs\\acceptance\\production-resilience-a5097aa-20261114.json",
+      "current_release_rerun": false
+    },
+    "database_failover": {
+      "started_at_utc": "2026-11-13T17:33:26.854835+00:00",
+      "old_az": "ap-southeast-1b",
+      "samples": [
+        {
+          "at_utc": "2026-11-13T17:34:26.979610+00:00",
+          "readiness": 200,
+          "status": "rebooting",
+          "az": "ap-southeast-1b"
+        },
+        {
+          "at_utc": "2026-11-13T17:35:17.377206+00:00",
+          "readiness": 200,
+          "status": "available",
+          "az": "ap-southeast-1b"
+        }
+      ],
+      "new_az": "ap-southeast-1b",
+      "availability_zone_changed": false,
+      "aws_failover_started_at_utc": "2026-11-13T17:33:33.637000+00:00",
+      "aws_failover_completed_at_utc": "2026-11-13T17:34:08.525000+00:00",
+      "aws_failover_seconds": 34.888,
+      "pass": true,
+      "finished_at_utc": "2026-11-13T17:35:17.377206+00:00",
+      "seconds": 110.522371,
+      "evidence_release": "a5097aa3fd941c53a9cc9a3961f205d9e55d1553",
+      "evidence_source": "docs\\acceptance\\production-resilience-a5097aa-20261114.json",
+      "current_release_rerun": false
+    },
+    "api_rollback": {
+      "pass": true,
+      "events": [
+        {
+          "phase": "rollback-previous-production",
+          "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-api:34",
+          "release": "a5097aa3fd941c53a9cc9a3961f205d9e55d1553",
+          "pass": true,
+          "seconds": 151.05099330001394,
+          "at_utc": "2026-11-14T02:09:04.648466+00:00"
+        },
+        {
+          "phase": "candidate-after-rollback",
+          "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-api:36",
+          "release": "5f2308ce8dc1b03bf63f9c7f9d5747ea410a1c8d",
+          "pass": true,
+          "seconds": 150.111682799994,
+          "at_utc": "2026-11-14T02:11:34.762271+00:00"
+        }
+      ],
+      "old_revision": "hw-api:34",
+      "new_revision": "hw-api:36",
+      "schema_changed": false,
+      "current_release_rerun": true
+    }
+  },
+  "snapshot_id": "hw-prod-before-core-20261113-df1fc11e",
+  "snapshot_retain_until": "2026-11-27",
+  "temporary_resources_cleaned": true,
+  "evidence_policy": {
+    "new_candidate_restore_and_rollback": true,
+    "infrastructure_drills_carried_forward": "docs\\acceptance\\production-resilience-a5097aa-20261114.json",
+    "justification": "Jobs-only source change; infra, backend/app, Dockerfile/lock and frontend source are byte-identical between tested baseline and this release.",
+    "unchanged_source_paths": [
+      "backend/app",
+      "backend/Dockerfile",
+      "backend/requirements.lock",
+      "frontend/src",
+      "infra"
+    ]
+  },
+  "limits": [
+    "PITR/snapshot application validation and API rollback used the new image.",
+    "API replacement, Redis failover and RDS failover results retain their original baseline release/timestamps; these infrastructure failures were not triggered again.",
+    "No primary endpoint cutover or whole-AZ outage was performed. Observed timings are not an SLA."
+  ]
+}

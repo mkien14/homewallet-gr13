@@ -1,23 +1,25 @@
 # Bàn giao production — stack hiện tại
 
 Cập nhật **14/11/2026**. Chủ vận hành/dữ liệu: **Kiên**.
-Biên bản ở nhánh `release/production-a5097aa`; Kiên commit/push/merge.
+Biên bản hiện hành: [jobs/lịch 5f2308c](../acceptance/production-schedules-5f2308c-20261114.md).
+Kiên giữ quyền commit/push/merge tài liệu vận hành.
 
 ## 1. Điểm chuẩn
 
 | Thành phần | Giá trị |
 | --- | --- |
 | Website | https://daoedidcrnf1f.cloudfront.net |
-| Main / candidate | `a5097aa3fd941c53a9cc9a3961f205d9e55d1553` / [43471247102](https://github.com/mkien14/homewallet-gr13/actions/runs/43471247102) |
-| API / worker / jobs | `hw-api:34` / `hw-worker:10` / `hw-jobs:9` |
-| ECR image | `homewallet-backend@sha256:4e6af786b86b595f9526010848e52d023bc027030260910edfcd91f02d41ca4a` |
+| Main / candidate | `5f2308ce8dc1b03bf63f9c7f9d5747ea410a1c8d` / [43542308036](https://github.com/mkien14/homewallet-gr13/actions/runs/43542308036) |
+| API / worker / jobs | `hw-api:36` / `hw-worker:12` / `hw-jobs:10` |
+| ECR image | `homewallet-backend@sha256:7aebb61f9261145388427440ed53d4238ddf71d477293cb1a42e811af7ec4832` |
+| Scheduler | Ba lịch ENABLED, target jobs :10 có allowlist SQL; Asia/Ho_Chi_Minh |
 | Account / Region | `179923444714` / `ap-southeast-1` |
 | CloudFront / HTTP API | `E1FBDSJYV9WAKM` / `4o95mvff40` |
 | RDS / Redis | `homewallet-dev-mysql` / `homewallet-dev-redis` |
 | Frontend bucket | `hw-frontend-dev-179923444714`, private/OAC/versioned |
 | State | Bucket `hw-tfstate-homewallet-gr13`, key `dev/terraform.tfstate`, encrypted/private/versioned, S3 lockfile |
 | Restore checkpoint | `hw-prod-before-core-20261113-df1fc11e`, review giữ/dọn ngày 27/11/2026 |
-| Gate / Terraform | 93/93 GO; plan cuối No changes |
+| Gate / Terraform | 96/96 GO; plan cuối No changes |
 
 Tên/tag `dev` là tên cũ của stack production hiện tại. Không rename tài nguyên,
 không chạy Deploy Dev hoặc apply `infra/envs/prod` vào đây. Phát triển dùng local/mock.
@@ -31,7 +33,7 @@ $productionSettings = Join-Path $ops 'operator-settings.json'
 ```
 
 Thư mục giới hạn ACL cho operator, SYSTEM và Administrators. Bản ghi mới nằm
-trong `ocr-final`; root tfvars/settings, active release, checkpoint frontend và
+trong `scheduler-20261114`; root tfvars/settings, active release, checkpoint frontend và
 rollback đã cập nhật. Bản cũ giữ để truy vết. Không upload thư mục này: state
 có thể chứa secret, tfvars chứa email nhận budget. Bàn giao sang máy khác bằng
 kênh bảo mật, cấp AWS identity/MFA phù hợp; không đưa access key vào repo/chat.
@@ -75,8 +77,11 @@ ECS service/DB; đọc đúng address và skip_destroy.
 
 Terraform đăng ký revision; service/target lịch có ignore_changes nên còn bước
 cập nhật release thực tế. API rolling 100/200%, worker stop-first 0/100%. Cập nhật
-ba target Scheduler sang jobs mới, giữ DISABLED và giữ expression/timezone/input/
-role/network/retry. Chỉ publish bằng `publish-frontend-release.py` sau gate GO;
+ba target Scheduler sang jobs mới, giữ expression/timezone/input/role/network/retry.
+Tạm dừng lịch khi chuyển target, rồi bật theo quyết định đã được duyệt sau kiểm
+scope. Trạng thái hiện hành là ENABLED, `notifications_release_accepted=true` ở
+tfvars/operator settings; không lấy default false để ghi đè input đang dùng.
+Chỉ publish bằng `publish-frontend-release.py` sau gate GO;
 assets trước index, không sync --delete, chờ invalidation và nghiệm thu phiên bản.
 
 ## 5. OCR, dữ liệu và quota
@@ -102,13 +107,20 @@ cũ để suy ra grant mới đã có. Không đổi mật khẩu runtime hoặc
 
 Chỉ worker nhận Gemini secret. Kiên xác nhận thu hồi khóa cũ ở Google HWAPI;
 rotation sau dùng helper nhập ẩn trong [runbook khóa](../gemini-ocr-production-enablement.md).
-API gợi ý ngân sách dùng rule; Textract fallback và ba lịch gửi tự động giữ tắt.
+API gợi ý ngân sách dùng rule; Textract fallback tắt. Ba lịch gửi đã ENABLED:
+nhắc hạn 07:45 hằng ngày, ngân sách 20:00 hằng ngày, báo cáo tuần 08:00 thứ Hai.
+Jobs dùng cùng allowlist; thiếu/sai scope dừng trước DB/gửi. Kết quả từng kỳ cần
+log/nhận riêng, không suy từ trạng thái ENABLED.
 Onboarding là thao tác admin có kiểm soát, không mở signup để lách allowlist.
 
 ## 6. Dừng, rollback và phục hồi
 
-- Rollback API **:35 → :29 → :35** đã đạt, điểm chuẩn cuối là **:34**. Fallback
-  production trước là API **:29**, worker **:6** (OCR paused), jobs **:6** (lịch
+- Bản hiện hành đã thử rollback API **:36 → :34 → :36**. Full fallback trước
+  là a5097aa: API :34/worker :10/jobs :9 và checkpoint frontend trước publish.
+  **Tắt ba lịch trước khi rollback jobs về :9** vì revision đó chưa lọc hộ.
+  Input/root checkpoint và biên bản mới đã lưu; không đổi nhãn các phép failover cũ.
+- Đợt a5097aa trước đã thử **:35 → :29 → :35**, điểm chuẩn khi đó là **:34**. Fallback
+  của đợt đó là API **:29**, worker **:6** (OCR paused), jobs **:6** (lịch
   tắt), frontend candidate `26a0645`. Bản ghi rollback/checkpoint ở thư mục ops.
   Không dùng :22/:25 có profile dev hoặc candidate OCR lỗi `727f929`.
 - Khi dừng OCR: chặn upload mới ở API/UI và pause worker trước ReceiveMessage;
@@ -121,10 +133,13 @@ Onboarding là thao tác admin có kiểm soát, không mở signup để lách 
 - DB: PITR/snapshot sang instance **mới**, private/encrypted/SG riêng. Kiểm TLS,
   schema, runtime/audit grants, giao dịch thử và ứng dụng trước quyết định đổi
   endpoint. Secret/password của clone xử lý riêng; không restore đè primary.
-- Candidate này đạt PITR/snapshot khoảng **14,6/11,2 phút**, restore point trễ
+- Đợt a5097aa đạt PITR/snapshot khoảng **14,6/11,2 phút**, restore point trễ
   **254 giây**; clone/SG/role tạm đã dọn. Task replacement, Redis/RDS failover,
   TLS/Lua sau failover và rollback đạt. RDS metadata AZ không đổi. Không tuyên
   bố thử mất cả AZ, cutover DB endpoint hoặc SLA từ các thời gian này.
+- Bản 5f2308c khởi động đúng image trên PITR/snapshot clone mới khoảng
+  **900,07/901,57 giây**, rollback :36→:34→:36 đạt; clone/SG/role đã dọn.
+  Các phép failover hạ tầng trên giữ nguồn cũ; mã IaC/dependency/API/OCR/UI không đổi.
 
 Snapshot có tag giữ đến 27/11, không tự xóa. Kiên review checkpoint mới và chính
 sách dữ liệu trước quyết định dọn. RDS backup 14 ngày, Redis 7, log 30 và frontend
@@ -140,7 +155,7 @@ trong đợt này. CloudWatch dashboard: `homewallet-dev-operations`.
 JSON release/OCR/resilience. Một ảnh tổng hợp là canary release, không thay bộ
 benchmark rộng #34 hoặc đo tải kéo dài.
 
-Kiên stage theo `deploy/release-evidence-paths-a5097aa.txt`, kiểm staged diff,
-commit/push nhánh `release/production-a5097aa` và merge sau CI. Không stage
+Kiên tạo nhánh tài liệu, stage theo `deploy/scheduler-evidence-paths-20261114.txt`,
+kiểm staged diff, commit/push và merge sau CI. Không stage
 state/tfvars, artifact, key/token hoặc DOCX hướng dẫn các tuần. PR tài liệu này
 ghi nhận hệ thống đã deploy; pull/merge tài liệu không yêu cầu deploy lại.

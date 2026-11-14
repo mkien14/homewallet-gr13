@@ -1,0 +1,8 @@
+docs/acceptance/production-schedules-5f2308c-20261114.md
+docs/acceptance/production-schedules-5f2308c-20261114.json
+docs/acceptance/production-resilience-5f2308c-20261114.json
+docs/production-readiness.md
+docs/production-rollout.md
+docs/runbooks/current-stack-production.md
+docs/runbooks/scheduled-notifications.md
+deploy/scheduler-evidence-paths-20261114.txt

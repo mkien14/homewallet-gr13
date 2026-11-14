@@ -9,9 +9,10 @@ Không mở đăng ký công khai. Không phát sinh yêu cầu mua domain/accou
 | Phần | Trạng thái |
 | --- | --- |
 | Website | https://daoedidcrnf1f.cloudfront.net |
-| Source / candidate | Main `a5097aa3fd941c53a9cc9a3961f205d9e55d1553`; [run 43471247102](https://github.com/mkien14/homewallet-gr13/actions/runs/43471247102) |
-| Image | `sha256:4e6af786b86b595f9526010848e52d023bc027030260910edfcd91f02d41ca4a`; scan 0 HIGH/CRITICAL/secret finding |
-| Runtime | API `hw-api:34`, worker `hw-worker:10`, jobs `hw-jobs:9`; cùng immutable image và SHA |
+| Source / candidate | Main `5f2308ce8dc1b03bf63f9c7f9d5747ea410a1c8d`; [run 43542308036](https://github.com/mkien14/homewallet-gr13/actions/runs/43542308036) |
+| Image | `sha256:7aebb61f9261145388427440ed53d4238ddf71d477293cb1a42e811af7ec4832`; scan 0 HIGH/CRITICAL/secret finding |
+| Runtime | API `hw-api:36`, worker `hw-worker:12`, jobs `hw-jobs:10`; cùng immutable image và SHA |
+| Lịch định kỳ | Ba lịch ENABLED; 07:45 hằng ngày, 20:00 hằng ngày, 08:00 thứ Hai; Asia/Ho_Chi_Minh; jobs lọc allowlist SQL |
 | Frontend | Cùng artifact; invalidation hoàn tất, hash index và phiên bản public khớp |
 | HTTPS | Browser → CloudFront → HTTP API `4o95mvff40` bằng HTTPS; VPC Link → Cloud Map → ECS dùng HTTP trong VPC |
 | Origin/WAF | Kiểm tra origin secret; đóng ingress ALB công khai cũ; CommonRuleSet và rate rule bật chặn |
@@ -23,7 +24,7 @@ Không mở đăng ký công khai. Không phát sinh yêu cầu mua domain/accou
 | OCR | Worker Gemini `gemini-3.5-flash-lite`; consent audit, membership/allowlist, prefix/queue riêng; cap 10 attempts/ngày UTC |
 | Ngân sách | Cảnh báo AWS 100 USD/tháng; không tự ngắt tài nguyên hoặc giới hạn tiền Google |
 | Terraform | Kết nối Secrets Manager đã hoạt động; saved plan/apply hoàn tất; plan cuối **No changes** |
-| Gate cuối | **93/93 GO**, kiểm tra trên phạm vi cuối sau cleanup |
+| Gate cuối | **96/96 GO**, sau cập nhật jobs và bật ba lịch; Terraform No changes |
 
 Tên/tag `dev` và state key `dev/terraform.tfstate` là tên cũ của stack đang dùng.
 Phát triển dùng local/mock; không chạy Deploy Dev hoặc apply `infra/envs/prod`
@@ -31,6 +32,11 @@ vào stack này. TLS không được tuyên bố trên mọi hop nội bộ.
 
 ## Nghiệm thu
 
+- [Bản cập nhật jobs/lịch](acceptance/production-schedules-5f2308c-20261114.md):
+  cùng candidate mới, scope SQL trên DB phục hồi, rollback :36→:34→:36,
+  hai clone khởi động bằng image mới và ba trạng thái ENABLED. Không gửi bù;
+  thư của kỳ tương lai cần log/nhận riêng. Các ca OCR/Edge/failover dưới đây
+  giữ đúng revision và thời điểm cũ; source API/OCR/UI/IaC/dependency không đổi.
 - [Biên bản release](acceptance/production-release-a5097aa-20261114.md): CI,
   checksum/scan, cùng image/version, Edge SRP/TOTP, 12 kiểm tra trang/mobile,
   không page error/API 5xx. Local 234 PASS/60 SKIP; MySQL/policy riêng 15 PASS.
@@ -52,7 +58,8 @@ không tự được đưa vào allowlist.
 
 Chỉ worker nhận Gemini key mới. Kiên xác nhận thu hồi khóa cũ tại Google HWAPI;
 đây là attestation của chủ project. API gợi ý ngân sách dùng rule, Textract
-fallback tắt. Ba Scheduler **DISABLED** theo quyết định hiện tại.
+fallback tắt. Ba Scheduler **ENABLED** theo yêu cầu bật lại ngày 14/11/2026.
+Tắt lịch trước khi rollback jobs về revision :9 chưa có bộ lọc hộ.
 
 Một canary không thay benchmark chất lượng rộng #34, quota Google còn lại hay
 SLA. Chưa diễn tập mất cả AZ, chưa chuyển primary endpoint sang DB phục hồi,

@@ -1,0 +1,156 @@
+{
+  "status": "PASS",
+  "at_utc": "2026-11-14T02:21:42.911579+00:00",
+  "account": "179923444714",
+  "region": "ap-southeast-1",
+  "release": "5f2308ce8dc1b03bf63f9c7f9d5747ea410a1c8d",
+  "candidate_run": 43542308036,
+  "candidate_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43542308036",
+  "artifact_id": 14092630636,
+  "archive_sha256": "85d90cbffae97ca62809b0970db686b6253a632b17f85d60dc71f7227af7d6d3",
+  "image_digest": "sha256:7aebb61f9261145388427440ed53d4238ddf71d477293cb1a42e811af7ec4832",
+  "services": {
+    "api_task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-api:36",
+    "worker_task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-worker:12",
+    "jobs_task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:10"
+  },
+  "security": {
+    "HIGH": 0,
+    "CRITICAL": 0,
+    "secrets": 0,
+    "other_severities": {}
+  },
+  "ci_checks": [
+    {
+      "name": "Build backend image",
+      "conclusion": "success",
+      "html_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43541555620/job/132283033578"
+    },
+    {
+      "name": "Community authorization and MySQL acceptance",
+      "conclusion": "success",
+      "html_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43541555620/job/132283033545"
+    },
+    {
+      "name": "OCR pilot offline checks",
+      "conclusion": "success",
+      "html_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43541555620/job/132283033519"
+    },
+    {
+      "name": "Backend tests",
+      "conclusion": "success",
+      "html_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43541555620/job/132283033439"
+    },
+    {
+      "name": "Terraform format and validate",
+      "conclusion": "success",
+      "html_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43541555620/job/132283033435"
+    },
+    {
+      "name": "Frontend lint, test and build",
+      "conclusion": "success",
+      "html_url": "https://github.com/mkien14/homewallet-gr13/actions/runs/43541555620/job/132283033159"
+    }
+  ],
+  "preflight": {
+    "status": "GO",
+    "passed": 96,
+    "total": 96
+  },
+  "terraform": {
+    "final_plan_exit_code": 0,
+    "resource_changes": 0
+  },
+  "frontend": {
+    "release": "5f2308ce8dc1b03bf63f9c7f9d5747ea410a1c8d",
+    "invalidations": [
+      "IE3W1845GYCY2SYPPK4EHYXHLW"
+    ],
+    "artifact_id": 14092630636,
+    "at_utc": "2026-11-14T02:19:31.069910+00:00",
+    "invalidation_completed": true,
+    "index_matches_candidate": true,
+    "index_sha256": "c922db1b6bf564b9defd140fd4851e8efd950c3d020f7f728a116c9654a1f7ab"
+  },
+  "schedules": {
+    "status": "ENABLED",
+    "at_utc": "2026-11-14T02:15:18.631554+00:00",
+    "at_local": "2026-11-14T09:15:18.679380+07:00",
+    "account": "179923444714",
+    "region": "ap-southeast-1",
+    "release": "5f2308ce8dc1b03bf63f9c7f9d5747ea410a1c8d",
+    "jobs_task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:10",
+    "only_schedule_state_changed": true,
+    "send_now_invocations": 0,
+    "group": "homewallet-dev-jobs",
+    "schedules": [
+      {
+        "name": "hw-recurring-reminders",
+        "state": "ENABLED",
+        "expression": "cron(45 7 * * ? *)",
+        "timezone": "Asia/Ho_Chi_Minh",
+        "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:10"
+      },
+      {
+        "name": "hw-budget-alerts",
+        "state": "ENABLED",
+        "expression": "cron(0 20 * * ? *)",
+        "timezone": "Asia/Ho_Chi_Minh",
+        "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:10"
+      },
+      {
+        "name": "hw-weekly-report",
+        "state": "ENABLED",
+        "expression": "cron(0 8 ? * MON *)",
+        "timezone": "Asia/Ho_Chi_Minh",
+        "task_definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-jobs:10"
+      }
+    ]
+  },
+  "job_scope": {
+    "task": "arn:aws:ecs:ap-southeast-1:179923444714:task/homewallet/ab32256f6a56489796265da9ba4a5c4a",
+    "definition": "arn:aws:ecs:ap-southeast-1:179923444714:task-definition/hw-recovery-20261114-e81e1285-validator:1",
+    "exit_code": 0,
+    "events": [
+      {
+        "event": "JOBS_SCOPE_PASS",
+        "approved_household_count": 16,
+        "households_selected": 16,
+        "bills_selected": 1,
+        "budget_rows_selected": 41,
+        "retained_household_1_present": true,
+        "household_1_selected": false,
+        "empty_scope_denies_all": true,
+        "invalid_scope_rejected_before_db": 18,
+        "email_calls": 0,
+        "push_calls": 0,
+        "data_writes": 0,
+        "release": "5f2308ce8dc1b03bf63f9c7f9d5747ea410a1c8d"
+      }
+    ],
+    "passed": true
+  },
+  "probe_attempts": {
+    "final_pass": true,
+    "attempt_count": 2,
+    "first_attempt": "Probe harness compared an empty tuple to [], then corrected to an emptiness check; production code was unchanged."
+  },
+  "resilience_evidence": "production-resilience-5f2308c-20261114.json",
+  "restore_seconds": {
+    "pitr": 900.071506,
+    "snapshot": 901.571883
+  },
+  "api_rollback_current_release": true,
+  "infrastructure_failover_evidence": "production-resilience-a5097aa-20261114.json (original release and timestamps retained)",
+  "data_boundary": {
+    "approved_household_count": 16,
+    "household_1_excluded": true,
+    "outside_households_modified": false
+  },
+  "limits": [
+    "ENABLED confirms configuration; the next recurring delivery and mailbox receipt were not observed in this run.",
+    "No manual catch-up delivery was invoked; job scope probe sent zero emails/pushes and wrote no data.",
+    "OCR/auth/frontend application source, infrastructure and dependency files are unchanged from the prior accepted release.",
+    "Current-image PITR/snapshot app startup and API rollback were checked; prior infrastructure failover drills were not rerun."
+  ]
+}

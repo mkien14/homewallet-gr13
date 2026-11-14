@@ -168,7 +168,8 @@ release_commit                = "<same Git SHA>"
 release_image_digest          = "sha256:<digest from ECR>"
 waf_enforce_common_rules      = true
 waf_enforce_api_rate          = true
-job_schedules_enabled         = false
+job_schedules_enabled         = true
+notifications_release_accepted = true
 production_budget_enabled     = true
 production_monthly_budget_usd  = 100
 production_budget_emails       = ["<existing-reviewed-operations-mailbox>"]
@@ -199,7 +200,11 @@ không dùng workflow đó để ghi lại tag dev sau khi chuyển.
 API service có ignore_changes task_definition từ thiết kế cũ; chuyển sang
 revision mới sau apply. Khi bật HA, worker service và Scheduler target cũng
 ignore task revision. Phải cập nhật worker và cả ba target theo saved outputs;
-giữ lịch DISABLED:
+giữ lịch DISABLED trong lúc chuyển target, kiểm bộ lọc hộ rồi bật lại theo input
+đã được duyệt. Bản 5f2308c hiện có ba lịch ENABLED; xem
+[biên bản bật lịch](acceptance/production-schedules-5f2308c-20261114.md). Hai cờ
+trên phải đồng bộ với operator settings. Không bật lịch trên jobs :9 hoặc bản
+cũ chưa có bộ lọc SQL:
 
 Health check ALB dùng `/health` hoặc `/ready` trực tiếp nên chỉ hai đường nội bộ
 này được miễn origin header. Các đường `/api/health`, `/api/ready`, `/api/release`
