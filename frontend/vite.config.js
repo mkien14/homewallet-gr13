@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => {
     }
     if (!["true", "false"].includes(env.VITE_ENABLE_OCR)) throw new Error("Set VITE_ENABLE_OCR explicitly for production");
     if (!["true", "false"].includes(env.VITE_SELF_SIGN_UP)) throw new Error("Set VITE_SELF_SIGN_UP explicitly for production");
+    if (!["true", "false"].includes(env.VITE_ENABLE_HOSTED_UI_FALLBACK)) throw new Error("Set VITE_ENABLE_HOSTED_UI_FALLBACK explicitly for production");
   }
   return {
     plugins: [localizeJsxText(), react()],

@@ -29,7 +29,8 @@ const ERROR_TEXT = {
   InvalidPasswordException: "Mật khẩu chưa đáp ứng yêu cầu bảo mật của tài khoản.",
   CodeDeliveryFailureException: "Không gửi được mã. Hãy kiểm tra cấu hình email Cognito.",
   NetworkError: "Không kết nối được dịch vụ xác thực. Hãy thử lại.",
-  UnsupportedSignInStep: "Bước xác minh này chưa được hỗ trợ. Hãy dùng trang đăng nhập dự phòng hoặc liên hệ hỗ trợ.",
+  HostedUiUnavailable: "Đăng nhập dự phòng chỉ dùng được trên website đã phát hành. Hãy đăng nhập bằng biểu mẫu này.",
+  UnsupportedSignInStep: "Bước xác minh này chưa được hỗ trợ. Hãy liên hệ hỗ trợ.",
 };
 
 export default function ReactAuth() {
@@ -176,7 +177,7 @@ export default function ReactAuth() {
           {flow === "confirmSignUp" && <button type="button" className="link-button" disabled={busy} onClick={() => run(async () => { await reactResendSignUpCode(email.trim()); setMessage(t("Mã đã được gửi lại.")); })}>{t("Gửi lại mã")}</button>}
           {flow !== "signIn" && <button type="button" className="link-button" disabled={busy} onClick={() => changeFlow("signIn")}>{t("Quay lại đăng nhập")}</button>}
         </div>
-        <div className="auth-footer"><button type="button" className="link-button" disabled={busy} onClick={() => run(login)}>{t("Dùng trang đăng nhập dự phòng")}</button><Link to="/">{t("Quay về trang chủ")}</Link></div>
+        <div className="auth-footer">{config.hostedUiFallbackEnabled && <button type="button" className="link-button" disabled={busy} onClick={() => run(login)}>{t("Dùng trang đăng nhập dự phòng")}</button>}<Link to="/">{t("Quay về trang chủ")}</Link></div>
         <small className="auth-security-note">{t("Thông tin đăng nhập được xác thực trực tiếp bởi Amazon Cognito.")}</small>
       </div>
     </div>

@@ -8,6 +8,15 @@ const VERIFIER_KEY = "hw.pkce.verifier";
 const STATE_KEY = "hw.pkce.state";
 
 export async function login() {
+  if (!config.hostedUiFallbackEnabled) {
+    if (config.reactAuthEnabled) {
+      window.location.assign("/auth/react");
+      return;
+    }
+    const error = new Error("Hosted UI chỉ dùng được trên website đã phát hành.");
+    error.name = "HostedUiUnavailable";
+    throw error;
+  }
   if (!config.cognitoDomain || !config.clientId) throw new Error("Cognito chưa được cấu hình.");
   if (sessionStorage.getItem(AUTH_MODE_KEY) === "srp") {
     const { reactSignOut } = await import("./cognito");

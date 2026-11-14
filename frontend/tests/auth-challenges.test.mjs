@@ -2,7 +2,15 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { signInStep } from "../src/auth/signInStep.js";
 import { readSessionToken } from "../src/auth/sessionToken.js";
+import { hostedUiFallbackEnabled } from "../src/auth/hostedUiPolicy.js";
 
+test("Hosted UI fallback is opt-in and unavailable from local origins", () => {
+  assert.equal(hostedUiFallbackEnabled(undefined, "http://localhost:5173"), false);
+  assert.equal(hostedUiFallbackEnabled("true", "http://localhost:5173"), false);
+  assert.equal(hostedUiFallbackEnabled("true", "https://127.0.0.1:5173"), false);
+  assert.equal(hostedUiFallbackEnabled("false", "https://daoedidcrnf1f.cloudfront.net"), false);
+  assert.equal(hostedUiFallbackEnabled("true", "https://daoedidcrnf1f.cloudfront.net"), true);
+});
 test("TOTP sign-in setup consumes the challenge secret, not an authenticated setup API", () => {
   assert.deepEqual(signInStep({ nextStep: { signInStep: "CONTINUE_SIGN_IN_WITH_TOTP_SETUP", totpSetupDetails: { sharedSecret: "SYNTHETIC" } } }), { flow: "totpSetup", secret: "SYNTHETIC" });
   assert.equal(signInStep({ nextStep: { signInStep: "CONTINUE_SIGN_IN_WITH_TOTP_SETUP" } }).flow, "unsupported");

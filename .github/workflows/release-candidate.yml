@@ -28,6 +28,7 @@ jobs:
       VITE_RELEASE_CHANNEL: production
       VITE_USE_MOCK: "0"
       VITE_ENABLE_REACT_AUTH_UI: "true"
+      VITE_ENABLE_HOSTED_UI_FALLBACK: "true"
       VITE_ENABLE_OCR: ${{ inputs.enable_ocr && 'true' || 'false' }}
       VITE_SELF_SIGN_UP: ${{ inputs.public_registration && 'true' || 'false' }}
       VITE_COGNITO_DOMAIN: ${{ vars.PRODUCTION_COGNITO_DOMAIN }}

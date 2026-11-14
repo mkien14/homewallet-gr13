@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { t as translate } from "../preferences";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { handleCallback, login } from "../auth/auth";
+import { config } from "../config";
 
 export default function Callback() {
   const navigate = useNavigate();
@@ -20,12 +21,14 @@ export default function Callback() {
     return (
       <div className="card">
         <p className="error">{error}</p>
-        <button disabled={busy} onClick={async () => {
-          setBusy(true);
-          try { await login(); }
-          catch { setError(translate("Không kết nối được dịch vụ xác thực. Hãy thử lại.")); }
-          finally { setBusy(false); }
-        }}>{translate("Đăng nhập lại")}</button>
+        {config.hostedUiFallbackEnabled
+          ? <button disabled={busy} onClick={async () => {
+            setBusy(true);
+            try { await login(); }
+            catch { setError(translate("Không kết nối được dịch vụ xác thực. Hãy thử lại.")); }
+            finally { setBusy(false); }
+          }}>{translate("Đăng nhập lại")}</button>
+          : <Link to="/auth/react">{translate("Quay lại đăng nhập bằng email")}</Link>}
       </div>
     );
   }
