@@ -1,46 +1,36 @@
-# Bật lại thông báo định kỳ trên stack production
+# Thông báo định kỳ — trạng thái production
 
-Yêu cầu vận hành ngày 14/11/2026: bật lại ba lịch, tiếp tục giữ hộ 1 ngoài phạm vi.
-Đã bật **ENABLED lúc 09:15:18 ngày 14/11/2026 (UTC+7)**, target `hw-jobs:10`.
-Xem [biên bản đã áp dụng](../acceptance/production-schedules-5f2308c-20261114.md).
-Gate 96/96 GO, Terraform No changes; input production/operator settings đã đồng bộ.
-ENABLED không thay bằng chứng nhận thư của mỗi kỳ tương lai.
+Cập nhật **14/11/2026**: ba lịch đang **ENABLED**, cùng target jobs `hw-jobs:12`
+của bản phát hành công khai `16f87ea`. [Biên bản phát hành và nghiệm thu](../acceptance/production-public-16f87ea-20261114.md).
 
-| Tên | Chức năng | Giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
+| Lịch | Chức năng | Múi giờ và thời gian |
 | --- | --- | --- |
-| `hw-recurring-reminders` | Nhắc hạn hóa đơn đang hoạt động | 07:45 mỗi ngày |
-| `hw-budget-alerts` | Cảnh báo ngân sách đạt 80%/100% | 20:00 mỗi ngày |
-| `hw-weekly-report` | Tổng hợp tuần hoàn chỉnh trước đó | 08:00 thứ Hai |
+| `hw-recurring-reminders` | Nhắc hạn hóa đơn | 07:45 hằng ngày, `Asia/Ho_Chi_Minh` |
+| `hw-budget-alerts` | Cảnh báo ngân sách 80%/100% | 20:00 hằng ngày, `Asia/Ho_Chi_Minh` |
+| `hw-weekly-report` | Báo cáo tuần hoàn chỉnh trước đó | 08:00 thứ Hai, `Asia/Ho_Chi_Minh` |
 
-## Điều kiện và triển khai
+## Phạm vi và bằng chứng gửi
 
-1. Merge bản sửa `jobs.household_scope` vào main; CI và Build release candidate
-   phải đạt. Giữ OCR bật trong candidate. Triển khai cùng artifact/image đã quét
-   cho frontend, API, worker và jobs theo runbook production hiện tại.
-2. Jobs production phải có allowlist hợp lệ, không chứa hộ 1. Cả ba truy vấn
-   chọn hộ/hóa đơn/ngân sách được lọc ngay trong SQL; thiếu/sai allowlist thì
-   dừng trước khi mở DB, ghi `job_runs`, gửi email hoặc push.
-3. Đối chiếu target mới, expression, timezone, input, IAM role, private network
-   và retry với bản chụp trước thay đổi. Không thay kỳ chạy để gửi bù.
-4. Trong **tfvars production ngoài Git**, đặt `job_schedules_enabled=true` và
-   `notifications_release_accepted=true`. Trong operator settings, đặt cùng hai
-   giá trị. Đây là quyết định bật gửi định kỳ cho các hộ đã được admin duyệt;
-   không mở rộng hộ hay thay đổi sở thích/ngôn ngữ người nhận.
-5. Chạy plan toàn stack, đọc saved plan; phần bật lịch chỉ được đổi State của
-   đúng ba schedule từ DISABLED sang ENABLED. Apply saved plan, đọc lại AWS và
-   chạy preflight. Không dùng `-target` hoặc mở cả lịch bằng lệnh không giữ target.
-6. Cập nhật biên bản và báo cáo Word/PDF/sơ đồ bằng trạng thái thực tế. ENABLED
-   chứng minh lịch được bật; chỉ ghi nhận một kỳ gửi thành công khi có log task
-   thực tế và kết quả nhận tương ứng. Không tự chạy job để gửi bù nhiều thư.
+Job truy vấn dữ liệu bằng SQL với `household_id > 1`: hộ mới được phục vụ mà không
+cần allowlist; household 1 luôn bị loại. Mỗi nghiệp vụ vẫn kiểm tra dữ liệu thuộc
+hộ tương ứng. Bật schedule xác nhận trạng thái cấu hình, không xác nhận một email
+cụ thể đã tới inbox. Kiểm tra kỳ gửi bằng log `job_runs`, số gửi/skip/fail của job
+và hộp thư đã đăng ký; không chạy kỳ tương lai thủ công để gửi bù.
 
-## Dừng gửi
+## Thay đổi release
 
-Đặt cả hai bản cấu hình vận hành về `job_schedules_enabled=false`, plan/review/apply
-và đọc lại ba trạng thái DISABLED. Việc tắt lịch ngăn invocation tương lai;
-không tự dừng task đã chạy, xóa dữ liệu, xóa `job_runs` hay gửi lại kỳ cũ.
+1. Merge mã job lên `main`; CI, candidate và security scan phải đạt.
+2. Review profile/plan đã lưu; API, worker, jobs và cả ba target phải cùng SHA và
+   image digest. Không áp dụng stack `infra/envs/prod` vào stack đang chạy có tên dev.
+3. Khi cập nhật target, tạm dừng lịch trong lúc chuyển, giữ nguyên expression,
+   timezone, input, role, network và retry; kiểm tra target mới rồi mới bật lại.
+4. Chạy production preflight và đối chiếu trạng thái AWS. Lịch ENABLED chỉ được
+   coi là hoàn tất khi target trỏ đúng revision jobs đã review.
+5. Ghi nhận riêng kết quả gửi của từng kỳ, không đưa địa chỉ email riêng vào Git.
 
-Các giới hạn dữ liệu, quota OCR và các bằng chứng HA/restore cũ vẫn theo
-[runbook production](current-stack-production.md).
+## Dừng và rollback
 
-Trước rollback jobs về :9 hoặc revision cũ chưa có bộ lọc, phải tắt cả ba lịch.
-Không giữ ENABLED trên job cũ chỉ vì API trước đó đã có allowlist.
+Để ngăn gửi tiếp, đặt schedule về DISABLED trong AWS và cập nhật operator settings
+để lần reconcile sau không bật lại. Khi rollback sang jobs revision không lọc
+`household_id > 1`, giữ lịch tắt cho đến khi revision an toàn được khôi phục. Không
+receive, purge hay replay DLQ/queue cũ trong thao tác release thông thường.

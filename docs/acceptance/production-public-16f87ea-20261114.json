@@ -1,0 +1,162 @@
+{
+  "status": "PASS_WITH_DOCUMENTED_LIMITS",
+  "accepted_at_local_date": "2026-11-14",
+  "release": {
+    "source_sha": "16f87ea10d4fc6c47afd198e3ee77274fa6c3013",
+    "candidate_run": 43567562979,
+    "candidate_artifact_id": 14102797171,
+    "artifact_sha256": "b9d6be287765dd2596fd9f374f466cf8c10bd9062d180c329e059aac2e6ba8c3",
+    "backend_image_digest": "sha256:7c2a2473aabe3536d6dbca2dd509589f782955104b69438d2a9e7e8767b43b23",
+    "runtime": [
+      "hw-api:38",
+      "hw-worker:14",
+      "hw-jobs:12"
+    ],
+    "frontend_invalidation_completed": true,
+    "api_readiness": "PASS"
+  },
+  "production_preflight": {
+    "status": "GO",
+    "passed": 99,
+    "total": 99,
+    "failed": 0,
+    "source": "production-preflight-20261114.json"
+  },
+  "operator_attestation": {
+    "source": "User confirmation in this conversation; live public website tested directly by project admin",
+    "signup_button": "PASS",
+    "email_verification": "PASS",
+    "login_after_verification": "PASS",
+    "new_household_creation": "PASS",
+    "joining_household": "PASS",
+    "mailbox_address_recorded": false
+  },
+  "runtime_acceptance": {
+    "cognito_public_registration_and_email_verification": "PASS",
+    "password_reset": "PASS",
+    "admin_totp_challenge": "PASS_OPERATOR_ATTESTATION",
+    "synthetic_user_totp_challenge": "PASS",
+    "synthetic_household_owner_and_member_roles": "PASS",
+    "retained_household_1_nonmember_boundary": "PASS_404",
+    "synthetic_resources_cleaned": "PASS",
+    "live_ocr_submission": "NOT_TESTED",
+    "schedules": [
+      "hw-recurring-reminders",
+      "hw-budget-alerts",
+      "hw-weekly-report"
+    ],
+    "schedule_state": "ENABLED",
+    "schedule_target": "hw-jobs:12"
+  },
+  "resilience": {
+    "pitr_restore": {
+      "status": "PASS",
+      "backup_lag_seconds": 349.995,
+      "restore_seconds": 754.733,
+      "application_readiness_status": 200,
+      "tls_verified": true,
+      "schema_cleaned": true,
+      "application_auth_gate_status": 401
+    },
+    "manual_snapshot_restore": {
+      "status": "PASS",
+      "restore_seconds": 452.77,
+      "application_readiness_status": 200,
+      "tls_verified": true,
+      "schema_cleaned": true,
+      "application_auth_gate_status": 401
+    },
+    "api_task_replacement": {
+      "status": "PASS",
+      "recovery_seconds": 75.184,
+      "running_desired": "2/2",
+      "healthy_targets": 2,
+      "public_api_health_status": 200
+    },
+    "database_failover": {
+      "status": "PASS",
+      "recovery_seconds": 169.252,
+      "primary_az_changed": "ap-southeast-1a -> ap-southeast-1b",
+      "public_readiness_status": 200,
+      "non_200_readiness_samples": 1
+    },
+    "redis_failover": {
+      "status": "PASS",
+      "recovery_seconds": 75.838,
+      "primary_node_changed": "homewallet-dev-redis-001 -> homewallet-dev-redis-002",
+      "tls_authenticated_ping": true,
+      "public_readiness_status": 200,
+      "non_200_readiness_samples": 0
+    },
+    "api_rollback": {
+      "status": "PASS",
+      "rollback_task_definition": "hw-api:37",
+      "restored_task_definition": "hw-api:38",
+      "restored_public_readiness_status": 200,
+      "public_registration_temporarily_disabled": true
+    },
+    "temporary_resources_cleaned": true
+  },
+  "automated_checks": {
+    "frontend_lint": "PASS",
+    "frontend_build": "PASS",
+    "frontend_tests": {
+      "passed": 102
+    },
+    "backend_changed_scope_tests": {
+      "passed": 63
+    },
+    "isolated_mysql_auth_community_history_public_onboarding": {
+      "passed": 98
+    },
+    "households_leave_weekly_local_regression": {
+      "passed": 21
+    },
+    "existing_deployment_script_tests": {
+      "passed": 27
+    },
+    "candidate_registration_mismatch_regressions": {
+      "passed": 2
+    },
+    "terraform_validate_dev": "PASS",
+    "terraform_validate_prod": "PASS",
+    "browser": {
+      "environment": "Local Chromium; mocked Cognito SDK; no live identity or email",
+      "status": "PASS",
+      "cases": [
+        "signup_confirmation_resend",
+        "totp_signin_setup",
+        "server_mfa_choices",
+        "forced_password_reset",
+        "unsupported_challenge",
+        "cancel_clears_secrets",
+        "english_signup"
+      ],
+      "page_errors": 0
+    }
+  },
+  "limits": [
+    "Test groups overlap; counts are not a unique-test total.",
+    "Initial DB tests skipped while local MySQL was stopped; rerun against a new isolated local MySQL 8.4 succeeded.",
+    "Website and ECS are confirmed on release 16f87ea; publication is distinct from end-to-end acceptance.",
+    "Public signup, email confirmation, password reset, and test-account TOTP enrollment/sign-in challenge passed for synthetic Cognito users.",
+    "The synthetic household owner/member flow passed; a nonmember request for retained household 1 returned 404 without data.",
+    "No live OCR document was submitted during this acceptance run.",
+    "Current-release PITR and snapshot restores, API task replacement, RDS and Redis failovers, and API rollback were performed and verified; recovery evidence is recorded outside the repository and the 99-gate preflight is GO.",
+    "An initial restore probe used a stale bootstrap image and returned 404 for the current readiness route; it was excluded, its resources were cleaned, and both restores passed when repeated with API release :38.",
+    "The API rollback temporarily used :37, which disables public registration; :38 was restored and verified healthy afterward.",
+    "Two synthetic Cognito users were created and confirmed, then deleted; their DB profiles/history and one synthetic household were cleaned. Four one-off bootstrap tasks were started and stopped: one by its environment guard, then read-only inspection, cleanup, and cleanup verification.",
+    "No pre-existing user, household, production schedule, or provider key was changed.",
+    "Interactive signup, email confirmation, login, household creation and joining were confirmed by the project admin; no mailbox address, password, OTP, token or screenshot was copied into this evidence file.",
+    "Public release does not mean OCR was tested for a new public account; live OCR submission remains NOT_TESTED in this acceptance."
+  ],
+  "evidence_files": [
+    "production-preflight-20261114.json",
+    "public-registration-local-20261114.json"
+  ],
+  "release_urls": {
+    "website": "https://daoedidcrnf1f.cloudfront.net",
+    "candidate_run": "https://github.com/mkien14/homewallet-gr13/actions/runs/43567562979",
+    "main_ci_run": "https://github.com/mkien14/homewallet-gr13/actions/runs/43566446650"
+  }
+}

@@ -1,25 +1,26 @@
 # Chuyển phiên bản production trên stack hiện có
 
-Kiên thực hiện commit/push. Đã chốt cảnh báo 100 USD/tháng; HA/restore đã nghiệm thu trên stack hiện tại; xem biên bản ngày 13/11/2026. Thay đổi Terraform cần saved plan riêng, không dùng `-target`. Không gửi
-plan/state/token/secret vào báo cáo. Không có bước bật lịch hay xóa dữ liệu.
+Kiên thực hiện commit/push. Thay đổi Terraform cần saved plan riêng, không dùng
+`-target`. Không gửi plan/state/token/secret vào báo cáo. Đây là runbook cho stack
+đang vận hành, không phải biên bản trạng thái cũ.
 
-**Điểm chuẩn ngày 14/11/2026:** main `a5097aa3fd941c53a9cc9a3961f205d9e55d1553`,
-API `hw-api:34`, worker `hw-worker:10`, jobs `hw-jobs:9`, frontend cùng candidate;
-gate cuối **93/93 GO**. Xem [biên bản](acceptance/production-release-a5097aa-20261114.md).
-Kết nối Secrets Manager đã khắc phục; saved plan đã review/apply, plan cuối
-**No changes**. Không import hoặc push state. Biên bản timeout/state cũ ngày
-13/11 được giữ làm lịch sử, không còn mô tả điểm chuẩn hiện tại.
+**Điểm chuẩn hiện hành ngày 14/11/2026:** public release `16f87ea10d4fc6c47afd198e3ee77274fa6c3013`,
+API `hw-api:38`, worker `hw-worker:14`, jobs `hw-jobs:12`, frontend cùng candidate;
+preflight **99/99 GO**. Xem [biên bản phát hành công khai](acceptance/production-public-16f87ea-20261114.md).
+Terraform plan cuối **No changes**. Các release `a5097aa`, `5f2308c` và biên bản
+trước đó được giữ làm bằng chứng theo thời điểm, không phải trạng thái hiện hành.
 
-OCR đã nghiệm thu và bật với Gemini `gemini-3.5-flash-lite` tại worker, consent/
-membership/allowlist và queue riêng; cap 10 attempts/ngày UTC. Chỉ thử ảnh tổng
-hợp. API Gemini gợi ý ngân sách, Textract fallback và Scheduler vẫn tắt.
-Xem [phạm vi và vận hành OCR](gemini-ocr-production-enablement.md).
+OCR Gemini `gemini-3.5-flash-lite` vẫn bật tại worker, có consent/membership và
+queue riêng; cap 10 attempts/ngày UTC. Bản public acceptance này chưa thử live OCR
+trên tài khoản công khai mới; canary ảnh tổng hợp thuộc release đã ghi trong hồ sơ
+OCR. API Gemini gợi ý ngân sách dùng RULE, Textract fallback tắt; ba Scheduler
+đang ENABLED. Xem [phạm vi và vận hành OCR](gemini-ocr-production-enablement.md).
 
 ## 1. Source và candidate
 
-Các thay đổi hạ tầng/dependency/OCR đã merge main; candidate `a5097aa` đã phát hành.
-Biên bản mới ở `release/production-a5097aa`. Với lần phát hành sau, review và
-merge source mới theo quy trình nhóm. Không dùng `git add .` khi còn công việc
+Các thay đổi hạ tầng/dependency/OCR/public signup đã merge main; candidate
+`16f87ea` đã phát hành. Biên bản hiện hành ở `acceptance/production-public-16f87ea-20261114.md`.
+Với lần phát hành sau, review và merge source mới theo quy trình nhóm. Không dùng `git add .` khi còn công việc
 khác; bỏ DOCX hướng dẫn các tuần.
 Không chạy workflow Deploy Dev sau chuyển production vì nó dùng tag dev.
 
@@ -185,10 +186,10 @@ còn dùng được. API không nhận Gemini key; worker chỉ nhận key khi O
 hiện có, cột thời gian `at`; runtime cần SELECT và INSERT trên bảng này.
 API/worker/jobs trong profile này đều chạy UID/GID 10001:10001, drop ALL Linux
 capabilities và có init process. Task revision cũ không tự nhận cấu hình này.
-Chốt allowlist bằng snapshot chỉ đọc ID các hộ hiện có khác 1 theo quyết định
-Kiên, không đưa token/email/tên thành viên vào biên bản. Household 1 và danh tính
-chưa thuộc hộ được duyệt nhận 403 trước bước tạo user; không có bypass cho admin.
-Cognito và frontend tắt tự đăng ký mới; onboarding cần quy trình admin riêng.
+Public signup đã bật trên release hiện hành. Hộ mới được tạo sau email verification;
+quyền dữ liệu vẫn theo membership. Household 1 và dữ liệu legacy bị loại khỏi phạm
+vi công khai; kiểm thử nonmember với hộ này trả 404. Khi cần đóng public signup,
+phải review ảnh hưởng tới các hộ đã tạo, không khôi phục allowlist 16 hộ một cách mù.
 Budget 100 USD là cảnh báo tổng account, không phải hard cap; giữ hai budget cũ.
 Không copy giá trị placeholder trên vào apply. Email nhận cảnh báo lấy từ danh
 sách vận hành đã được duyệt, lưu ở tfvars local ngoài Git.
@@ -201,8 +202,8 @@ API service có ignore_changes task_definition từ thiết kế cũ; chuyển s
 revision mới sau apply. Khi bật HA, worker service và Scheduler target cũng
 ignore task revision. Phải cập nhật worker và cả ba target theo saved outputs;
 giữ lịch DISABLED trong lúc chuyển target, kiểm bộ lọc hộ rồi bật lại theo input
-đã được duyệt. Bản 5f2308c hiện có ba lịch ENABLED; xem
-[biên bản bật lịch](acceptance/production-schedules-5f2308c-20261114.md). Hai cờ
+đã được duyệt. Bản hiện hành có ba lịch ENABLED trỏ `hw-jobs:12`; xem
+[biên bản phát hành công khai](acceptance/production-public-16f87ea-20261114.md). Hai cờ
 trên phải đồng bộ với operator settings. Không bật lịch trên jobs :9 hoặc bản
 cũ chưa có bộ lọc SQL:
 
