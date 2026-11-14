@@ -11,6 +11,7 @@ from botocore.exceptions import ClientError
 from app.config import load_config
 from app.db import connect
 from app.localization import group_recipients_by_locale
+from jobs.household_scope import approved_households, household_filter
 from jobs.job_runs import claim_job_run, finish_job_run
 
 JOB_TIMEZONE = "Asia/Ho_Chi_Minh"
@@ -45,9 +46,10 @@ def _week_bounds(period_key=None, timezone=JOB_TIMEZONE):
     return start, start + timedelta(days=7)
 
 
-def _list_households(db):
+def _list_households(db, household_ids=None):
+    scope_sql, scope_params = household_filter(household_ids, "id")
     with db.cursor() as cur:
-        cur.execute("SELECT id, name FROM households ORDER BY id")
+        cur.execute("SELECT id, name FROM households WHERE 1 = 1" + scope_sql + " ORDER BY id", scope_params)
         return cur.fetchall()
 
 
@@ -227,6 +229,7 @@ def run_weekly_reports(
     *, config=None, ses_client=None, period_key=None, timezone=JOB_TIMEZONE, db=None
 ):
     config = config or load_config()
+    household_ids = approved_households(config)
     start, end = _week_bounds(period_key, timezone)
     effective_period_key = start.isoformat()
     own_db = db is None
@@ -235,7 +238,7 @@ def run_weekly_reports(
     sent = skipped = failed = 0
 
     try:
-        households = _list_households(db)
+        households = _list_households(db, household_ids)
         for household in households:
             household_id = household["id"]
             report = build_weekly_report_data(db, household_id, start, end)

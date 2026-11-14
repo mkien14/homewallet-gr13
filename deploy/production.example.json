@@ -19,6 +19,8 @@
   "cognito_admin_group": "homewallet-dev-admins",
   "schedule_names": ["hw-recurring-reminders", "hw-budget-alerts", "hw-weekly-report"],
   "schedule_group": "homewallet-dev-jobs",
+  "job_schedules_enabled": false,
+  "notifications_release_accepted": false,
   "budget_name": "HomeWallet-Production-Monthly",
   "monthly_budget_usd": 100,
   "household_scope_rule": "snapshot_existing_households_except_1",
