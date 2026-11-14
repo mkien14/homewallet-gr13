@@ -130,6 +130,8 @@ def evaluate(settings, session):
     jobs_env = {x["name"]: x["value"] for x in jobs.get("environment", [])}
     gate("jobs_match_production_release", jobs.get("image") == expected_image and
          jobs_env.get("APP_RELEASE") == expected_release and jobs_env.get("APP_ENV") == "production")
+    gate("jobs_approved_household_scope_enforced", approved_valid and
+         set(jobs_env.get("PRODUCTION_ALLOWED_HOUSEHOLD_IDS", "").split(",")) == {str(value) for value in approved})
     container_security("jobs", jobs)
     gate("admin_mfa_challenge_verified", settings.get("admin_mfa_challenge_verified") is True)
     gate("admission_and_consent", truth("RATE_LIMIT_ENABLED") and truth("OCR_REQUIRE_CONSENT"))
@@ -177,9 +179,15 @@ def evaluate(settings, session):
                 gate("frontend_release_history_versioned", s3.get_bucket_versioning(Bucket=bucket).get("Status") == "Enabled")
     schedules = settings.get("schedule_names", [])
     gate("scheduler_inventory_recorded", len(schedules) == 3 and len(set(schedules)) == 3)
+    schedules_enabled = settings.get("job_schedules_enabled", False)
+    valid_schedule_setting = type(schedules_enabled) is bool
+    gate("scheduler_state_setting_valid", valid_schedule_setting)
+    if schedules_enabled is True:
+        gate("notification_delivery_accepted", settings.get("notifications_release_accepted") is True)
+    expected_schedule_state = "ENABLED" if schedules_enabled is True else "DISABLED"
     for name in schedules:
         schedule = session.client("scheduler").get_schedule(Name=name, GroupName=settings.get("schedule_group", "default"))
-        gate("schedule_disabled", schedule["State"] == "DISABLED")
+        gate("schedule_state_matches_operator_settings", valid_schedule_setting and schedule["State"] == expected_schedule_state)
         gate("schedule_targets_reviewed_jobs_revision", schedule.get("Target", {}).get("EcsParameters", {}).get("TaskDefinitionArn") == jobs_task["taskDefinitionArn"])
     if gate("budget_name_configured", bool(settings.get("budget_name"))):
         try:

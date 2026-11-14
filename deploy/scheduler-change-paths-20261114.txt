@@ -1,0 +1,7 @@
+backend/jobs/household_scope.py
+backend/jobs/recurring_alerts.py
+backend/jobs/weekly_report.py
+scripts/production-preflight.py
+deploy/production.example.json
+docs/runbooks/scheduled-notifications.md
+deploy/scheduler-change-paths-20261114.txt

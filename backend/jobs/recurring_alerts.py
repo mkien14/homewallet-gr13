@@ -12,6 +12,7 @@ from app.config import load_config
 from app.db import connect
 from app.localization import group_recipients_by_locale
 from app.notifications import create_household_notifications, send_push_to_users
+from jobs.household_scope import approved_households, household_filter
 from jobs.job_runs import claim_job_run as _claim_job_run
 from jobs.job_runs import finish_job_run as _finish_job_run
 
@@ -117,11 +118,14 @@ def _bill_is_due_for_reminder(bill, run_date):
     return due_date == due_target, due_date
 
 
-def _list_active_bills(db):
+def _list_active_bills(db, household_ids=None):
+    scope_sql, scope_params = household_filter(household_ids, "household_id")
     with db.cursor() as cur:
         cur.execute(
             "SELECT id, household_id, name, due_day, expected_amount, "
-            "remind_days_before FROM recurring_bills WHERE active = 1 ORDER BY id"
+            "remind_days_before FROM recurring_bills WHERE active = 1"
+            + scope_sql + " ORDER BY id",
+            scope_params,
         )
         return cur.fetchall()
 
@@ -165,13 +169,14 @@ def run_recurring_reminders(
     *, config=None, ses_client=None, period_key=None, timezone=JOB_TIMEZONE, db=None
 ):
     config = config or load_config()
+    household_ids = approved_households(config)
     run_date = _execution_date(period_key, timezone)
     own_db = db is None
     db = db or connect(config)
     ses = None
     sent = skipped = failed = 0
     try:
-        for bill in _list_active_bills(db):
+        for bill in _list_active_bills(db, household_ids):
             due, due_date = _bill_is_due_for_reminder(bill, run_date)
             if not due:
                 continue
@@ -250,7 +255,8 @@ def run_recurring_reminders(
             db.close()
 
 
-def _active_budget_spending(db, period):
+def _active_budget_spending(db, period, household_ids=None):
+    scope_sql, scope_params = household_filter(household_ids, "b.household_id")
     period_start = date.fromisoformat(f"{period}-01")
     if period_start.month == 12:
         period_end = date(period_start.year + 1, 1, 1)
@@ -265,10 +271,10 @@ def _active_budget_spending(db, period):
             "LEFT JOIN transactions t ON t.household_id = b.household_id "
             "AND t.category_id = bl.category_id AND t.status = 'CONFIRMED' "
             "AND t.occurred_on >= %s AND t.occurred_on < %s "
-            "WHERE b.period = %s AND b.status = 'ACTIVE' "
-            "GROUP BY b.household_id, bl.category_id, c.name, bl.amount "
+            "WHERE b.period = %s AND b.status = 'ACTIVE'"
+            + scope_sql + " GROUP BY b.household_id, bl.category_id, c.name, bl.amount "
             "ORDER BY b.household_id, bl.category_id",
-            (period_start, period_end, period),
+            (period_start, period_end, period) + scope_params,
         )
         return cur.fetchall()
 
@@ -378,6 +384,7 @@ def run_budget_alerts(
     *, config=None, ses_client=None, period_key=None, timezone=JOB_TIMEZONE, db=None
 ):
     config = config or load_config()
+    household_ids = approved_households(config)
     run_date = _execution_date(period_key, timezone)
     period = run_date.strftime("%Y-%m")
     day_key = run_date.isoformat()
@@ -392,7 +399,7 @@ def run_budget_alerts(
 
         sent = skipped = failed = 0
         try:
-            rows = _active_budget_spending(db, period)
+            rows = _active_budget_spending(db, period, household_ids)
             active_rows = [row for row in rows if int(row["budget_amount"]) > 0]
             if active_rows:
                 ses = _ses_client(config, ses_client)
