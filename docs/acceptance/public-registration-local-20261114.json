@@ -1,0 +1,31 @@
+{
+  "status": "LOCAL_ACCEPTANCE_PASS_AWS_DEPLOYMENT_PENDING",
+  "branch": "fix/auth-registration-and-challenges",
+  "base_release": "4b00901ea45cb321db8c38ae2f9e9fad5707c5d9",
+  "decision": "Public signup and household onboarding; retained household 1 remains excluded",
+  "checks": {
+    "frontend_lint": "PASS",
+    "frontend_build": "PASS",
+    "frontend_tests": {"passed": 102},
+    "backend_changed_scope_tests": {"passed": 63},
+    "isolated_mysql_auth_community_history_public_onboarding": {"passed": 98},
+    "households_leave_weekly_local_regression": {"passed": 21},
+    "existing_deployment_script_tests": {"passed": 27},
+    "candidate_registration_mismatch_regressions": {"passed": 2},
+    "terraform_validate_dev": "PASS",
+    "terraform_validate_prod": "PASS",
+    "browser": {
+      "environment": "Local Chromium; mocked Cognito SDK; no live identity or email",
+      "status": "PASS",
+      "cases": ["signup_confirmation_resend", "totp_signin_setup", "server_mfa_choices", "forced_password_reset", "unsupported_challenge", "cancel_clears_secrets", "english_signup"],
+      "page_errors": 0
+    }
+  },
+  "limits": [
+    "Test groups overlap; counts are not a unique-test total.",
+    "Initial DB tests skipped while local MySQL was stopped; rerun against a new isolated local MySQL 8.4 succeeded.",
+    "Cognito signup/confirmation/reset with real email and live TOTP still require candidate acceptance.",
+    "No AWS resources, live data, production schedules, or provider keys were changed by this task.",
+    "CI, security scan, candidate deployment and public runtime acceptance are pending user commit/push/merge."
+  ]
+}

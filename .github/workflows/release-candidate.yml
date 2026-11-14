@@ -7,6 +7,10 @@ on:
         description: "Build reviewed OCR UI; runtime activation still requires production acceptance"
         type: boolean
         default: false
+      public_registration:
+        description: "Enable public sign-up UI; deploy matching Cognito and runtime policy"
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -25,7 +29,7 @@ jobs:
       VITE_USE_MOCK: "0"
       VITE_ENABLE_REACT_AUTH_UI: "true"
       VITE_ENABLE_OCR: ${{ inputs.enable_ocr && 'true' || 'false' }}
-      VITE_SELF_SIGN_UP: "false"
+      VITE_SELF_SIGN_UP: ${{ inputs.public_registration && 'true' || 'false' }}
       VITE_COGNITO_DOMAIN: ${{ vars.PRODUCTION_COGNITO_DOMAIN }}
       VITE_COGNITO_CLIENT_ID: ${{ vars.PRODUCTION_COGNITO_CLIENT_ID }}
       VITE_COGNITO_USER_POOL_ID: ${{ vars.PRODUCTION_COGNITO_USER_POOL_ID }}
@@ -101,7 +105,7 @@ jobs:
           cp -r frontend/dist release-artifact/frontend
           python - <<'PY'
           import json, os, pathlib, runpy
-          payload = {"release": os.environ["GITHUB_SHA"], "ocr_enabled": os.environ.get("VITE_ENABLE_OCR") == "true", "channel": "production-candidate"}
+          payload = {"release": os.environ["GITHUB_SHA"], "ocr_enabled": os.environ.get("VITE_ENABLE_OCR") == "true", "public_registration_enabled": os.environ.get("VITE_SELF_SIGN_UP") == "true", "channel": "production-candidate"}
           pathlib.Path("release-artifact/frontend/release.json").write_text(json.dumps(payload) + "\n")
           security = runpy.run_path("scripts/release-security.py")
           payload["security"] = security["security_metadata"](pathlib.Path("release-artifact"), os.environ["GITHUB_SHA"])

@@ -155,13 +155,19 @@ variable "release_commit" {
   default = ""
 }
 
+variable "production_public_registration" {
+  description = "Allow new users and households; retained household 1 stays excluded."
+  type        = bool
+  default     = false
+}
+
 variable "production_allowed_household_ids" {
   description = "Reviewed current household IDs for closed rollout; household 1 remains retained and excluded."
   type        = set(number)
   default     = []
   validation {
     condition = !var.application_hardening_enabled || (
-      length(var.production_allowed_household_ids) > 0 &&
+      (var.production_public_registration || length(var.production_allowed_household_ids) > 0) &&
       alltrue([for id in var.production_allowed_household_ids : id > 1 && floor(id) == id])
     )
     error_message = "Production requires a fixed approved household ID list excluding household 1."

@@ -6,6 +6,7 @@ import { handleCallback, login } from "../auth/auth";
 export default function Callback() {
   const navigate = useNavigate();
   const [error, setError] = useState(null);
+  const [busy, setBusy] = useState(false);
   const ran = useRef(false); 
   useEffect(() => {
     if (ran.current) return;
@@ -19,7 +20,12 @@ export default function Callback() {
     return (
       <div className="card">
         <p className="error">{error}</p>
-        <button onClick={login}>{translate("Đăng nhập lại")}</button>
+        <button disabled={busy} onClick={async () => {
+          setBusy(true);
+          try { await login(); }
+          catch { setError(translate("Không kết nối được dịch vụ xác thực. Hãy thử lại.")); }
+          finally { setBusy(false); }
+        }}>{translate("Đăng nhập lại")}</button>
       </div>
     );
   }

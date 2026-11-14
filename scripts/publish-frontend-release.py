@@ -49,9 +49,12 @@ def verify_artifact(root, release):
         manifest = json.loads((root / name).read_text(encoding="utf-8"))
         if manifest.get("release") != release or type(manifest.get("ocr_enabled")) is not bool or manifest.get("channel") != "production-candidate":
             raise ValueError("Wrong candidate release or feature profile")
-        profiles.append(manifest["ocr_enabled"])
+        registration = manifest.get("public_registration_enabled", False)
+        if type(registration) is not bool:
+            raise ValueError("Invalid candidate registration profile")
+        profiles.append((manifest["ocr_enabled"], registration))
     if profiles[0] != profiles[1]:
-        raise ValueError("Candidate OCR profiles differ")
+        raise ValueError("Candidate feature profiles differ")
     if not (root / "frontend/index.html").is_file() or not (root / "backend.tar").is_file():
         raise ValueError("Incomplete release candidate")
     spec = importlib.util.spec_from_file_location("release_security", Path(__file__).with_name("release-security.py"))
@@ -71,6 +74,8 @@ def verify_running_image(session, settings, root):
     manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
     if manifest["ocr_enabled"] != (env.get("OCR_ENABLED", "false").lower() in {"true", "1"}):
         raise ValueError("Candidate OCR profile differs from the running API")
+    if manifest.get("public_registration_enabled", False) != (env.get("PRODUCTION_PUBLIC_REGISTRATION", "false").lower() == "true"):
+        raise ValueError("Candidate registration profile differs from the running API")
     prefix = settings["account"] + ".dkr.ecr." + settings["region"] + ".amazonaws.com/"
     if not image.startswith(prefix) or "@sha256:" not in image:
         raise ValueError("Expected immutable image in the reviewed account")

@@ -84,8 +84,16 @@ def evaluate(settings, session):
          container.get("image", "").endswith("@" + settings.get("release_image_digest", "")))
     approved = settings.get("allowed_household_ids", [])
     approved_valid = isinstance(approved, list) and bool(approved) and all(type(value) is int and value > 1 for value in approved)
-    configured_ids = env.get("PRODUCTION_ALLOWED_HOUSEHOLD_IDS", "").split(",")
-    gate("approved_household_scope_enforced", approved_valid and set(configured_ids) == {str(value) for value in approved})
+    public_registration = settings.get("public_registration_enabled", False)
+    gate("registration_policy_explicit", type(public_registration) is bool)
+
+    def scope_matches(runtime):
+        public = runtime.get("PRODUCTION_PUBLIC_REGISTRATION", "false").lower()
+        if public_registration is True:
+            return public == "true"
+        return public == "false" and approved_valid and set(runtime.get("PRODUCTION_ALLOWED_HOUSEHOLD_IDS", "").split(",")) == {str(value) for value in approved}
+
+    gate("approved_household_scope_enforced", scope_matches(env))
     expected_image = container.get("image", "")
     expected_release = env.get("APP_RELEASE", "")
     image_ref = re.fullmatch(re.escape(account + ".dkr.ecr." + settings["region"] + ".amazonaws.com/") +
@@ -113,6 +121,7 @@ def evaluate(settings, session):
         worker_task = ecs.describe_task_definition(taskDefinition=worker_service["taskDefinition"])["taskDefinition"]
         worker = next((x for x in worker_task["containerDefinitions"] if x["name"] == "worker"), {})
         worker_env = {x["name"]: x["value"] for x in worker.get("environment", [])}
+        gate("worker_household_scope_enforced", scope_matches(worker_env))
         gate("worker_matches_production_release", worker.get("image") == expected_image and
              worker_env.get("APP_RELEASE") == expected_release and worker_env.get("APP_ENV") == "production")
         container_security("worker", worker)
@@ -130,8 +139,7 @@ def evaluate(settings, session):
     jobs_env = {x["name"]: x["value"] for x in jobs.get("environment", [])}
     gate("jobs_match_production_release", jobs.get("image") == expected_image and
          jobs_env.get("APP_RELEASE") == expected_release and jobs_env.get("APP_ENV") == "production")
-    gate("jobs_approved_household_scope_enforced", approved_valid and
-         set(jobs_env.get("PRODUCTION_ALLOWED_HOUSEHOLD_IDS", "").split(",")) == {str(value) for value in approved})
+    gate("jobs_approved_household_scope_enforced", scope_matches(jobs_env))
     container_security("jobs", jobs)
     gate("admin_mfa_challenge_verified", settings.get("admin_mfa_challenge_verified") is True)
     gate("admission_and_consent", truth("RATE_LIMIT_ENABLED") and truth("OCR_REQUIRE_CONSENT"))
@@ -147,7 +155,8 @@ def evaluate(settings, session):
     cognito = session.client("cognito-idp")
     if gate("cognito_pool_configured", bool(pool_id and pool_id.startswith(settings["region"] + "_"))):
         pool = cognito.describe_user_pool(UserPoolId=pool_id)["UserPool"]
-        gate("closed_rollout_no_self_signup", pool.get("AdminCreateUserConfig", {}).get("AllowAdminCreateUserOnly") is True)
+        gate("cognito_registration_matches_policy", pool.get("AdminCreateUserConfig", {}).get("AllowAdminCreateUserOnly") is (not public_registration))
+        gate("cognito_email_verification_enabled", "email" in pool.get("AutoVerifiedAttributes", []))
         clients = [x.strip() for x in env.get("COGNITO_CLIENT_IDS", "").split(",") if x.strip()]
         gate("one_spa_client_only", len(clients) == 1)
         for client_id in clients:

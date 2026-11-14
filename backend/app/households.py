@@ -3,12 +3,13 @@ import io
 import secrets
 
 import pymysql
-from flask import Blueprint, g, jsonify, make_response, request
+from flask import Blueprint, current_app, g, jsonify, make_response, request
 
 from .auth import require_auth
 from .db import get_db
 from .errors import ApiError
 from .localization import SUPPORTED_LOCALES
+from .household_policy import household_admitted
 
 bp = Blueprint("households", __name__, url_prefix="/api")
 
@@ -298,6 +299,9 @@ def join_household():
     with db.cursor() as cur:
         cur.execute("SELECT id FROM households WHERE invite_code = %s", (code,))
         h = cur.fetchone()
+        if h and not household_admitted(current_app.config, h["id"]):
+            db.rollback()
+            raise ApiError(404, "INVITE_NOT_FOUND", "Mã mời không đúng")
         if h:
             # Lock by primary key, matching the order used by dissolution.
             # Recheck the invite code after waiting for any concurrent change.

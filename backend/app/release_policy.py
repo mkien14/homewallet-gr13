@@ -1,12 +1,13 @@
 """Validate security-critical settings before a production process serves traffic."""
 import re
+from .household_policy import public_registration
 
 
 def validate_release_config(config):
     if config.get("APP_ENV") != "production":
         return
     approved = config.get("PRODUCTION_ALLOWED_HOUSEHOLD_IDS", set())
-    if not approved or any(type(value) is not int or value <= 1 for value in approved):
+    if (not approved and not public_registration(config)) or any(type(value) is not int or value <= 1 for value in approved):
         raise RuntimeError("Production requires explicit approved household IDs; retained household 1 is excluded")
     missing = [key for key in (
         "COGNITO_ISSUER", "COGNITO_JWKS_URI", "COGNITO_CLIENT_IDS", "DB_SSL_CA",

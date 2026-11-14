@@ -23,6 +23,7 @@ def load_config():
     return {
         "APP_ENV": os.getenv("APP_ENV", "dev").strip().lower(),
         "APP_RELEASE": os.getenv("APP_RELEASE", "local"),
+        "PRODUCTION_PUBLIC_REGISTRATION": _boolean("PRODUCTION_PUBLIC_REGISTRATION", False),
         "PRODUCTION_ALLOWED_HOUSEHOLD_IDS": {
             int(value.strip()) for value in os.getenv("PRODUCTION_ALLOWED_HOUSEHOLD_IDS", "").split(",") if value.strip()
         },

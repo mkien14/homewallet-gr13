@@ -43,6 +43,16 @@ def test_authorized_receipt():
     policy.authorize(Cursor(), RECEIPT, CFG, bucket="approved")
 
 
+def test_public_ocr_admits_new_household_but_still_requires_consent():
+    cfg = dict(CFG, PRODUCTION_PUBLIC_REGISTRATION=True)
+    receipt = dict(RECEIPT, household_id=999, s3_key="receipts/production/999/new.jpg")
+    policy.authorize(Cursor(), receipt, cfg, bucket="approved")
+    with pytest.raises(policy.ReceiptRejected, match="CONSENT_REQUIRED"):
+        policy.authorize(Cursor(consent=False), receipt, cfg, bucket="approved")
+    with pytest.raises(policy.ReceiptRejected, match="HOUSEHOLD_NOT_APPROVED"):
+        policy.authorize(Cursor(), dict(receipt, household_id=1), cfg, bucket="approved")
+
+
 @pytest.mark.parametrize("kwargs", [dict(used=10), dict(attempts=2), dict(locked=False),
                                     dict(latest="now")])
 def test_quota_denials_never_reserve(kwargs):

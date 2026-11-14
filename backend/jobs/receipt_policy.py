@@ -1,5 +1,6 @@
 """Production receipt authorization and a shared, fail-closed provider budget."""
 from datetime import datetime, timezone
+from app.household_policy import household_admitted
 
 
 class ReceiptRejected(ValueError):
@@ -16,7 +17,7 @@ def authorize(cursor, receipt, config, *, bucket=None):
     if not config.get("OCR_ENABLED") or not config.get("GEMINI_ENABLED"):
         raise ReceiptRejected("OCR_DISABLED")
     household = receipt["household_id"]
-    if household <= 1 or household not in config.get("PRODUCTION_ALLOWED_HOUSEHOLD_IDS", set()):
+    if not household_admitted(config, household):
         raise ReceiptRejected("HOUSEHOLD_NOT_APPROVED")
     if bucket is not None and bucket != config.get("S3_BUCKET"):
         raise ReceiptRejected("UNEXPECTED_BUCKET")

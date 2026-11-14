@@ -17,6 +17,7 @@ locals {
   hardened_environment = var.application_hardening_enabled ? {
     APP_ENV                          = "production"
     APP_RELEASE                      = var.release_commit
+    PRODUCTION_PUBLIC_REGISTRATION   = tostring(var.production_public_registration)
     PRODUCTION_ALLOWED_HOUSEHOLD_IDS = join(",", sort([for id in var.production_allowed_household_ids : tostring(id)]))
     RATE_LIMIT_ENABLED               = "true"
     OCR_REQUIRE_CONSENT              = "true"

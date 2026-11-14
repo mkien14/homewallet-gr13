@@ -1,9 +1,10 @@
 # Bật lại thông báo định kỳ trên stack production
 
 Yêu cầu vận hành ngày 14/11/2026: bật lại ba lịch, tiếp tục giữ hộ 1 ngoài phạm vi.
-Tại thời điểm chuẩn bị thay đổi, ba lịch vẫn DISABLED và target là `hw-jobs:9`.
-Không coi tài liệu này là bằng chứng đã bật lịch; trạng thái sau áp dụng phải lấy
-trực tiếp từ AWS và ghi trong biên bản mới.
+Đã bật **ENABLED lúc 09:15:18 ngày 14/11/2026 (UTC+7)**, target `hw-jobs:10`.
+Xem [biên bản đã áp dụng](../acceptance/production-schedules-5f2308c-20261114.md).
+Gate 96/96 GO, Terraform No changes; input production/operator settings đã đồng bộ.
+ENABLED không thay bằng chứng nhận thư của mỗi kỳ tương lai.
 
 | Tên | Chức năng | Giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
 | --- | --- | --- |
@@ -40,3 +41,6 @@ không tự dừng task đã chạy, xóa dữ liệu, xóa `job_runs` hay gửi
 
 Các giới hạn dữ liệu, quota OCR và các bằng chứng HA/restore cũ vẫn theo
 [runbook production](current-stack-production.md).
+
+Trước rollback jobs về :9 hoặc revision cũ chưa có bộ lọc, phải tắt cả ba lịch.
+Không giữ ENABLED trên job cũ chỉ vì API trước đó đã có allowlist.

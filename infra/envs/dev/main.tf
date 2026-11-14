@@ -244,7 +244,7 @@ module "migrate" {
 }
 
 module "cognito" {
-  self_signup_enabled = !var.application_hardening_enabled
+  self_signup_enabled = !var.application_hardening_enabled || var.production_public_registration
   log_retention_days  = var.resilience_hardening_enabled ? 30 : 14
   source              = "../../modules/cognito"
 

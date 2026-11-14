@@ -1,5 +1,9 @@
 const messages = {
   en: {
+    "Không kết nối được dịch vụ xác thực. Hãy thử lại.": "Unable to connect to authentication. Please retry.",
+    "Bước xác minh này chưa được hỗ trợ. Hãy dùng trang đăng nhập dự phòng hoặc liên hệ hỗ trợ.": "This verification step is not supported. Use the alternative sign-in page or contact support.",
+    "Thiết lập email xác thực": "Set up email verification",
+    "Email nhận mã xác thực": "Email for verification codes",
     "Bảo mật tài khoản": "Account security",
     "Dùng ứng dụng xác thực để bảo vệ những lần đăng nhập tiếp theo.": "Use an authenticator app to protect future sign-ins.",
     "Không thể thiết lập xác thực. Hãy đăng nhập lại rồi thử lại.": "Unable to set up authentication. Sign in again and retry.",

@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => {
       throw new Error("Private credentials must never use the VITE_ prefix");
     }
     if (!["true", "false"].includes(env.VITE_ENABLE_OCR)) throw new Error("Set VITE_ENABLE_OCR explicitly for production");
-    if (env.VITE_SELF_SIGN_UP !== "false") throw new Error("Closed production rollout requires self sign-up to be disabled");
+    if (!["true", "false"].includes(env.VITE_SELF_SIGN_UP)) throw new Error("Set VITE_SELF_SIGN_UP explicitly for production");
   }
   return {
     plugins: [localizeJsxText(), react()],
