@@ -24,7 +24,7 @@ function Write-DevEnvFiles {
   param([switch]$LocalApi)
 
   $out = @{}
-  foreach ($name in "cognito_issuer", "cognito_jwks_uri", "cognito_spa_client_id",
+  foreach ($name in "cognito_user_pool_id", "cognito_issuer", "cognito_jwks_uri", "cognito_spa_client_id",
            "cognito_dev_client_id", "cognito_hosted_ui", "receipts_bucket", "cloudfront_url") {
     $value = (Get-TfOutput $name 2>$null)
     if ([string]::IsNullOrWhiteSpace("$value")) {
@@ -34,6 +34,13 @@ function Write-DevEnvFiles {
   }
 
   $apiTarget = if ($LocalApi) { "http://localhost:5000" } else { $out.cloudfront_url }
+  $selfSignupEnabled = (Get-TfOutput "cognito_self_signup_enabled" 2>$null)
+  if ($LASTEXITCODE -eq 0 -and "$selfSignupEnabled".Trim().ToLowerInvariant() -in @("true", "false")) {
+    $selfSignupEnabled = "$selfSignupEnabled".Trim().ToLowerInvariant()
+  } else {
+    Write-Warning "Terraform output 'cognito_self_signup_enabled' is unavailable; local public sign-up stays disabled until infra\envs\dev is applied."
+    $selfSignupEnabled = "false"
+  }
 
   Set-Content -Encoding ascii -Path (Join-Path $RepoRoot "backend\.env") -Value @(
     "COGNITO_ISSUER=$($out.cognito_issuer)", "COGNITO_JWKS_URI=$($out.cognito_jwks_uri)",
@@ -44,7 +51,9 @@ function Write-DevEnvFiles {
 
   Set-Content -Encoding ascii -Path (Join-Path $RepoRoot "frontend\.env.local") -Value @(
     "VITE_COGNITO_DOMAIN=$($out.cognito_hosted_ui)", "VITE_COGNITO_CLIENT_ID=$($out.cognito_spa_client_id)",
-    "VITE_API_TARGET=$apiTarget")
+    "VITE_COGNITO_USER_POOL_ID=$($out.cognito_user_pool_id)", "VITE_ENABLE_REACT_AUTH_UI=true",
+    "VITE_API_TARGET=$apiTarget", "VITE_ENABLE_HOSTED_UI_FALLBACK=false",
+    "VITE_SELF_SIGN_UP=$selfSignupEnabled")
 
   $mode = if ($LocalApi) { "backend cục bộ localhost:5000" } else { "ECS qua CloudFront" }
   Write-Host "Đã ghi backend\.env và frontend\.env.local (API: $mode)."

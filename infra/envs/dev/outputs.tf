@@ -9,6 +9,7 @@ output "db_address" { value = module.data.address }
 output "redis_endpoint" { value = module.cache.endpoint_address }
 output "redis_auth_token_secret_arn" { value = module.cache.auth_token_secret_arn }
 output "cognito_user_pool_id" { value = module.cognito.user_pool_id }
+output "cognito_self_signup_enabled" { value = local.self_signup_enabled }
 output "cognito_spa_client_id" { value = module.cognito.spa_client_id }
 output "cognito_dev_client_id" { value = module.cognito.dev_client_id }
 output "cognito_issuer" { value = module.cognito.issuer }

@@ -1,13 +1,15 @@
 import { normalizeCognitoOrigin } from "./auth/cognitoOrigin.js";
+import { hostedUiFallbackEnabled } from "./auth/hostedUiPolicy.js";
 
 export const config = {
   cognitoDomain: normalizeCognitoOrigin(import.meta.env.VITE_COGNITO_DOMAIN),
   clientId: import.meta.env.VITE_COGNITO_CLIENT_ID,
   userPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID,
+  hostedUiFallbackEnabled: hostedUiFallbackEnabled(import.meta.env.VITE_ENABLE_HOSTED_UI_FALLBACK, window.location.origin),
   reactAuthEnabled: import.meta.env.VITE_ENABLE_REACT_AUTH_UI === "true" && Boolean(import.meta.env.VITE_COGNITO_USER_POOL_ID && import.meta.env.VITE_COGNITO_CLIENT_ID),
   vapidPublicKey: import.meta.env.VITE_VAPID_PUBLIC_KEY,
   ocrEnabled: import.meta.env.VITE_ENABLE_OCR !== "false",
-  selfSignupEnabled: import.meta.env.VITE_SELF_SIGN_UP !== "false",
+  selfSignupEnabled: import.meta.env.VITE_SELF_SIGN_UP === "true",
   supportEmail: import.meta.env.VITE_SUPPORT_EMAIL || "homewallet26@gmail.com",
   redirectUri: `${window.location.origin}/auth/callback`,
   logoutUri: `${window.location.origin}/`,
