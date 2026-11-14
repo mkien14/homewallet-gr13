@@ -148,7 +148,7 @@ jobs:
             backend/requirements.txt
             backend/requirements-dev.txt
       - run: python -m pip install -r requirements-dev.txt
-      - run: python -m pytest tests/test_auth.py tests/test_community.py tests/test_community_mysql.py tests/test_household_history_mysql.py -ra
+      - run: python -m pytest tests/test_auth.py tests/test_community.py tests/test_community_mysql.py tests/test_household_history_mysql.py tests/test_public_onboarding_mysql.py -ra
 
   docker:
     name: Build backend image

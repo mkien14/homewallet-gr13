@@ -39,6 +39,7 @@ locals {
     APP_ENV                          = "production"
     APP_RELEASE                      = var.release_commit
     PRODUCTION_ALLOWED_HOUSEHOLD_IDS = join(",", sort([for id in var.production_allowed_household_ids : tostring(id)]))
+    PRODUCTION_PUBLIC_REGISTRATION   = tostring(var.production_public_registration)
     RATE_LIMIT_ENABLED               = "true"
     OCR_REQUIRE_CONSENT              = "true"
     OCR_ENABLED                      = "false"
@@ -195,7 +196,7 @@ module "queue" {
   bucket_arn  = module.storage.bucket_arn
 }
 module "cognito" {
-  self_signup_enabled = false
+  self_signup_enabled = var.production_public_registration
   source              = "../../modules/cognito"
   name                = local.name
   callback_urls       = ["${module.edge.url}/auth/callback"]

@@ -101,10 +101,16 @@ variable "waf_validation_reference" {
     error_message = "Record the WAF review evidence."
   }
 }
+variable "production_public_registration" {
+  description = "Allow public onboarding while retaining household 1 outside service."
+  type        = bool
+  default     = false
+}
+
 variable "production_allowed_household_ids" {
   type = set(number)
   validation {
-    condition = length(var.production_allowed_household_ids) > 0 && alltrue([
+    condition = (var.production_public_registration || length(var.production_allowed_household_ids) > 0) && alltrue([
       for id in var.production_allowed_household_ids : id > 1 && floor(id) == id
     ])
     error_message = "Explicit approved household IDs are required; household 1 is retained and excluded."

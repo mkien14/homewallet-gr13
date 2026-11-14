@@ -1,5 +1,6 @@
 import { config } from "../config";
 import { challengeFor, randomString } from "./pkce";
+import { readSessionToken } from "./sessionToken";
 
 const TOKEN_KEY = "hw.token";
 const AUTH_MODE_KEY = "hw.auth.mode";
@@ -7,6 +8,7 @@ const VERIFIER_KEY = "hw.pkce.verifier";
 const STATE_KEY = "hw.pkce.state";
 
 export async function login() {
+  if (!config.cognitoDomain || !config.clientId) throw new Error("Cognito chưa được cấu hình.");
   if (sessionStorage.getItem(AUTH_MODE_KEY) === "srp") {
     const { reactSignOut } = await import("./cognito");
     await reactSignOut();
@@ -61,21 +63,16 @@ export async function handleCallback() {
 }
 
 export function getToken() {
-  const raw = sessionStorage.getItem(TOKEN_KEY);
-  if (!raw) return null;
-  const t = JSON.parse(raw);
-  if (Date.now() >= t.exp) {
-    sessionStorage.removeItem(TOKEN_KEY);
-    return null;
-  }
-  return t.access;
+  return readSessionToken(sessionStorage);
 }
 
 export async function getAccessToken() {
   if (sessionStorage.getItem(AUTH_MODE_KEY) === "srp") {
     try {
       const { getReactAccessToken } = await import("./cognito");
-      return await getReactAccessToken();
+      const token = await getReactAccessToken();
+      if (!token) throw new Error("Session expired");
+      return token;
     } catch {
       sessionStorage.removeItem(TOKEN_KEY);
       sessionStorage.removeItem(AUTH_MODE_KEY);

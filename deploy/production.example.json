@@ -24,6 +24,7 @@
   "budget_name": "HomeWallet-Production-Monthly",
   "monthly_budget_usd": 100,
   "household_scope_rule": "snapshot_existing_households_except_1",
+  "public_registration_enabled": false,
   "allowed_household_ids": [],
   "operations_owner": "Kiên",
   "data_boundary_reviewed": false,
