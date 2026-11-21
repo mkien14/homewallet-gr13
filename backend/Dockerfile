@@ -1,6 +1,6 @@
 # Same supported Python minor for API/worker/jobs; Alpine avoids shipping the
 # unused Debian mount/login/systemd/perl stack. Keep the distribution explicit.
-FROM python:3.12-alpine3.24@sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89 AS wheels
+FROM python:3.15-alpine3.24@sha256:0f9552bb28711333da16915ec146f5e6bb44a7fdac9ced15dc17c2e0206346dd AS wheels
 
 WORKDIR /build
 COPY requirements.txt requirements.lock ./
@@ -9,7 +9,7 @@ COPY requirements.txt requirements.lock ./
 RUN pip wheel --no-cache-dir --require-hashes --wheel-dir /wheels \
     --only-binary=:all: --no-binary=http-ece -r requirements.lock -r requirements.txt
 
-FROM python:3.12-alpine3.24@sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89
+FROM python:3.15-alpine3.24@sha256:0f9552bb28711333da16915ec146f5e6bb44a7fdac9ced15dc17c2e0206346dd
 
 ARG APP_RELEASE=local
 ENV APP_RELEASE=${APP_RELEASE}
